@@ -117,6 +117,8 @@ export async function onRequest(context) {
       const notionData = await response.json();
       console.log('✅ Tabela recebida com sucesso!');
       console.log('📝 Total de registros:', notionData.results?.length || 0);
+      console.log('📝 Primeiro registro:', notionData.results?.[0] || 'nenhum');
+      console.log('📝 Propriedades do primeiro registro:', notionData.results?.[0]?.properties || {});
 
       // Função para extrair valores
       const extractValue = (prop, defaultValue = '') => {

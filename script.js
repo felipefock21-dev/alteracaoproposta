@@ -98,14 +98,20 @@ async function loadProposalFromNotion(tableId) {
     if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
         console.error('❌ Erro detalhado:', errorBody);
+        console.error('❌ Status:', response.status);
+        console.error('❌ StatusText:', response.statusText);
         throw new Error(`Erro ao carregar dados: ${response.status} - ${errorBody.error || response.statusText}`);
     }
 
     const data = await response.json();
     console.log('📊 Dados recebidos:', data);
+    console.log('📊 É array?', Array.isArray(data));
+    console.log('📊 Tamanho:', Array.isArray(data) ? data.length : 'N/A');
+    console.log('📊 Primeiro item:', Array.isArray(data) && data.length > 0 ? data[0] : 'vazio');
     
     // Espera um array de emissoras
-    if (Array.isArray(data)) {
+    if (Array.isArray(data) && data.length > 0) {
+        console.log('✅ Processando', data.length, 'emissoras');
         proposalData.emissoras = data.map(row => ({
             id: row.id,
             emissora: row.emissora || '',
