@@ -236,6 +236,37 @@
             accent-color: var(--primary);
         }
 
+        /* INPUT NUMBER STYLES */
+        input[type="number"].input-spots,
+        input[type="number"].input-valor {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--gray);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: 'Roboto', sans-serif;
+            color: var(--dark);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="number"].input-spots:focus,
+        input[type="number"].input-valor:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        input[type="number"].input-spots,
+        input[type="number"].input-valor {
+            background: var(--white);
+        }
+
+        tr.emissora-header-row {
+            background: #f3f4f6;
+            font-weight: bold;
+            color: var(--dark);
+        }
+
         tr.radio-disabled {
             opacity: 0.6;
             background: #f9fafb;

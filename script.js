@@ -209,45 +209,24 @@ function renderInterface() {
 }
 
 function renderSpotsTable() {
-    const container = document.getElementById('spotsTableContainer');
-    if (!container) return;
+    const tbody = document.getElementById('spotsTableBody');
+    if (!tbody) return;
     
-    // Limpar e criar nova tabela
-    container.innerHTML = '';
+    tbody.innerHTML = '';
     
-    // Renderizar por emissora
+    // Renderizar cada emissora como um grupo
     proposalData.emissoras.forEach((emissora, index) => {
-        const emissoraSection = document.createElement('div');
-        emissoraSection.className = 'emissora-section';
-        emissoraSection.innerHTML = `
-            <div class="emissora-header">
-                <h3>${emissora.emissora}</h3>
-                <p class="emissora-info">📍 ${emissora.praca} | 📻 ${emissora.dial || 'N/A'}</p>
-            </div>
+        // Header com info da emissora
+        const headerRow = document.createElement('tr');
+        headerRow.className = 'emissora-header-row';
+        headerRow.innerHTML = `
+            <td colspan="6" style="background: #f3f4f6; font-weight: bold; padding: 12px; border-top: 2px solid #6366f1;">
+                📻 ${emissora.emissora} | 📍 ${emissora.praca} | 📡 ${emissora.dial || 'N/A'}
+            </td>
         `;
+        tbody.appendChild(headerRow);
         
-        // Criar tabela para esta emissora
-        const table = document.createElement('table');
-        table.className = 'spots-detail-table';
-        
-        // Header da tabela
-        const thead = document.createElement('thead');
-        thead.innerHTML = `
-            <tr>
-                <th>Produto</th>
-                <th>Quantidade</th>
-                <th>Valor Tabela</th>
-                <th>Valor Negociado</th>
-                <th>Investimento Tabela</th>
-                <th>Investimento Negociado</th>
-            </tr>
-        `;
-        table.appendChild(thead);
-        
-        // Body da tabela
-        const tbody = document.createElement('tbody');
-        
-        // Iterar sobre todos os produtos
+        // Linhas de produtos
         PRODUTOS.forEach(produto => {
             const spots = emissora[produto.key] || 0;
             const valorTabela = emissora[produto.tabelaKey] || 0;
@@ -263,7 +242,7 @@ function renderSpotsTable() {
             
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="produto-name"><strong>${produto.label}</strong></td>
+                <td><strong>${produto.label}</strong></td>
                 <td>
                     <input 
                         type="number" 
@@ -274,6 +253,7 @@ function renderSpotsTable() {
                     >
                 </td>
                 <td class="value-cell">R$ ${valorTabela.toFixed(2)}</td>
+                <td class="value-cell">R$ ${invTabela.toFixed(2)}</td>
                 <td>
                     <input 
                         type="number" 
@@ -284,15 +264,10 @@ function renderSpotsTable() {
                         step="0.01"
                     >
                 </td>
-                <td class="value-cell">R$ ${invTabela.toFixed(2)}</td>
                 <td class="value-cell">R$ ${invNegociado.toFixed(2)}</td>
             `;
             tbody.appendChild(row);
         });
-        
-        table.appendChild(tbody);
-        emissoraSection.appendChild(table);
-        container.appendChild(emissoraSection);
     });
 }
 
