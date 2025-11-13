@@ -274,8 +274,13 @@ function renderInterface() {
 
 function renderSpotsTable() {
     const tbody = document.getElementById('spotsTableBody');
-    if (!tbody) return;
+    addDebug(`🔍 Procurando tbody: ${tbody ? 'ENCONTRADO' : 'NÃO ENCONTRADO'}`);
+    if (!tbody) {
+        addDebug('❌ Elemento spotsTableBody não encontrado!');
+        return;
+    }
     
+    addDebug(`📊 Renderizando ${proposalData.emissoras.length} emissoras`);
     tbody.innerHTML = '';
     
     // Renderizar cada emissora como um grupo
@@ -289,8 +294,10 @@ function renderSpotsTable() {
             </td>
         `;
         tbody.appendChild(headerRow);
+        addDebug(`  ✅ Emissora renderizada: ${emissora.emissora}`);
         
         // Linhas de produtos
+        let produtosRenderizados = 0;
         PRODUTOS.forEach(produto => {
             const spots = emissora[produto.key] || 0;
             const valorTabela = emissora[produto.tabelaKey] || 0;
@@ -300,6 +307,8 @@ function renderSpotsTable() {
             const temSelecionado = spots > 0 || valorTabela > 0 || valorNegociado > 0;
             
             if (!temSelecionado) return; // Pular produtos não selecionados
+            
+            produtosRenderizados++;
             
             const invTabela = spots * valorTabela;
             const invNegociado = spots * valorNegociado;
@@ -332,7 +341,11 @@ function renderSpotsTable() {
             `;
             tbody.appendChild(row);
         });
+        
+        addDebug(`  📦 Produtos renderizados: ${produtosRenderizados}`);
     });
+    
+    addDebug(`✅ Tabela renderizada com sucesso!`);
 }
 
 function updateStats() {
