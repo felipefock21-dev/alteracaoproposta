@@ -143,6 +143,19 @@ async function loadProposalFromNotion(tableId) {
         }
 
         const data = await response.json();
+        
+        // Log detalhado no console para diagnóstico
+        console.log('');
+        console.log('╔════════════════════════════════════════════════════════╗');
+        console.log('║  RESPOSTA BRUTA DA API - PRIMEIRO REGISTRO COMPLETO   ║');
+        console.log('╚════════════════════════════════════════════════════════╝');
+        if (Array.isArray(data) && data.length > 0) {
+            console.log(data[0]);
+        } else {
+            console.log(data);
+        }
+        console.log('');
+        
         addDebug(`📦 Dados tipo: ${typeof data}`);
         addDebug(`📦 Dados é array? ${Array.isArray(data)}`);
         addDebug(`📦 Dados tem .error? ${'error' in data}`);
