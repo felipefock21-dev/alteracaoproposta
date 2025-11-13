@@ -21,11 +21,13 @@ export async function onRequest(context) {
 
   try {
     // ===== BUSCAR TOKEN NOTION_TOKEN =====
-    const notionToken = 'ntn_d87800291735CSok9UAEgUkUBpPCLBjfwhuLV2HJG9c4cS';
+    const notionToken = env.NOTION_TOKEN || 'ntn_d87800291735CSok9UAEgUkUBpPCLBjfwhuLV2HJG9c4cS';
     
     console.log('=== DEBUG CLOUDFLARE ===');
     console.log('1. Token existe?', !!notionToken);
-    console.log('2. Método:', request.method);
+    console.log('2. Usando token de env?', !!env.NOTION_TOKEN);
+    console.log('3. Método:', request.method);
+    console.log('4. URL:', request.url);
     console.log('========================');
     
     if (!notionToken) {

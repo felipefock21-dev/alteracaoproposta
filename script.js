@@ -94,9 +94,12 @@ async function loadProposalFromNotion(notionId) {
     console.log('📡 Params recebidos:', new URLSearchParams(window.location.search));
     
     const apiUrl = getApiUrl();
-    const finalUrl = `${apiUrl}?id=${notionId}`;
+    // Se a URL termina com /, não adiciona outro. Se não termina, adiciona
+    const baseUrl = apiUrl.endsWith('/') ? apiUrl : apiUrl + '/';
+    const finalUrl = `${baseUrl}?id=${notionId}`;
     
-    console.log('📡 URL da API:', finalUrl);
+    console.log('📡 Base URL:', baseUrl);
+    console.log('📡 URL da API final:', finalUrl);
     
     const response = await fetch(finalUrl);
     
