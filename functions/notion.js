@@ -146,15 +146,59 @@ export async function onRequest(context) {
         return {
           id: row.id,
           emissora: extractValue(properties['Emissora']),
+          praca: extractValue(properties['Praça']),
+          dial: extractValue(properties['Dial']),
           uf: extractValue(properties['UF']),
+          
+          // Spots 30"
           spots30: extractValue(properties['Spots 30"'], 0),
-          valorTabela30: extractValue(properties['Valor spot 30" Tabela'], 0),
-          valorNegociado30: extractValue(properties['Valor spot 30" Negociado'], 0),
-          spotsTest60: extractValue(properties['Testemunhal 60"'], 0),
-          valorTabelaTest60: extractValue(properties['Testemunhal 60" Tabela'], 0),
-          valorNegociadoTest60: extractValue(properties['Testemunhal 60" Negociado'], 0),
-          investimento: extractValue(properties['Investimento'], 0),
-          investimentoTabela: extractValue(properties['Investimento Tabela'], 0)
+          valorTabela30: extractValue(properties['Valor spot 30" (Tabela)'], 0),
+          valorNegociado30: extractValue(properties['Valor spot 30" (Negociado)'], 0),
+          
+          // Spots 60"
+          spots60: extractValue(properties['Spots 60"'], 0),
+          valorTabela60: extractValue(properties['Valor spot 60" (Tabela)'], 0),
+          valorNegociado60: extractValue(properties['Valor spot 60" (Negociado)'], 0),
+          
+          // Blitz
+          spotsBlitz: extractValue(properties['Blitz'], 0),
+          valorTabelaBlitz: extractValue(properties['Valor Blitz (Tabela)'], 0),
+          valorNegociadoBlitz: extractValue(properties['Valor Blitz (Negociado)'], 0),
+          
+          // Spots 15"
+          spots15: extractValue(properties['Spots 15"'], 0),
+          valorTabela15: extractValue(properties['Valor spot 15" (Tabela)'], 0),
+          valorNegociado15: extractValue(properties['Valor spot 15" (Negociado)'], 0),
+          
+          // Spots 5"
+          spots5: extractValue(properties['Spots 5"'], 0),
+          valorTabela5: extractValue(properties['Valor spot 5" (Tabela)'], 0),
+          valorNegociado5: extractValue(properties['Valor spot 5" (Negociado)'], 0),
+          
+          // Test 60"
+          spotsTest60: extractValue(properties['Test 60"'], 0),
+          valorTabelaTest60: extractValue(properties['Valor Test 60" (Tabela)'], 0),
+          valorNegociadoTest60: extractValue(properties['Valor Test 60" (Negociado)'], 0),
+          
+          // Flash 30"
+          spotsFlash30: extractValue(properties['Flash 30"'], 0),
+          valorTabelaFlash30: extractValue(properties['Valor Flash 30" (Tabela)'], 0),
+          valorNegociadoFlash30: extractValue(properties['Valor Flash 30" (Negociado)'], 0),
+          
+          // Flash 60"
+          spotsFlash60: extractValue(properties['Flash 60"'], 0),
+          valorTabelaFlash60: extractValue(properties['Valor Flash 60" (Tabela)'], 0),
+          valorNegociadoFlash60: extractValue(properties['Valor Flash 60" (Negociado)'], 0),
+          
+          // Mensham 30"
+          spotsMensham30: extractValue(properties['Mensham 30"'], 0),
+          valorTabelaMensham30: extractValue(properties['Valor Mensham 30" (Tabela)'], 0),
+          valorNegociadoMensham30: extractValue(properties['Valor Mensham 30" (Negociado)'], 0),
+          
+          // Mensham 60"
+          spotsMensham60: extractValue(properties['Mensham 60"'], 0),
+          valorTabelaMensham60: extractValue(properties['Valor Mensham 60" (Tabela)'], 0),
+          valorNegociadoMensham60: extractValue(properties['Valor Mensham 60" (Negociado)'], 0)
         };
       });
 
@@ -216,11 +260,35 @@ export async function onRequest(context) {
         // Mapear campo para nome do Notion
         const fieldMap = {
           'spots30': 'Spots 30"',
-          'valorTabela30': 'Valor spot 30" Tabela',
-          'valorNegociado30': 'Valor spot 30" Negociado',
-          'spotsTest60': 'Testemunhal 60"',
-          'valorTabelaTest60': 'Testemunhal 60" Tabela',
-          'valorNegociadoTest60': 'Testemunhal 60" Negociado'
+          'valorTabela30': 'Valor spot 30" (Tabela)',
+          'valorNegociado30': 'Valor spot 30" (Negociado)',
+          'spots60': 'Spots 60"',
+          'valorTabela60': 'Valor spot 60" (Tabela)',
+          'valorNegociado60': 'Valor spot 60" (Negociado)',
+          'spotsBlitz': 'Blitz',
+          'valorTabelaBlitz': 'Valor Blitz (Tabela)',
+          'valorNegociadoBlitz': 'Valor Blitz (Negociado)',
+          'spots15': 'Spots 15"',
+          'valorTabela15': 'Valor spot 15" (Tabela)',
+          'valorNegociado15': 'Valor spot 15" (Negociado)',
+          'spots5': 'Spots 5"',
+          'valorTabela5': 'Valor spot 5" (Tabela)',
+          'valorNegociado5': 'Valor spot 5" (Negociado)',
+          'spotsTest60': 'Test 60"',
+          'valorTabelaTest60': 'Valor Test 60" (Tabela)',
+          'valorNegociadoTest60': 'Valor Test 60" (Negociado)',
+          'spotsFlash30': 'Flash 30"',
+          'valorTabelaFlash30': 'Valor Flash 30" (Tabela)',
+          'valorNegociadoFlash30': 'Valor Flash 30" (Negociado)',
+          'spotsFlash60': 'Flash 60"',
+          'valorTabelaFlash60': 'Valor Flash 60" (Tabela)',
+          'valorNegociadoFlash60': 'Valor Flash 60" (Negociado)',
+          'spotsMensham30': 'Mensham 30"',
+          'valorTabelaMensham30': 'Valor Mensham 30" (Tabela)',
+          'valorNegociadoMensham30': 'Valor Mensham 30" (Negociado)',
+          'spotsMensham60': 'Mensham 60"',
+          'valorTabelaMensham60': 'Valor Mensham 60" (Tabela)',
+          'valorNegociadoMensham60': 'Valor Mensham 60" (Negociado)'
         };
 
         const notionField = fieldMap[change.field];

@@ -8,6 +8,20 @@ let proposalData = {
     changes: {}
 };
 
+// Definição de todos os produtos disponíveis
+const PRODUTOS = [
+    { key: 'spots30', label: 'Spots 30"', tabelaKey: 'valorTabela30', negKey: 'valorNegociado30' },
+    { key: 'spots60', label: 'Spots 60"', tabelaKey: 'valorTabela60', negKey: 'valorNegociado60' },
+    { key: 'spotsBlitz', label: 'Blitz', tabelaKey: 'valorTabelaBlitz', negKey: 'valorNegociadoBlitz' },
+    { key: 'spots15', label: 'Spots 15"', tabelaKey: 'valorTabela15', negKey: 'valorNegociado15' },
+    { key: 'spots5', label: 'Spots 5"', tabelaKey: 'valorTabela5', negKey: 'valorNegociado5' },
+    { key: 'spotsTest60', label: 'Test 60"', tabelaKey: 'valorTabelaTest60', negKey: 'valorNegociadoTest60' },
+    { key: 'spotsFlash30', label: 'Flash 30"', tabelaKey: 'valorTabelaFlash30', negKey: 'valorNegociadoFlash30' },
+    { key: 'spotsFlash60', label: 'Flash 60"', tabelaKey: 'valorTabelaFlash60', negKey: 'valorNegociadoFlash60' },
+    { key: 'spotsMensham30', label: 'Mensham 30"', tabelaKey: 'valorTabelaMensham30', negKey: 'valorNegociadoMensham30' },
+    { key: 'spotsMensham60', label: 'Mensham 60"', tabelaKey: 'valorTabelaMensham60', negKey: 'valorNegociadoMensham60' }
+];
+
 let charts = {
     investment: null,
     impacts: null
@@ -95,15 +109,59 @@ async function loadProposalFromNotion(tableId) {
         proposalData.emissoras = data.map(row => ({
             id: row.id,
             emissora: row.emissora || '',
+            praca: row.praca || '',
+            dial: row.dial || '',
             uf: row.uf || '',
+            
+            // Spots 30"
             spots30: parseFloat(row.spots30) || 0,
             valorTabela30: parseFloat(row.valorTabela30) || 0,
             valorNegociado30: parseFloat(row.valorNegociado30) || 0,
+            
+            // Spots 60"
+            spots60: parseFloat(row.spots60) || 0,
+            valorTabela60: parseFloat(row.valorTabela60) || 0,
+            valorNegociado60: parseFloat(row.valorNegociado60) || 0,
+            
+            // Blitz
+            spotsBlitz: parseFloat(row.spotsBlitz) || 0,
+            valorTabelaBlitz: parseFloat(row.valorTabelaBlitz) || 0,
+            valorNegociadoBlitz: parseFloat(row.valorNegociadoBlitz) || 0,
+            
+            // Spots 15"
+            spots15: parseFloat(row.spots15) || 0,
+            valorTabela15: parseFloat(row.valorTabela15) || 0,
+            valorNegociado15: parseFloat(row.valorNegociado15) || 0,
+            
+            // Spots 5"
+            spots5: parseFloat(row.spots5) || 0,
+            valorTabela5: parseFloat(row.valorTabela5) || 0,
+            valorNegociado5: parseFloat(row.valorNegociado5) || 0,
+            
+            // Test 60"
             spotsTest60: parseFloat(row.spotsTest60) || 0,
             valorTabelaTest60: parseFloat(row.valorTabelaTest60) || 0,
             valorNegociadoTest60: parseFloat(row.valorNegociadoTest60) || 0,
-            investimento: parseFloat(row.investimento) || 0,
-            investimentoTabela: parseFloat(row.investimentoTabela) || 0
+            
+            // Flash 30"
+            spotsFlash30: parseFloat(row.spotsFlash30) || 0,
+            valorTabelaFlash30: parseFloat(row.valorTabelaFlash30) || 0,
+            valorNegociadoFlash30: parseFloat(row.valorNegociadoFlash30) || 0,
+            
+            // Flash 60"
+            spotsFlash60: parseFloat(row.spotsFlash60) || 0,
+            valorTabelaFlash60: parseFloat(row.valorTabelaFlash60) || 0,
+            valorNegociadoFlash60: parseFloat(row.valorNegociadoFlash60) || 0,
+            
+            // Mensham 30"
+            spotsMensham30: parseFloat(row.spotsMensham30) || 0,
+            valorTabelaMensham30: parseFloat(row.valorTabelaMensham30) || 0,
+            valorNegociadoMensham30: parseFloat(row.valorNegociadoMensham30) || 0,
+            
+            // Mensham 60"
+            spotsMensham60: parseFloat(row.spotsMensham60) || 0,
+            valorTabelaMensham60: parseFloat(row.valorTabelaMensham60) || 0,
+            valorNegociadoMensham60: parseFloat(row.valorNegociadoMensham60) || 0
         }));
         console.log('✅ Emissoras carregadas:', proposalData.emissoras);
     } else {
@@ -151,63 +209,90 @@ function renderInterface() {
 }
 
 function renderSpotsTable() {
-    const tbody = document.getElementById('spotsTableBody');
-    tbody.innerHTML = '';
+    const container = document.getElementById('spotsTableContainer');
+    if (!container) return;
     
+    // Limpar e criar nova tabela
+    container.innerHTML = '';
+    
+    // Renderizar por emissora
     proposalData.emissoras.forEach((emissora, index) => {
-        const investimentoTabela = (emissora.spots30 * emissora.valorTabela30) + 
-                                  (emissora.spotsTest60 * emissora.valorTabelaTest60);
-        const investimentoNegociado = (emissora.spots30 * emissora.valorNegociado30) + 
-                                     (emissora.spotsTest60 * emissora.valorNegociadoTest60);
-        
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td><strong>${emissora.emissora}</strong></td>
-            <td>${emissora.uf}</td>
-            <td>
-                <input 
-                    type="number" 
-                    value="${emissora.spots30}" 
-                    onchange="updateEmissora(${index}, 'spots30', this.value)"
-                    class="input-spots"
-                    min="0"
-                >
-            </td>
-            <td class="value-cell">R$ ${emissora.valorTabela30.toFixed(2)}</td>
-            <td>
-                <input 
-                    type="number" 
-                    value="${emissora.valorNegociado30.toFixed(2)}" 
-                    onchange="updateEmissora(${index}, 'valorNegociado30', this.value)"
-                    class="input-valor"
-                    min="0"
-                    step="0.01"
-                >
-            </td>
-            <td>
-                <input 
-                    type="number" 
-                    value="${emissora.spotsTest60}" 
-                    onchange="updateEmissora(${index}, 'spotsTest60', this.value)"
-                    class="input-spots"
-                    min="0"
-                >
-            </td>
-            <td class="value-cell">R$ ${emissora.valorTabelaTest60.toFixed(2)}</td>
-            <td>
-                <input 
-                    type="number" 
-                    value="${emissora.valorNegociadoTest60.toFixed(2)}" 
-                    onchange="updateEmissora(${index}, 'valorNegociadoTest60', this.value)"
-                    class="input-valor"
-                    min="0"
-                    step="0.01"
-                >
-            </td>
-            <td class="value-cell">R$ ${investimentoTabela.toFixed(2)}</td>
-            <td class="value-cell">R$ ${investimentoNegociado.toFixed(2)}</td>
+        const emissoraSection = document.createElement('div');
+        emissoraSection.className = 'emissora-section';
+        emissoraSection.innerHTML = `
+            <div class="emissora-header">
+                <h3>${emissora.emissora}</h3>
+                <p class="emissora-info">📍 ${emissora.praca} | 📻 ${emissora.dial || 'N/A'}</p>
+            </div>
         `;
-        tbody.appendChild(row);
+        
+        // Criar tabela para esta emissora
+        const table = document.createElement('table');
+        table.className = 'spots-detail-table';
+        
+        // Header da tabela
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Valor Tabela</th>
+                <th>Valor Negociado</th>
+                <th>Investimento Tabela</th>
+                <th>Investimento Negociado</th>
+            </tr>
+        `;
+        table.appendChild(thead);
+        
+        // Body da tabela
+        const tbody = document.createElement('tbody');
+        
+        // Iterar sobre todos os produtos
+        PRODUTOS.forEach(produto => {
+            const spots = emissora[produto.key] || 0;
+            const valorTabela = emissora[produto.tabelaKey] || 0;
+            const valorNegociado = emissora[produto.negKey] || 0;
+            
+            // Verificar se o produto foi selecionado (qualquer valor > 0)
+            const temSelecionado = spots > 0 || valorTabela > 0 || valorNegociado > 0;
+            
+            if (!temSelecionado) return; // Pular produtos não selecionados
+            
+            const invTabela = spots * valorTabela;
+            const invNegociado = spots * valorNegociado;
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="produto-name"><strong>${produto.label}</strong></td>
+                <td>
+                    <input 
+                        type="number" 
+                        value="${spots}" 
+                        onchange="updateEmissora(${index}, '${produto.key}', this.value)"
+                        class="input-spots"
+                        min="0"
+                    >
+                </td>
+                <td class="value-cell">R$ ${valorTabela.toFixed(2)}</td>
+                <td>
+                    <input 
+                        type="number" 
+                        value="${valorNegociado.toFixed(2)}" 
+                        onchange="updateEmissora(${index}, '${produto.negKey}', this.value)"
+                        class="input-valor"
+                        min="0"
+                        step="0.01"
+                    >
+                </td>
+                <td class="value-cell">R$ ${invTabela.toFixed(2)}</td>
+                <td class="value-cell">R$ ${invNegociado.toFixed(2)}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        table.appendChild(tbody);
+        emissoraSection.appendChild(table);
+        container.appendChild(emissoraSection);
     });
 }
 
@@ -273,23 +358,29 @@ function renderInvestmentChart() {
 }
 
 function renderSpotTypesChart() {
-    const ctx = document.getElementById('spotsChart').getContext('2d');
+    const ctx = document.getElementById('spotsChart');
+    if (!ctx) return;
+    
+    const canvasCtx = ctx.getContext('2d');
     
     const labels = [];
     const data = [];
     
     proposalData.emissoras.forEach(emissora => {
-        if (emissora.spots30 > 0) {
-            labels.push(`${emissora.emissora} (30")`);
-            data.push(emissora.spots30);
-        }
-        if (emissora.spotsTest60 > 0) {
-            labels.push(`${emissora.emissora} (60")`);
-            data.push(emissora.spotsTest60);
-        }
+        PRODUTOS.forEach(produto => {
+            const spots = emissora[produto.key] || 0;
+            if (spots > 0) {
+                labels.push(`${emissora.emissora} - ${produto.label}`);
+                data.push(spots);
+            }
+        });
     });
     
-    charts.impacts = new Chart(ctx, {
+    if (charts.impacts) {
+        charts.impacts.destroy();
+    }
+    
+    charts.impacts = new Chart(canvasCtx, {
         type: 'bar',
         data: {
             labels: labels,
@@ -323,23 +414,29 @@ function renderSpotTypesChart() {
 
 function calculateTotalSpots() {
     return proposalData.emissoras.reduce((total, emissora) => {
-        return total + (emissora.spots30 || 0) + (emissora.spotsTest60 || 0);
+        return total + PRODUTOS.reduce((subtotal, produto) => {
+            return subtotal + (emissora[produto.key] || 0);
+        }, 0);
     }, 0);
 }
 
 function calculateTotalInvestimentoTabela() {
     return proposalData.emissoras.reduce((total, emissora) => {
-        const inv30 = (emissora.spots30 || 0) * (emissora.valorTabela30 || 0);
-        const invTest60 = (emissora.spotsTest60 || 0) * (emissora.valorTabelaTest60 || 0);
-        return total + inv30 + invTest60;
+        return total + PRODUTOS.reduce((subtotal, produto) => {
+            const spots = emissora[produto.key] || 0;
+            const valor = emissora[produto.tabelaKey] || 0;
+            return subtotal + (spots * valor);
+        }, 0);
     }, 0);
 }
 
 function calculateTotalInvestimentoNegociado() {
     return proposalData.emissoras.reduce((total, emissora) => {
-        const inv30 = (emissora.spots30 || 0) * (emissora.valorNegociado30 || 0);
-        const invTest60 = (emissora.spotsTest60 || 0) * (emissora.valorNegociadoTest60 || 0);
-        return total + inv30 + invTest60;
+        return total + PRODUTOS.reduce((subtotal, produto) => {
+            const spots = emissora[produto.key] || 0;
+            const valor = emissora[produto.negKey] || 0;
+            return subtotal + (spots * valor);
+        }, 0);
     }, 0);
 }
 
