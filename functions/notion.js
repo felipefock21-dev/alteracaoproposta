@@ -1,79 +1,5 @@
 // Cloudflare Pages Function - NOTION API GATEWAY
 
-// ===== FUZZY MATCHING FUNCTIONS =====
-// Normaliza string para comparação
-function normalizeString(str) {
-  return str
-    .toLowerCase()
-    .replace(/[^\w\s]/g, '') // Remove caracteres especiais
-    .replace(/\s+/g, '')      // Remove espaços
-    .trim();
-}
-
-// Calcula similaridade entre duas strings (Levenshtein distance)
-function calculateSimilarity(str1, str2) {
-  const norm1 = normalizeString(str1);
-  const norm2 = normalizeString(str2);
-  
-  if (norm1 === norm2) return 1; // Match perfeito
-  
-  const len1 = norm1.length;
-  const len2 = norm2.length;
-  const maxLen = Math.max(len1, len2);
-  
-  if (maxLen === 0) return 1;
-  
-  const distance = levenshteinDistance(norm1, norm2);
-  return 1 - (distance / maxLen);
-}
-
-// Calcula distância de Levenshtein
-function levenshteinDistance(str1, str2) {
-  const matrix = [];
-  
-  for (let i = 0; i <= str2.length; i++) {
-    matrix[i] = [i];
-  }
-  
-  for (let j = 0; j <= str1.length; j++) {
-    matrix[0][j] = j;
-  }
-  
-  for (let i = 1; i <= str2.length; i++) {
-    for (let j = 1; j <= str1.length; j++) {
-      if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
-        );
-      }
-    }
-  }
-  
-  return matrix[str2.length][str1.length];
-}
-
-// Busca a propriedade mais similar
-function findPropertyByName(properties, searchName, threshold = 0.7) {
-  if (!properties || typeof properties !== 'object') return null;
-  
-  let bestMatch = null;
-  let bestSimilarity = threshold;
-  
-  for (const [key, value] of Object.entries(properties)) {
-    const similarity = calculateSimilarity(key, searchName);
-    if (similarity > bestSimilarity) {
-      bestSimilarity = similarity;
-      bestMatch = value;
-    }
-  }
-  
-  return bestMatch;
-}
-
 export async function onRequest(context) {
   const { request, env } = context;
   const url = new URL(request.url);
@@ -192,17 +118,27 @@ export async function onRequest(context) {
       const notionData = await response.json();
       console.log('✅ Tabela recebida com sucesso!');
       console.log('📝 Total de registros:', notionData.results?.length || 0);
-      console.log('📝 Primeiro registro:', notionData.results?.[0] || 'nenhum');
-      console.log('📝 Propriedades do primeiro registro:', notionData.results?.[0]?.properties || {});
+      console.log('📝 Primeiro registro ID:', notionData.results?.[0]?.id || 'nenhum');
+      console.log('📝 Propriedades do primeiro registro:', Object.keys(notionData.results?.[0]?.properties || {}));
+      
+      if (!notionData.results || notionData.results.length === 0) {
+        console.log('⚠️ AVISO: Database retornou vazio!');
+        return new Response(JSON.stringify({ 
+          error: 'Database vazia',
+          debug: {
+            has_results: !!notionData.results,
+            results_length: notionData.results?.length || 0,
+            has_object: !!notionData.object
+          }
+        }), {
+          status: 200,
+          headers
+        });
+      }
 
-      // Função para extrair valores com fuzzy matching
-      const extractValue = (properties, searchName, defaultValue = '') => {
-        const prop = findPropertyByName(properties, searchName);
-        
-        if (!prop) {
-          console.log(`⚠️ Campo não encontrado: ${searchName}`);
-          return defaultValue;
-        }
+      // Função para extrair valores
+      const extractValue = (prop, defaultValue = '') => {
+        if (!prop) return defaultValue;
         
         switch (prop.type) {
           case 'number':
@@ -229,60 +165,60 @@ export async function onRequest(context) {
         
         return {
           id: row.id,
-          emissora: extractValue(properties, 'Emissora'),
-          praca: extractValue(properties, 'Praça'),
-          dial: extractValue(properties, 'Dial'),
-          uf: extractValue(properties, 'UF'),
+          emissora: extractValue(properties['Emissora'], ''),
+          praca: extractValue(properties['Praça'], ''),
+          dial: extractValue(properties['Dial'], ''),
+          uf: extractValue(properties['UF'], ''),
           
           // Spots 30"
-          spots30: extractValue(properties, 'Spots 30', 0),
-          valorTabela30: extractValue(properties, 'Valor spot 30 Tabela', 0),
-          valorNegociado30: extractValue(properties, 'Valor spot 30 Negociado', 0),
+          spots30: extractValue(properties['Spots 30"'], 0),
+          valorTabela30: extractValue(properties['Valor spot 30" (Tabela)'], 0),
+          valorNegociado30: extractValue(properties['Valor spot 30" (Negociado)'], 0),
           
           // Spots 60"
-          spots60: extractValue(properties, 'Spots 60', 0),
-          valorTabela60: extractValue(properties, 'Valor spot 60 Tabela', 0),
-          valorNegociado60: extractValue(properties, 'Valor spot 60 Negociado', 0),
+          spots60: extractValue(properties['Spots 60"'], 0),
+          valorTabela60: extractValue(properties['Valor spot 60" (Tabela)'], 0),
+          valorNegociado60: extractValue(properties['Valor spot 60" (Negociado)'], 0),
           
           // Blitz
-          spotsBlitz: extractValue(properties, 'Blitz', 0),
-          valorTabelaBlitz: extractValue(properties, 'Valor Blitz Tabela', 0),
-          valorNegociadoBlitz: extractValue(properties, 'Valor Blitz Negociado', 0),
+          spotsBlitz: extractValue(properties['Blitz'], 0),
+          valorTabelaBlitz: extractValue(properties['Valor Blitz (Tabela)'], 0),
+          valorNegociadoBlitz: extractValue(properties['Valor Blitz (Negociado)'], 0),
           
           // Spots 15"
-          spots15: extractValue(properties, 'Spots 15', 0),
-          valorTabela15: extractValue(properties, 'Valor spot 15 Tabela', 0),
-          valorNegociado15: extractValue(properties, 'Valor spot 15 Negociado', 0),
+          spots15: extractValue(properties['Spots 15"'], 0),
+          valorTabela15: extractValue(properties['Valor spot 15" (Tabela)'], 0),
+          valorNegociado15: extractValue(properties['Valor spot 15" (Negociado)'], 0),
           
           // Spots 5"
-          spots5: extractValue(properties, 'Spots 5', 0),
-          valorTabela5: extractValue(properties, 'Valor spot 5 Tabela', 0),
-          valorNegociado5: extractValue(properties, 'Valor spot 5 Negociado', 0),
+          spots5: extractValue(properties['Spots 5"'], 0),
+          valorTabela5: extractValue(properties['Valor spot 5" (Tabela)'], 0),
+          valorNegociado5: extractValue(properties['Valor spot 5" (Negociado)'], 0),
           
           // Test 60"
-          spotsTest60: extractValue(properties, 'Test 60', 0),
-          valorTabelaTest60: extractValue(properties, 'Valor Test 60 Tabela', 0),
-          valorNegociadoTest60: extractValue(properties, 'Valor Test 60 Negociado', 0),
+          spotsTest60: extractValue(properties['Test 60"'], 0),
+          valorTabelaTest60: extractValue(properties['Valor Test 60" (Tabela)'], 0),
+          valorNegociadoTest60: extractValue(properties['Valor Test 60" (Negociado)'], 0),
           
           // Flash 30"
-          spotsFlash30: extractValue(properties, 'Flash 30', 0),
-          valorTabelaFlash30: extractValue(properties, 'Valor Flash 30 Tabela', 0),
-          valorNegociadoFlash30: extractValue(properties, 'Valor Flash 30 Negociado', 0),
+          spotsFlash30: extractValue(properties['Flash 30"'], 0),
+          valorTabelaFlash30: extractValue(properties['Valor Flash 30" (Tabela)'], 0),
+          valorNegociadoFlash30: extractValue(properties['Valor Flash 30" (Negociado)'], 0),
           
           // Flash 60"
-          spotsFlash60: extractValue(properties, 'Flash 60', 0),
-          valorTabelaFlash60: extractValue(properties, 'Valor Flash 60 Tabela', 0),
-          valorNegociadoFlash60: extractValue(properties, 'Valor Flash 60 Negociado', 0),
+          spotsFlash60: extractValue(properties['Flash 60"'], 0),
+          valorTabelaFlash60: extractValue(properties['Valor Flash 60" (Tabela)'], 0),
+          valorNegociadoFlash60: extractValue(properties['Valor Flash 60" (Negociado)'], 0),
           
           // Mensham 30"
-          spotsMensham30: extractValue(properties, 'Mensham 30', 0),
-          valorTabelaMensham30: extractValue(properties, 'Valor Mensham 30 Tabela', 0),
-          valorNegociadoMensham30: extractValue(properties, 'Valor Mensham 30 Negociado', 0),
+          spotsMensham30: extractValue(properties['Mensham 30"'], 0),
+          valorTabelaMensham30: extractValue(properties['Valor Mensham 30" (Tabela)'], 0),
+          valorNegociadoMensham30: extractValue(properties['Valor Mensham 30" (Negociado)'], 0),
           
           // Mensham 60"
-          spotsMensham60: extractValue(properties, 'Mensham 60', 0),
-          valorTabelaMensham60: extractValue(properties, 'Valor Mensham 60 Tabela', 0),
-          valorNegociadoMensham60: extractValue(properties, 'Valor Mensham 60 Negociado', 0)
+          spotsMensham60: extractValue(properties['Mensham 60"'], 0),
+          valorTabelaMensham60: extractValue(properties['Valor Mensham 60" (Tabela)'], 0),
+          valorNegociadoMensham60: extractValue(properties['Valor Mensham 60" (Negociado)'], 0)
         };
       });
 

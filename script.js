@@ -118,13 +118,25 @@ async function loadProposalFromNotion(tableId) {
         }
 
         const data = await response.json();
-        addDebug(`📦 Dados recebidos: ${JSON.stringify(data).substring(0, 200)}...`);
+        addDebug(`📦 Dados tipo: ${typeof data}`);
+        addDebug(`📦 Dados é array? ${Array.isArray(data)}`);
+        addDebug(`📦 Dados tem .error? ${'error' in data}`);
+        addDebug(`📦 Dados completo: ${JSON.stringify(data).substring(0, 500)}`);
+        
+        // Se recebeu erro, mostrar
+        if (data.error) {
+          addDebug(`❌ API retornou erro: ${data.error}`);
+          addDebug(`📋 Debug info: ${JSON.stringify(data.debug || {})}`);
+          throw new Error(`Erro da API: ${data.error}`);
+        }
+        
         addDebug(`📊 É array? ${Array.isArray(data)}`);
         addDebug(`📊 Tamanho: ${Array.isArray(data) ? data.length : 'N/A'}`);
         
         if (Array.isArray(data) && data.length > 0) {
             addDebug(`✅ Processando ${data.length} emissoras`);
             addDebug(`📋 Primeiro item chaves: ${Object.keys(data[0]).join(', ')}`);
+            addDebug(`📋 Primeiro emissora: ${data[0].emissora || 'SEM NOME'}`);
             
             proposalData.emissoras = data.map(row => ({
                 id: row.id,
