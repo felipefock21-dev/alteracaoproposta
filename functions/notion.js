@@ -159,9 +159,19 @@ export async function onRequest(context) {
       };
 
       // Mapear registros da tabela
-      const emissoras = notionData.results.map(row => {
+      const emissoras = notionData.results.map((row, rowIndex) => {
         const properties = row.properties || {};
-        console.log('🔍 Propriedades encontradas:', Object.keys(properties));
+        
+        // Log apenas do primeiro registro para não poluir o console
+        if (rowIndex === 0) {
+          console.log('🔍 NOMES EXATOS DOS CAMPOS NO NOTION:');
+          const fieldNames = Object.keys(properties).sort();
+          fieldNames.forEach(name => {
+            const prop = properties[name];
+            console.log(`  "${name}" (tipo: ${prop.type})`);
+          });
+          console.log('');
+        }
         
         return {
           id: row.id,
