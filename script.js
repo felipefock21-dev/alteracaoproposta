@@ -78,17 +78,42 @@ function showWelcomeMessage() {
                     Plataforma de Gestão de Propostas Radiofônicas
                 </p>
                 <div style="background: #f3f4f6; padding: 30px; border-radius: 12px; max-width: 600px; margin: 0 auto;">
-                    <p style="color: #374151; font-size: 1rem; line-height: 1.6;">
-                        ℹ️ Nenhuma proposta foi carregada.<br><br>
-                        Para visualizar e editar uma proposta, acesse a URL com o ID:<br><br>
-                        <code style="background: white; padding: 10px; border-radius: 6px; display: inline-block; margin: 10px 0;">
-                            ?id=SEU_ID_AQUI
-                        </code>
+                    <p style="color: #374151; font-size: 1rem; line-height: 1.6; margin-bottom: 25px;">
+                        ℹ️ Nenhuma proposta foi carregada.
+                    </p>
+                    <div style="background: white; padding: 20px; border-radius: 8px;">
+                        <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 10px;">
+                            ID da Tabela no Notion:
+                        </label>
+                        <input 
+                            id="tableIdInput" 
+                            type="text" 
+                            placeholder="Cole o ID da tabela aqui..." 
+                            style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; margin-bottom: 15px;"
+                        />
+                        <button 
+                            onclick="loadFromWelcome()" 
+                            style="width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;"
+                        >
+                            ✅ Carregar Proposta
+                        </button>
+                    </div>
+                    <p style="color: #6b7280; font-size: 0.9rem; margin-top: 15px;">
+                        💡 Ou acesse a URL com o ID: <code style="background: white; padding: 5px 8px; border-radius: 4px;">?id=SEU_ID_AQUI</code>
                     </p>
                 </div>
             </div>
         `;
     }
+}
+
+function loadFromWelcome() {
+    const tableId = document.getElementById('tableIdInput')?.value?.trim();
+    if (!tableId) {
+        alert('⚠️ Por favor, insira o ID da tabela');
+        return;
+    }
+    window.location.href = `?id=${encodeURIComponent(tableId)}`;
 }
 
 // =====================================================
