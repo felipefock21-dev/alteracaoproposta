@@ -94,11 +94,12 @@ async function loadProposalFromNotion(notionId) {
     const apiUrl = getApiUrl();
     const response = await fetch(`${apiUrl}?id=${notionId}`);
     
+    console.log('📊 ai errou:', response);
+    
     if (!response.ok) {
         throw new Error(`Erro ao carregar dados: ${response.status}`);
     }
     
-    console.log('Resposta:', response);
 
     const data = await response.json();
     console.log('📊 Dados recebidos:', data);
