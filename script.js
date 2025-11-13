@@ -98,6 +98,8 @@ async function loadProposalFromNotion(notionId) {
         throw new Error(`Erro ao carregar dados: ${response.status}`);
     }
     
+    console.log('Resposta:', response);
+
     const data = await response.json();
     console.log('📊 Dados recebidos:', data);
     
