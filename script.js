@@ -330,11 +330,6 @@ function renderSpotsTable() {
             const valorTabela = emissora[produto.tabelaKey] || 0;
             const valorNegociado = emissora[produto.negKey] || 0;
             
-            // Verificar se o produto foi selecionado (qualquer valor > 0)
-            const temSelecionado = spots > 0 || valorTabela > 0 || valorNegociado > 0;
-            
-            if (!temSelecionado) return; // Pular produtos não selecionados
-            
             produtosRenderizados++;
             
             const invTabela = spots * valorTabela;
