@@ -28,19 +28,9 @@ let charts = {
     impacts: null
 };
 
-// Função de debug visual
-function addDebug(message) {
-    console.log(message);
-    const debugPanel = document.getElementById('debugPanel');
-    const debugContent = document.getElementById('debugContent');
-    if (debugPanel && debugContent) {
-        debugPanel.style.display = 'block';
-        const line = document.createElement('div');
-        line.textContent = message;
-        line.style.marginBottom = '5px';
-        debugContent.appendChild(line);
-    }
-}
+// Função de debug visual - removida
+// Todos os debugs agora vão apenas para console
+
 
 // =====================================================
 // INICIALIZAÇÃO
@@ -132,24 +122,21 @@ async function loadProposalFromNotion(tableId) {
     console.log('╚════════════════════════════════════════════════════════════════╝');
     console.log('Parâmetro tableId:', tableId);
     
-    addDebug('🚀 Iniciando carregamento...');
-    addDebug(`📌 ID da tabela: ${tableId}`);
-    
     const apiUrl = getApiUrl();
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : apiUrl + '/';
     const finalUrl = `${baseUrl}?id=${tableId}`;
     
-    addDebug(`📡 URL final: ${finalUrl}`);
+    console.log(`📡 URL final: ${finalUrl}`);
     
     try {
         const response = await fetch(finalUrl);
         
-        addDebug(`📊 Status HTTP: ${response.status}`);
-        addDebug(`✅ OK: ${response.ok}`);
+        console.log(`📊 Status HTTP: ${response.status}`);
+        console.log(`✅ OK: ${response.ok}`);
         
         if (!response.ok) {
             const errorBody = await response.json().catch(() => ({}));
-            addDebug(`❌ Erro: ${JSON.stringify(errorBody)}`);
+            console.log(`❌ Erro: ${JSON.stringify(errorBody)}`);
             throw new Error(`Erro ao carregar dados: ${response.status}`);
         }
 
@@ -167,48 +154,34 @@ async function loadProposalFromNotion(tableId) {
         }
         console.log('');
         
-        addDebug(`📦 Dados tipo: ${typeof data}`);
-        addDebug(`📦 Dados é array? ${Array.isArray(data)}`);
-        addDebug(`📦 Dados tem .error? ${'error' in data}`);
-        addDebug(`📦 Dados completo: ${JSON.stringify(data).substring(0, 500)}`);
+        console.log(`📦 Dados tipo: ${typeof data}`);
+        console.log(`📦 Dados é array? ${Array.isArray(data)}`);
+        console.log(`📦 Dados tem .error? ${'error' in data}`);
         
         // Se recebeu erro, mostrar
         if (data.error) {
-          addDebug(`❌ API retornou erro: ${data.error}`);
-          addDebug(`📋 Debug info: ${JSON.stringify(data.debug || {})}`);
+          console.log(`❌ API retornou erro: ${data.error}`);
+          console.log(`📋 Debug info: ${JSON.stringify(data.debug || {})}`);
           throw new Error(`Erro da API: ${data.error}`);
         }
         
-        addDebug(`📊 É array? ${Array.isArray(data)}`);
-        addDebug(`📊 Tamanho: ${Array.isArray(data) ? data.length : 'N/A'}`);
+        console.log(`📊 É array? ${Array.isArray(data)}`);
+        console.log(`📊 Tamanho: ${Array.isArray(data) ? data.length : 'N/A'}`);
         
         if (Array.isArray(data) && data.length > 0) {
-            addDebug(`✅ Processando ${data.length} emissoras`);
-            addDebug(`📋 Primeiro item chaves: ${Object.keys(data[0]).join(', ')}`);
-            addDebug(`📋 Primeiro emissora: ${data[0].emissora || 'SEM NOME'}`);
-            
-            // Log detalhado dos nomes dos campos
-            addDebug('');
-            addDebug('🔍 NOMES EXATOS DOS CAMPOS:');
-            const firstRecord = data[0];
-            Object.keys(firstRecord).sort().forEach(key => {
-                const value = firstRecord[key];
-                addDebug(`  "${key}": ${JSON.stringify(value).substring(0, 50)}`);
-            });
-            addDebug('');
+            console.log(`✅ Processando ${data.length} emissoras`);
+            console.log(`📋 Primeiro emissora: ${data[0].emissora || 'SEM NOME'}`);
             
             // Usar os dados diretamente do Notion, sem transformação
             proposalData.emissoras = data;
             
-            addDebug(`✅ ${proposalData.emissoras.length} emissoras carregadas com sucesso!`);
-            addDebug(`✅ Primeira emissora: ${proposalData.emissoras[0].emissora}`);
-            addDebug(`✅ Primeira emissora spots30: ${proposalData.emissoras[0].spots30}`);
+            console.log(`✅ ${proposalData.emissoras.length} emissoras carregadas com sucesso!`);
         } else {
-            addDebug('⚠️ Array vazio ou inválido');
+            console.log('⚠️ Array vazio ou inválido');
             throw new Error('Nenhuma emissora encontrada');
         }
     } catch (error) {
-        addDebug(`❌ Erro na função: ${error.message}`);
+        console.log(`❌ Erro na função: ${error.message}`);
         console.error(error);
         throw error;
     }
@@ -288,19 +261,14 @@ function renderInterface() {
 function renderSpotsTable() {
     console.log('\n🎯🎯🎯 renderSpotsTable() INICIADA 🎯🎯🎯');
     
-    const thead = document.querySelector('#spotsTable thead tr');
     const tbody = document.getElementById('spotsTableBody');
     
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: renderSpotsTable()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('✅ Procurando elementos...');
-    console.log('✅ thead encontrado?', !!thead);
+    console.log('✅ Procurando tbody #spotsTableBody...');
     console.log('✅ tbody encontrado?', !!tbody);
     console.log('✅ proposalData.emissoras.length:', proposalData.emissoras.length);
     
-    if (!tbody || !thead) {
-        console.error('❌ CRÍTICO: Elementos da tabela não encontrados no DOM!');
+    if (!tbody) {
+        console.error('❌ CRÍTICO: Elemento spotsTableBody não encontrado no DOM!');
         return;
     }
     
@@ -322,57 +290,14 @@ function renderSpotsTable() {
     
     console.log('🔍 Produtos ativos encontrados:', Array.from(produtosAtivos));
     
-    // Reconstrói o header da tabela dinamicamente
-    thead.innerHTML = `
-        <th style="width: 40px;">✓</th>
-        <th>Região</th>
-        <th>Praça</th>
-        <th style="min-width: 150px;">Emissora</th>
-    `;
-    
-    // Adiciona colunas para cada produto ativo
-    produtosAtivos.forEach(produtoKey => {
-        const produto = PRODUTOS.find(p => p.key === produtoKey);
-        if (produto) {
-            thead.innerHTML += `
-                <th colspan="3" style="text-align: center; border-bottom: 2px solid #ddd;">
-                    ${produto.label}
-                </th>
-            `;
-        }
-    });
-    
-    thead.innerHTML += `
-        <th>Investimento Tabela</th>
-        <th>Investimento Negociado</th>
-    `;
-    
-    // Cria sub-header para as colunas dos produtos
-    let subHeaderHTML = '<tr style="background-color: #f9fafb;">';
-    subHeaderHTML += '<th colspan="4"></th>'; // Colunas de Região, Praça, Emissora
-    
-    produtosAtivos.forEach(produtoKey => {
-        subHeaderHTML += `
-            <th style="padding: 8px; font-size: 0.85rem; border-bottom: 1px solid #ddd;">Qtd</th>
-            <th style="padding: 8px; font-size: 0.85rem; border-bottom: 1px solid #ddd;">V. Tabela</th>
-            <th style="padding: 8px; font-size: 0.85rem; border-bottom: 1px solid #ddd;">V. Neg</th>
-        `;
-    });
-    
-    subHeaderHTML += '<th></th><th></th></tr>';
-    
-    // Insere sub-header após o header principal
-    const firstTr = thead.parentElement.querySelector('tr');
-    firstTr.insertAdjacentHTML('afterend', subHeaderHTML);
-    
-    // Limpa o tbody
+    // LIMPA o tbody completamente
     tbody.innerHTML = '';
     
     let totalLinhasAdicionadas = 0;
     
     // Renderiza uma linha por emissora (não por produto)
     proposalData.emissoras.forEach((emissora, emissoraIndex) => {
-        console.log(`\n📍 Processando emissora ${emissoraIndex}: ${emissora.emissora}`);
+        console.log(`📍 Processando emissora ${emissoraIndex}: ${emissora.emissora}`);
         
         // Calcula investimentos para esta emissora
         let investimentoTabelaEmissora = 0;
@@ -501,9 +426,15 @@ function renderCharts() {
     console.log('📊 Renderizando gráficos...');
     
     try {
-        Object.values(charts).forEach(chart => {
-            if (chart) chart.destroy();
-        });
+        // Destroi os gráficos antigos se existirem
+        if (charts.investment) {
+            charts.investment.destroy();
+            charts.investment = null;
+        }
+        if (charts.impacts) {
+            charts.impacts.destroy();
+            charts.impacts = null;
+        }
         
         renderInvestmentChart();
         renderSpotTypesChart();
@@ -700,13 +631,17 @@ function updateEmissora(index, field, value) {
     }
     
     console.log(`📝 Emissora ${index} - ${field}: ${oldValue} → ${newValue}`);
-    renderSpotsTable();
+    
+    // NÃO chama renderSpotsTable, apenas atualiza estatísticas e gráficos
     updateStats();
+    renderCharts();
+    showUnsavedChanges();
 }
 
 function updateRowSelection() {
     // Função chamada quando um checkbox é marcado/desmarcado
     // Recalcula os totais baseado nas linhas selecionadas
+    console.log('📝 Linha selecionada/desmarcada');
     updateStats();
     renderCharts();
     showUnsavedChanges();
