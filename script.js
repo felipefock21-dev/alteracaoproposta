@@ -239,9 +239,13 @@ function renderInterface() {
     document.getElementById('proposalTitle').textContent = firstEmissora ? firstEmissora.emissora : 'Proposta de Mídia';
     document.getElementById('locationInfo').textContent = firstEmissora ? `${firstEmissora.uf}` : '';
     
+    console.log('🎯 Chamando renderSpotsTable...');
     renderSpotsTable();
+    console.log('🎯 Chamando updateStats...');
     updateStats();
+    console.log('🎯 Chamando renderCharts...');
     renderCharts();
+    console.log('✅ renderInterface() finalizado!');
 }
 
 function renderSpotsTable() {
@@ -375,16 +379,27 @@ function updateStats() {
 function renderCharts() {
     console.log('📊 Renderizando gráficos...');
     
-    Object.values(charts).forEach(chart => {
-        if (chart) chart.destroy();
-    });
-    
-    renderInvestmentChart();
-    renderSpotTypesChart();
+    try {
+        Object.values(charts).forEach(chart => {
+            if (chart) chart.destroy();
+        });
+        
+        renderInvestmentChart();
+        renderSpotTypesChart();
+        console.log('✅ Gráficos renderizados com sucesso!');
+    } catch (error) {
+        console.error('⚠️ Erro ao renderizar gráficos (não crítico):', error);
+    }
 }
 
 function renderInvestmentChart() {
-    const ctx = document.getElementById('investmentChart').getContext('2d');
+    const ctx = document.getElementById('investmentChart');
+    if (!ctx) {
+        console.warn('⚠️ Elemento investmentChart não encontrado');
+        return;
+    }
+    
+    const canvasCtx = ctx.getContext('2d');
     
     const labels = ['Tabela', 'Negociado'];
     const data = [
@@ -392,7 +407,7 @@ function renderInvestmentChart() {
         calculateTotalInvestimentoNegociado()
     ];
     
-    charts.investment = new Chart(ctx, {
+    charts.investment = new Chart(canvasCtx, {
         type: 'doughnut',
         data: {
             labels: labels,
