@@ -304,6 +304,12 @@ function renderSpotsTable() {
             const valorTabela = emissora[produto.tabelaKey] || 0;
             const valorNegociado = emissora[produto.negKey] || 0;
             
+            // PULAR se spots é 0 ou vazio
+            if (!spots || spots === 0) {
+                console.log(`  ⏭️ ${produto.label}: spots=${spots} (pulado - vazio)`);
+                return;
+            }
+            
             const invTabela = spots * valorTabela;
             const invNegociado = spots * valorNegociado;
             
