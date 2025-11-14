@@ -305,6 +305,10 @@ function renderSpotsTable() {
         return;
     }
     
+    console.log('📊 proposalData:', proposalData);
+    console.log('📊 emissoras array:', proposalData.emissoras);
+    console.log('📊 emissoras length:', proposalData.emissoras.length);
+    
     addDebug(`📊 Renderizando ${proposalData.emissoras.length} emissoras`);
     tbody.innerHTML = '';
     
