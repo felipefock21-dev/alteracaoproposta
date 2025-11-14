@@ -45,7 +45,12 @@ function addDebug(message) {
 // INICIALIZAÇÃO
 // =====================================================
 
+console.log('═══════════════════════════════════════════════════════════════');
+console.log('🔥 script.js CARREGADO!');
+console.log('═══════════════════════════════════════════════════════════════');
+
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('\n🎯 DOMContentLoaded DISPARADO!');
     console.log('🚀 Inicializando página de proposta...');
     
     try {
