@@ -245,7 +245,7 @@ export async function onRequest(context) {
           // Spots 30"
           spots30: extractValue(properties, 0, 'Spots 30', 'Spots 30"', 'Spots 30ʺ', 'Spots 30', 'spots30'),
           valorTabela30: extractValue(properties, 0, 'Valor spot 30 (Tabela)', 'Valor spot 30" (Tabela)', 'Valor spot 30ʺ (Tabela)', 'Valor spot 30 (Tabela)', 'valorTabela30'),
-          valorNegociado30: extractValue(properties, 0, 'Valor spot 30 (Negociado)', 'Valor spot 30"(Negociado)', 'Valor spot 30ʺ(Negociado)', 'Valor spot 30 (Negociado)', 'valorNegociado30'),
+          valorNegociado30: extractValue(properties, 0, 'Valor spot 30 (Negociado)', 'Valor spot 30"(Negociado)', 'Valor spot 30ʺ (Negociado)', 'Valor spot 30 (Negociado)', 'valorNegociado30'),
           
           // Spots 60"
           spots60: extractValue(properties, 0, 'Spots 60', 'Spots 60"', 'Spots 60ʺ', 'Spots 60', 'spots60'),
