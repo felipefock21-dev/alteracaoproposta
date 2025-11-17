@@ -38,7 +38,7 @@
 
         body {
             font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: linear-gradient(135deg, #e8eef5 0%, #d6e0eb 100%);
             color: var(--dark);
             min-height: 100vh;
         }
@@ -46,45 +46,49 @@
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 30px 20px;
         }
 
         /* HEADER */
         .header {
             background: var(--white);
             border-radius: 12px;
-            padding: 40px;
+            padding: 30px 40px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             border-left: 6px solid var(--primary);
-        }
-
-        .header-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
         }
 
         .header-logo-section {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 20px;
-            min-height: 60px;
+            margin-bottom: 25px;
+            min-height: 70px;
         }
 
         .header-logo {
-            max-height: 60px;
+            max-height: 70px;
             width: auto;
             object-fit: contain;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0;
+            padding-top: 15px;
+            border-top: 1px solid var(--gray);
         }
 
         .header-title {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--primary);
             font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.5px;
         }
 
         .header-actions {
@@ -94,16 +98,17 @@
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 11px 24px;
             border: none;
             border-radius: 8px;
             font-size: 0.95rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
             align-items: center;
             gap: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
         }
 
         .btn-primary {
@@ -114,7 +119,7 @@
         .btn-primary:hover {
             background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.35);
         }
 
         .btn-secondary {
@@ -124,7 +129,11 @@
         }
 
         .btn-secondary:hover {
-            background: var(--gray);
+            background: var(--white);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .header-info {
@@ -200,6 +209,9 @@
         /* TABELA */
         .table-wrapper {
             overflow-x: auto;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         }
 
         table {
@@ -208,28 +220,30 @@
         }
 
         thead {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
             border-bottom: 2px solid var(--primary);
         }
 
         th {
-            padding: 15px;
+            padding: 16px 15px;
             text-align: left;
-            font-weight: 600;
-            color: var(--dark);
-            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 0.9rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.6px;
+            font-family: 'Space Grotesk', sans-serif;
         }
 
         td {
-            padding: 15px;
+            padding: 14px 15px;
             border-bottom: 1px solid var(--gray);
             color: var(--dark);
+            font-size: 0.95rem;
         }
 
         tbody tr:hover {
-            background: var(--gray-light);
+            background: #f9fafb;
             transition: background 0.2s ease;
         }
 
@@ -238,7 +252,7 @@
         }
 
         .value-cell {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--primary);
         }
 
@@ -319,7 +333,7 @@
         .charts-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
+            gap: 25px;
             grid-column: 1 / -1;
         }
 
@@ -331,18 +345,26 @@
 
         .chart-container {
             position: relative;
-            height: 300px;
+            height: 320px;
             background: var(--white);
             border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .chart-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
 
         .chart-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--dark);
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: var(--primary);
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.3px;
         }
 
         /* STATS CARDS */
@@ -356,31 +378,53 @@
         .stat-card {
             background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             border-radius: 12px;
-            padding: 25px;
+            padding: 28px 25px;
             color: var(--white);
             text-align: center;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.25);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(99, 102, 241, 0.35);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 0;
         }
 
         .stat-card.secondary {
             background: linear-gradient(135deg, var(--secondary) 0%, #be185d 100%);
-            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.25);
         }
 
         .stat-card.accent {
             background: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.25);
         }
 
         .stat-card.success {
             background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.25);
         }
 
         .stat-value {
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
         }
 
         .stat-label {
@@ -393,14 +437,17 @@
         /* FOOTER */
         .footer {
             text-align: center;
-            padding: 30px;
+            padding: 40px 30px;
             color: var(--gray-dark);
             margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
         }
 
         .footer-logo {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         /* MODAL */
