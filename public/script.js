@@ -311,6 +311,7 @@ function renderSpotsTable() {
             <td>
                 <input 
                     type="checkbox" 
+                    data-emissora-index="${emissoraIndex}"
                     onchange="updateRowSelection()"
                     style="cursor: pointer;"
                     checked
@@ -370,26 +371,31 @@ function updateStats() {
     console.log('\n╔════════════════════════════════════════════════════════════════╗');
     console.log('║ 📍 INICIANDO: updateStats()');
     console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('✅ Iniciando cálculos...');
+    console.log('✅ Iniciando cálculos apenas das emissoras SELECIONADAS...');
     
-    // Calcula o investimento total (soma de todos os produtos × valores)
+    // Calcula o investimento total APENAS das emissoras checadas
     let totalInvestimentoTabela = 0;
     let totalInvestimentoNegociado = 0;
     let totalSpots = 0;
     
-    // Percorre todas as emissoras e produtos para calcular totais
-    proposalData.emissoras.forEach(emissora => {
-        PRODUTOS.forEach(produto => {
-            const spots = emissora[produto.key] || 0;
-            if (spots > 0) {
-                const valorTabela = emissora[produto.tabelaKey] || 0;
-                const valorNegociado = emissora[produto.negKey] || 0;
-                
-                totalInvestimentoTabela += spots * valorTabela;
-                totalInvestimentoNegociado += spots * valorNegociado;
-                totalSpots += spots;
-            }
-        });
+    // Percorre apenas as linhas que estão selecionadas (checkbox marcado)
+    proposalData.emissoras.forEach((emissora, index) => {
+        const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+        
+        // Se a checkbox está checada, inclui no cálculo
+        if (checkbox && checkbox.checked) {
+            PRODUTOS.forEach(produto => {
+                const spots = emissora[produto.key] || 0;
+                if (spots > 0) {
+                    const valorTabela = emissora[produto.tabelaKey] || 0;
+                    const valorNegociado = emissora[produto.negKey] || 0;
+                    
+                    totalInvestimentoTabela += spots * valorTabela;
+                    totalInvestimentoNegociado += spots * valorNegociado;
+                    totalSpots += spots;
+                }
+            });
+        }
     });
     
     const cpm = totalSpots > 0 ? (totalInvestimentoNegociado / totalSpots) * 1000 : 0;
