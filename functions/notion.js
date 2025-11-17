@@ -202,6 +202,16 @@ export async function onRequest(context) {
         if (rowIndex === 0) {
           console.log('');
           console.log('═══════════════════════════════════════════════════════════');
+          console.log('🔍 TODOS OS CAMPOS DISPONÍVEIS NO NOTION:');
+          console.log('═══════════════════════════════════════════════════════════');
+          
+          const allFields = Object.keys(properties).sort();
+          allFields.forEach(field => {
+            console.log(`  ✅ "${field}"`);
+          });
+          
+          console.log('');
+          console.log('═══════════════════════════════════════════════════════════');
           console.log('🔍 DEBUG: CAMPOS ENCONTRADOS vs PROCURADOS');
           console.log('═══════════════════════════════════════════════════════════');
           
@@ -215,7 +225,8 @@ export async function onRequest(context) {
             'Flash 30"', 'Valor Flash 30" (Tabela)', 'Valor Flash 30"(Negociado)',
             'Flash 60"', 'Valor Flash 60" (Tabela)', 'Valor Flash 60"(Negociado)',
             'Menshan 30"', 'Valor Mershan 30" (Tabela)', 'Valor Mershan 30" (Tabela)',
-            'Menshan 60"', 'Valor Mershan 60" (Tabela)', 'Valor Mershan 60" (Tabela)'
+            'Menshan 60"', 'Valor Mershan 60" (Tabela)', 'Valor Mershan 60" (Tabela)',
+            'Impactos', 'impactos', 'Quantidade de Impactos', 'IMPACTOS', 'Impacto', 'impacto', 'IMPACTO'
           ];
           
           const actualFields = Object.keys(properties);
@@ -243,7 +254,7 @@ export async function onRequest(context) {
           praca: extractValue(properties, '', 'Praça', 'Praça', 'Praca'),
           dial: extractValue(properties, '', 'Dial', 'Dial'),
           uf: extractValue(properties, '', 'UF', 'UF'),
-          impactos: extractValue(properties, 0, 'Impactos', 'Impactos', 'impactos', 'Quantidade de Impactos'),
+          impactos: extractValue(properties, 0, 'Impactos', 'Impactos', 'impactos', 'Quantidade de Impactos', 'IMPACTOS', 'Impacto', 'impacto', 'IMPACTO', 'Qtd Impactos', 'Quantidade Impactos', 'Total Impactos'),
           
           // Spots 30ʺ
           spots30: extractValue(properties, 0, 'Spots 30ʺ', 'Spots 30ʺ'),
