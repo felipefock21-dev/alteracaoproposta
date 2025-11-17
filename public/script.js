@@ -481,7 +481,7 @@ function renderCharts() {
         }
         
         renderInvestmentChart();
-        renderSpotTypesChart();
+        renderImpactsChart();
         console.log('✅ Gráficos renderizados com sucesso!');
     } catch (error) {
         console.error('⚠️ Erro ao renderizar gráficos (não crítico):', error);
@@ -556,8 +556,8 @@ function renderInvestmentChart() {
     });
 }
 
-function renderSpotTypesChart() {
-    const ctx = document.getElementById('spotsChart');
+function renderImpactsChart() {
+    const ctx = document.getElementById('impactsChart');
     if (!ctx) return;
     
     const canvasCtx = ctx.getContext('2d');
@@ -565,27 +565,12 @@ function renderSpotTypesChart() {
     const labels = [];
     const data = [];
     
-    // Itera apenas pelas linhas selecionadas
+    // Coleta impactos das emissoras selecionadas
     const rows = document.querySelectorAll('#spotsTableBody tr');
-    const produtosAtivos = new Set();
-    
-    // Primeiro, descobre quais produtos têm dados
-    proposalData.emissoras.forEach(emissora => {
-        PRODUTOS.forEach(produto => {
-            const spots = emissora[produto.key] || 0;
-            if (spots > 0) {
-                produtosAtivos.add(produto.label);
-            }
-        });
-    });
-    
-    // Agora conta spots apenas das linhas selecionadas
-    const spotsPorProduto = {};
     
     rows.forEach(row => {
         const checkbox = row.querySelector('input[type="checkbox"]');
         if (checkbox && checkbox.checked) {
-            // Obtém o nome da emissora (4ª coluna)
             const cells = row.querySelectorAll('td');
             if (cells.length >= 4) {
                 const emissoraName = cells[3].textContent.trim();
@@ -593,35 +578,35 @@ function renderSpotTypesChart() {
                 // Encontra a emissora correspondente
                 const emissora = proposalData.emissoras.find(e => e.emissora === emissoraName);
                 if (emissora) {
-                    PRODUTOS.forEach(produto => {
-                        const spots = emissora[produto.key] || 0;
-                        if (spots > 0) {
-                            const chave = `${emissoraName} - ${produto.label}`;
-                            spotsPorProduto[chave] = spots;
-                        }
-                    });
+                    const impactos = emissora.impactos || 0;
+                    labels.push(emissoraName);
+                    data.push(impactos);
                 }
             }
         }
     });
     
-    // Monta arrays de labels e data
-    Object.entries(spotsPorProduto).forEach(([label, spots]) => {
-        labels.push(label);
-        data.push(spots);
-    });
+    console.log('📊 Gráfico impactos - Emissoras encontradas:', labels.length);
     
-    console.log('📊 Gráfico spots - Produtos encontrados:', labels.length);
+    // Destrói o gráfico anterior se existir
+    if (charts.impacts) {
+        charts.impacts.destroy();
+    }
     
     charts.impacts = new Chart(canvasCtx, {
         type: 'bar',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Quantidade de Spots',
+                label: 'Quantidade de Impactos',
                 data: data,
-                backgroundColor: 'rgba(99, 102, 241, 0.8)',
-                borderColor: '#6366f1',
+                backgroundColor: [
+                    'rgba(139, 92, 246, 0.8)',
+                    'rgba(167, 139, 250, 0.8)',
+                    'rgba(196, 181, 253, 0.8)',
+                    'rgba(216, 180, 254, 0.8)'
+                ],
+                borderColor: '#8b5cf6',
                 borderWidth: 2,
                 borderRadius: 8
             }]
@@ -630,11 +615,25 @@ function renderSpotTypesChart() {
             indexAxis: 'y',
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: { 
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.parsed.x.toLocaleString('pt-BR');
+                        }
+                    }
+                }
+            },
             scales: {
                 x: {
                     beginAtZero: true,
-                    ticks: { stepSize: 1 }
+                    ticks: { 
+                        stepSize: 1,
+                        callback: function(value) {
+                            return value.toLocaleString('pt-BR');
+                        }
+                    }
                 }
             }
         }

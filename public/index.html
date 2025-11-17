@@ -72,9 +72,9 @@
         </div>
 
         <!-- MAIN GRID -->
-        <div class="main-grid">
+        <div class="main-grid" style="grid-template-columns: 1fr 300px; gap: 30px;">
             <!-- TABELA DE SPOTS -->
-            <div class="card">
+            <div class="card" style="grid-column: 1 / -1;">
                 <h2 class="card-title">
                     <i class="fas fa-table"></i> Detalhamento de Spots
                 </h2>
@@ -90,20 +90,24 @@
                 </div>
             </div>
 
-            <!-- GRÁFICO DE INVESTIMENTO -->
+            <!-- GRÁFICO DE IMPACTOS (BARRAS VERTICAIS) -->
             <div class="card">
                 <h2 class="card-title">
-                    <i class="fas fa-chart-pie"></i> Comparativo de Investimento
+                    <i class="fas fa-chart-bar"></i> Impactos
+                </h2>
+                <div class="chart-container">
+                    <canvas id="impactsChart"></canvas>
+                </div>
+            </div>
+
+            <!-- GRÁFICO DE INVESTIMENTO (PIZZA) -->
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-pie"></i> Investimento
                 </h2>
                 <div class="chart-container">
                     <canvas id="investmentChart"></canvas>
                 </div>
-            </div>
-
-            <!-- GRÁFICO DE SPOTS POR TIPO -->
-            <div class="chart-container">
-                <h3 class="chart-title">📊 Distribuição de Spots por Tipo</h3>
-                <canvas id="spotsChart"></canvas>
             </div>
         </div>
 

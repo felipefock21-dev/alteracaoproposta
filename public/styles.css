@@ -165,7 +165,7 @@ body {
    ===================================================== */
 .main-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 300px;
     gap: 30px;
     margin-bottom: 30px;
 }
