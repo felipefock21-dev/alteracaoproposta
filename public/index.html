@@ -51,12 +51,12 @@
 
         /* HEADER */
         .header {
-            background: var(--white);
+            background: linear-gradient(135deg, #06055b 0%, #1a0f4f 100%);
             border-radius: 12px;
             padding: 30px 40px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            border-left: 6px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-left: 6px solid #8b5cf6;
         }
 
         .header-logo-section {
@@ -71,7 +71,7 @@
             max-height: 70px;
             width: auto;
             object-fit: contain;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.05));
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
         }
 
         .header-top {
@@ -80,13 +80,13 @@
             align-items: center;
             margin-bottom: 0;
             padding-top: 15px;
-            border-top: 1px solid var(--gray);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .header-title {
             font-size: 2rem;
             font-weight: 700;
-            color: var(--primary);
+            color: #c4b5fd;
             font-family: 'Space Grotesk', sans-serif;
             letter-spacing: -0.5px;
         }
@@ -351,6 +351,9 @@
             padding: 25px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transition: all 0.3s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         .chart-container:hover {
@@ -693,7 +696,7 @@
             </div>
             <div class="stat-card success">
                 <div class="stat-value" id="statCPM">R$ 0</div>
-                <div class="stat-label">CPM (Cost Per Thousand)</div>
+                <div class="stat-label">CPM</div>
             </div>
             <div class="stat-card economy">
                 <div class="stat-value" id="statEconomia">R$ 0</div>

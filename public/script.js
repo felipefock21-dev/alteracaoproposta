@@ -349,14 +349,10 @@ function renderSpotsTable() {
                 </td>
                 <td style="text-align: right; padding: 8px;">R$ ${valorTabela.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td style="text-align: right; padding: 8px;">R$ ${valorNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="text-align: right; padding: 8px;">R$ ${invTabela.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="text-align: right; padding: 8px;">R$ ${invNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             `;
         });
-        
-        // Adiciona colunas de investimento total
-        row.innerHTML += `
-            <td class="value-cell" style="text-align: right;">R$ ${investimentoTabelaEmissora.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-            <td class="value-cell" style="text-align: right;">R$ ${investimentoNegociadoEmissora.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-        `;
         
         tbody.appendChild(row);
         totalLinhasAdicionadas++;
@@ -424,7 +420,7 @@ function updateStats() {
     if (statTotalSpots) statTotalSpots.textContent = totalSpots;
     if (statTabelaValue) statTabelaValue.textContent = formatCurrency(totalInvestimentoTabela);
     if (statNegociadoValue) statNegociadoValue.textContent = formatCurrency(totalInvestimentoNegociado);
-    if (statCPM) statCPM.textContent = `R$ ${cpm.toFixed(2)}`;
+    if (statCPM) statCPM.textContent = formatCurrency(cpm);
     if (statEconomia) statEconomia.textContent = formatCurrency(economia);
     
     console.log('✅ Estatísticas atualizadas!\n');
