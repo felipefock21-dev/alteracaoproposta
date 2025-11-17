@@ -291,14 +291,7 @@ function renderSpotsTable() {
         });
     });
     
-    // Se não há produtos ativos, não mostra tabela
-    if (produtosAtivos.size === 0) {
-        console.warn('⚠️ Nenhum produto com dados encontrado');
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px;">Nenhum produto com dados</td></tr>';
-        return;
-    }
-    
-    console.log('🔍 Produtos ativos encontrados:', Array.from(produtosAtivos).map(pk => {
+    console.log('🔍 Produtos com dados encontrados:', Array.from(produtosAtivos).map(pk => {
         const p = PRODUTOS.find(x => x.key === pk);
         return p ? p.label : pk;
     }));
