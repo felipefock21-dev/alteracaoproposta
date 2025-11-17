@@ -212,9 +212,37 @@ body {
    ===================================================== */
 .table-wrapper {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 500px;
     background: var(--white);
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Estilo da scrollbar */
+.table-wrapper::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #8b5cf6;
+    border-radius: 10px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #7c3aed;
+}
+
+/* Firefox */
+.table-wrapper {
+    scrollbar-color: #8b5cf6 #f1f1f1;
+    scrollbar-width: thin;
 }
 
 table {
