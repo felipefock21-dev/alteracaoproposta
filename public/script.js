@@ -349,8 +349,8 @@ function renderSpotsTable() {
                 </td>
                 <td style="text-align: right; padding: 8px;">R$ ${valorTabela.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 <td style="text-align: right; padding: 8px;">R$ ${valorNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td style="text-align: right; padding: 8px;">R$ ${invTabela.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td style="text-align: right; padding: 8px;">R$ ${invNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="investment-tabela" style="padding: 8px;">R$ ${invTabela.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td class="investment-negociado" style="padding: 8px;">R$ ${invNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             `;
         });
         
