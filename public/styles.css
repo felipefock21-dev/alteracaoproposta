@@ -217,6 +217,7 @@ body {
     background: var(--white);
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    width: 100%;
 }
 
 /* Estilo da scrollbar */
@@ -248,6 +249,33 @@ body {
 table {
     width: 100%;
     border-collapse: collapse;
+}
+
+/* Colunas fixas na tabela */
+table th:nth-child(1),
+table th:nth-child(2),
+table th:nth-child(3),
+table th:nth-child(4),
+table td:nth-child(1),
+table td:nth-child(2),
+table td:nth-child(3),
+table td:nth-child(4) {
+    position: sticky;
+    left: 0;
+    background: var(--white);
+}
+
+table th:nth-child(2),
+table th:nth-child(3),
+table th:nth-child(4) {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-right: 1px solid var(--gray);
+}
+
+table td:nth-child(2),
+table td:nth-child(3),
+table td:nth-child(4) {
+    border-right: 1px solid var(--gray);
 }
 
 thead {
@@ -293,6 +321,7 @@ tbody tr:last-child td {
     color: #6366f1;
     font-weight: 700;
     text-align: right;
+    min-width: 140px;
 }
 
 .investment-negociado {
@@ -300,6 +329,7 @@ tbody tr:last-child td {
     color: #10b981;
     font-weight: 700;
     text-align: right;
+    min-width: 140px;
 }
 
 /* =====================================================

@@ -291,11 +291,11 @@ function renderSpotsTable() {
         });
     });
     
-    // Se não há produtos ativos, trata como todos os produtos
+    // Se não há produtos ativos, não mostra tabela
     if (produtosAtivos.size === 0) {
-        PRODUTOS.forEach(produto => {
-            produtosAtivos.add(produto.key);
-        });
+        console.warn('⚠️ Nenhum produto com dados encontrado');
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 30px;">Nenhum produto com dados</td></tr>';
+        return;
     }
     
     console.log('🔍 Produtos ativos encontrados:', Array.from(produtosAtivos).map(pk => {
@@ -311,25 +311,25 @@ function renderSpotsTable() {
         
         // Cabeçalhos fixos
         headerRow.innerHTML = `
-            <th style="width: 40px;">✓</th>
-            <th>Região</th>
-            <th>Praça</th>
-            <th>Emissora</th>
+            <th style="width: 40px; min-width: 40px;">✓</th>
+            <th style="min-width: 80px;">Região</th>
+            <th style="min-width: 100px;">Praça</th>
+            <th style="min-width: 140px;">Emissora</th>
         `;
         
         // Cabeçalhos dinâmicos por produto
         produtosAtivos.forEach(produtoKey => {
             const produto = PRODUTOS.find(p => p.key === produtoKey);
             headerRow.innerHTML += `
-                <th colspan="2" style="text-align: center; border-bottom: 2px solid var(--primary);">
+                <th colspan="2" style="text-align: center; border-bottom: 2px solid var(--primary); min-width: 180px;">
                     ${produto.label}
                 </th>
             `;
         });
         
         headerRow.innerHTML += `
-            <th>Inv. Tabela</th>
-            <th>Inv. Negociado</th>
+            <th style="min-width: 140px;">Inv. Tabela</th>
+            <th style="min-width: 140px;">Inv. Negociado</th>
         `;
         
         thead.appendChild(headerRow);
@@ -380,7 +380,7 @@ function renderSpotsTable() {
             investimentoNegociadoEmissora += invNegociado;
             
             row.innerHTML += `
-                <td style="text-align: center;">
+                <td style="text-align: center; min-width: 90px;">
                     <input 
                         type="number" 
                         value="${spots}" 
@@ -388,10 +388,10 @@ function renderSpotsTable() {
                         class="input-spots"
                         min="0"
                         step="1"
-                        style="width: 50px; padding: 4px; text-align: center;"
+                        style="width: 60px; padding: 4px; text-align: center;"
                     >
                 </td>
-                <td style="text-align: right;">R$ ${valorNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="text-align: right; min-width: 90px;">R$ ${valorNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             `;
         });
         
