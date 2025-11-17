@@ -437,6 +437,11 @@
             box-shadow: 0 6px 20px rgba(216, 180, 254, 0.25);
         }
 
+        .stat-card.economy {
+            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.25);
+        }
+
         .stat-value {
             font-size: 1.7rem;
             font-weight: 700;
@@ -462,12 +467,9 @@
         /* FOOTER */
         .footer {
             text-align: center;
-            padding: 45px 30px;
+            padding: 45px;
             color: #e9d5ff;
-            margin-top: 50px;
-            margin-left: -30px;
-            margin-right: -30px;
-            margin-bottom: -30px;
+            margin: 50px -20px -30px -20px;
             background: linear-gradient(135deg, #1e1b4b 0%, #2d1b69 100%);
             font-size: 0.9rem;
             border-top: 3px solid #8b5cf6;
@@ -677,7 +679,7 @@
 
         <!-- STATS CARDS -->
         <div class="stats-grid">
-            <div class="stat-card primary">
+            <div class="stat-card">
                 <div class="stat-value" id="statTotalSpots">0</div>
                 <div class="stat-label">Total de Spots</div>
             </div>
@@ -693,7 +695,7 @@
                 <div class="stat-value" id="statCPM">R$ 0</div>
                 <div class="stat-label">CPM (Cost Per Thousand)</div>
             </div>
-            <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);">
+            <div class="stat-card economy">
                 <div class="stat-value" id="statEconomia">R$ 0</div>
                 <div class="stat-label">Economia</div>
             </div>
