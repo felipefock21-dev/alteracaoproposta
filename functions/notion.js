@@ -243,6 +243,7 @@ export async function onRequest(context) {
           praca: extractValue(properties, '', 'Praça', 'Praça', 'Praca'),
           dial: extractValue(properties, '', 'Dial', 'Dial'),
           uf: extractValue(properties, '', 'UF', 'UF'),
+          impactos: extractValue(properties, 0, 'Impactos', 'Impactos', 'impactos', 'Quantidade de Impactos'),
           
           // Spots 30ʺ
           spots30: extractValue(properties, 0, 'Spots 30ʺ', 'Spots 30ʺ'),
