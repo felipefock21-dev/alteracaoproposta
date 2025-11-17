@@ -264,13 +264,14 @@ function renderSpotsTable() {
     console.log('\n🎯🎯🎯 renderSpotsTable() INICIADA 🎯🎯🎯');
     
     const tbody = document.getElementById('spotsTableBody');
+    const table = document.getElementById('spotsTable');
     
     console.log('✅ Procurando tbody #spotsTableBody...');
     console.log('✅ tbody encontrado?', !!tbody);
     console.log('✅ proposalData.emissoras.length:', proposalData.emissoras.length);
     
-    if (!tbody) {
-        console.error('❌ CRÍTICO: Elemento spotsTableBody não encontrado no DOM!');
+    if (!tbody || !table) {
+        console.error('❌ CRÍTICO: Elementos da tabela não encontrados no DOM!');
         return;
     }
     
@@ -290,25 +291,68 @@ function renderSpotsTable() {
         });
     });
     
-    console.log('🔍 Produtos ativos encontrados:', Array.from(produtosAtivos));
+    // Se não há produtos ativos, trata como todos os produtos
+    if (produtosAtivos.size === 0) {
+        PRODUTOS.forEach(produto => {
+            produtosAtivos.add(produto.key);
+        });
+    }
+    
+    console.log('🔍 Produtos ativos encontrados:', Array.from(produtosAtivos).map(pk => {
+        const p = PRODUTOS.find(x => x.key === pk);
+        return p ? p.label : pk;
+    }));
+    
+    // RECONSTRÓI os cabeçalhos da tabela
+    const thead = table.querySelector('thead');
+    if (thead) {
+        thead.innerHTML = '';
+        const headerRow = document.createElement('tr');
+        
+        // Cabeçalhos fixos
+        headerRow.innerHTML = `
+            <th style="width: 40px;">✓</th>
+            <th>Região</th>
+            <th>Praça</th>
+            <th>Emissora</th>
+        `;
+        
+        // Cabeçalhos dinâmicos por produto
+        produtosAtivos.forEach(produtoKey => {
+            const produto = PRODUTOS.find(p => p.key === produtoKey);
+            headerRow.innerHTML += `
+                <th colspan="2" style="text-align: center; border-bottom: 2px solid var(--primary);">
+                    ${produto.label}
+                </th>
+            `;
+        });
+        
+        headerRow.innerHTML += `
+            <th>Inv. Tabela</th>
+            <th>Inv. Negociado</th>
+        `;
+        
+        thead.appendChild(headerRow);
+    }
     
     // LIMPA o tbody completamente
     tbody.innerHTML = '';
     
     let totalLinhasAdicionadas = 0;
     
-    // Renderiza uma linha por emissora (não por produto)
+    // Renderiza uma linha por emissora
     proposalData.emissoras.forEach((emissora, emissoraIndex) => {
         console.log(`📍 Processando emissora ${emissoraIndex}: ${emissora.emissora}`);
         
-        // Calcula investimentos para esta emissora
         let investimentoTabelaEmissora = 0;
         let investimentoNegociadoEmissora = 0;
         
         const row = document.createElement('tr');
         row.className = 'spots-data-row';
+        
+        // Colunas fixas
         row.innerHTML = `
-            <td>
+            <td class="checkbox-cell">
                 <input 
                     type="checkbox" 
                     data-emissora-index="${emissoraIndex}"
@@ -322,7 +366,7 @@ function renderSpotsTable() {
             <td><strong>${emissora.emissora || '-'}</strong></td>
         `;
         
-        // Adiciona colunas para cada produto ativo
+        // Colunas dinâmicas por produto
         produtosAtivos.forEach(produtoKey => {
             const produto = PRODUTOS.find(p => p.key === produtoKey);
             const spots = emissora[produto.key] || 0;
@@ -336,7 +380,7 @@ function renderSpotsTable() {
             investimentoNegociadoEmissora += invNegociado;
             
             row.innerHTML += `
-                <td style="text-align: center; padding: 8px;">
+                <td style="text-align: center;">
                     <input 
                         type="number" 
                         value="${spots}" 
@@ -347,12 +391,15 @@ function renderSpotsTable() {
                         style="width: 50px; padding: 4px; text-align: center;"
                     >
                 </td>
-                <td style="text-align: right; padding: 8px;">R$ ${valorTabela.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td style="text-align: right; padding: 8px;">R$ ${valorNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td class="investment-tabela" style="padding: 8px;">R$ ${invTabela.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-                <td class="investment-negociado" style="padding: 8px;">R$ ${invNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                <td style="text-align: right;">R$ ${valorNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             `;
         });
+        
+        // Colunas de investimento
+        row.innerHTML += `
+            <td class="investment-tabela">R$ ${investimentoTabelaEmissora.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td class="investment-negociado">R$ ${investimentoNegociadoEmissora.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+        `;
         
         tbody.appendChild(row);
         totalLinhasAdicionadas++;
