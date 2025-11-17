@@ -578,15 +578,25 @@ function renderImpactsChart() {
                 // Encontra a emissora correspondente
                 const emissora = proposalData.emissoras.find(e => e.emissora === emissoraName);
                 if (emissora) {
-                    const impactos = emissora.impactos || 0;
+                    // Converte impactos do formato brasileiro (com vírgula) para número
+                    let impactos = emissora.impactos || 0;
+                    
+                    // Se for string, converte o formato brasileiro
+                    if (typeof impactos === 'string') {
+                        impactos = parseFloat(impactos.replace('.', '').replace(',', '.')) || 0;
+                    }
+                    
                     labels.push(emissoraName);
                     data.push(impactos);
+                    
+                    console.log(`  📊 ${emissoraName}: ${impactos} impactos`);
                 }
             }
         }
     });
     
     console.log('📊 Gráfico impactos - Emissoras encontradas:', labels.length);
+    console.log('📊 Dados impactos:', data);
     
     // Destrói o gráfico anterior se existir
     if (charts.impacts) {
@@ -620,7 +630,12 @@ function renderImpactsChart() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return context.parsed.x.toLocaleString('pt-BR');
+                            const value = context.parsed.x;
+                            // Formata com separador de milhar
+                            return `${value.toLocaleString('pt-BR', { 
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            })} impactos`;
                         }
                     }
                 }
@@ -629,9 +644,11 @@ function renderImpactsChart() {
                 x: {
                     beginAtZero: true,
                     ticks: { 
-                        stepSize: 1,
                         callback: function(value) {
-                            return value.toLocaleString('pt-BR');
+                            return value.toLocaleString('pt-BR', {
+                                minimumFractionDigits: 0,
+                                maximumFractionDigits: 0
+                            });
                         }
                     }
                 }
