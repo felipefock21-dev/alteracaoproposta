@@ -426,49 +426,106 @@ export async function onRequest(context) {
         if (sheetResponse.ok) {
           const csvText = await sheetResponse.text();
           console.log('✅ Planilha do Google baixada com sucesso');
+          console.log('📝 Primeiras 500 chars do CSV:', csvText.substring(0, 500));
           
-          // Parse CSV simples
-          const lines = csvText.split('\n').filter(line => line.trim());
-          if (lines.length > 1) {
-            // Primeira linha é header
-            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+          // Parser CSV mais robusto que respeita aspas
+          const parseCSV = (csv) => {
+            const result = [];
+            let current = [];
+            let insideQuotes = false;
+            let value = '';
+            
+            for (let i = 0; i < csv.length; i++) {
+              const char = csv[i];
+              const nextChar = csv[i + 1];
+              
+              if (char === '"') {
+                if (insideQuotes && nextChar === '"') {
+                  value += '"';
+                  i++; // Skip next quote
+                } else {
+                  insideQuotes = !insideQuotes;
+                }
+              } else if (char === ',' && !insideQuotes) {
+                current.push(value.trim());
+                value = '';
+              } else if ((char === '\n' || char === '\r') && !insideQuotes) {
+                if (value.trim() || current.length > 0) {
+                  current.push(value.trim());
+                  if (current.some(c => c)) {
+                    result.push(current);
+                  }
+                  current = [];
+                  value = '';
+                }
+                if (char === '\r' && nextChar === '\n') i++; // Skip \r\n
+              } else {
+                value += char;
+              }
+            }
+            
+            if (value.trim() || current.length > 0) {
+              current.push(value.trim());
+              if (current.some(c => c)) {
+                result.push(current);
+              }
+            }
+            
+            return result;
+          };
+          
+          const rows = parseCSV(csvText);
+          console.log(`📊 Total de linhas parseadas: ${rows.length}`);
+          
+          if (rows.length > 1) {
+            const headers = rows[0].map(h => h.toLowerCase());
             const emissoraIndex = headers.findIndex(h => h.includes('emissora'));
             const logoIndex = headers.findIndex(h => h.includes('logo') || h.includes('imagem'));
             
             console.log(`📋 Headers encontrados:`, headers);
             console.log(`📍 Index Emissora: ${emissoraIndex}, Logo: ${logoIndex}`);
+            console.log(`📋 Primeira linha de dados:`, rows[1]);
             
             if (emissoraIndex !== -1 && logoIndex !== -1) {
               // Criar mapa de emissoras -> logos
               const logoMap = {};
-              for (let i = 1; i < lines.length; i++) {
-                const cells = lines[i].split(',').map(c => c.trim());
-                if (cells[emissoraIndex] && cells[logoIndex]) {
-                  logoMap[cells[emissoraIndex].toLowerCase()] = cells[logoIndex];
+              for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row[emissoraIndex] && row[logoIndex]) {
+                  const emissoraName = row[emissoraIndex].trim();
+                  const logoPath = row[logoIndex].trim();
+                  logoMap[emissoraName.toLowerCase()] = logoPath;
+                  console.log(`📌 Mapeado: "${emissoraName}" -> "${logoPath.substring(0, 50)}..."`);
                 }
               }
               
               console.log(`📊 Mapa de logos criado com ${Object.keys(logoMap).length} entradas`);
+              console.log(`📊 Mapa keys:`, Object.keys(logoMap).slice(0, 5));
               
               // Adicionar logo a cada emissora
               emissoras.forEach(emissora => {
-                const emissoraKey = (emissora.emissora || '').toLowerCase();
-                emissora.logo = logoMap[emissoraKey] || null;
+                const emissoraKey = (emissora.emissora || '').toLowerCase().trim();
+                const logo = logoMap[emissoraKey];
+                emissora.logo = logo || null;
                 if (emissora.logo) {
-                  console.log(`✅ Logo encontrada para: ${emissora.emissora}`);
+                  console.log(`✅ Logo encontrada para: "${emissora.emissora}" -> "${logo.substring(0, 50)}..."`);
                 } else {
-                  console.log(`⚠️ Logo NÃO encontrada para: ${emissora.emissora}`);
+                  console.log(`⚠️ Logo NÃO encontrada para: "${emissora.emissora}" (procurou por: "${emissoraKey}")`);
                 }
               });
             } else {
               console.log('⚠️ Colunas de emissora ou logo não encontradas na planilha');
+              console.log('Headers disponíveis:', headers);
             }
+          } else {
+            console.log('⚠️ Planilha com menos de 2 linhas');
           }
         } else {
           console.log(`⚠️ Erro ao buscar planilha: ${sheetResponse.status}`);
         }
       } catch (error) {
         console.log(`⚠️ Erro ao processar planilha do Google:`, error.message);
+        console.error(error);
       }
 
       return new Response(JSON.stringify(emissoras), {
