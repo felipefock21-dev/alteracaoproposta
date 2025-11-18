@@ -201,22 +201,12 @@ body {
 .card {
     background: var(--white);
     border-radius: 16px;
-    padding: 30px;
+    padding: 0;
     box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
     transition: all 0.3s ease;
     border: 1px solid rgba(196, 181, 253, 0.3);
     position: relative;
-}
-
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
-    border-radius: 16px 16px 0 0;
+    overflow: hidden;
 }
 
 .card:hover {
@@ -229,6 +219,7 @@ body {
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 20px;
+    padding: 30px 30px 0 30px;
     color: var(--dark);
     display: flex;
     align-items: center;
@@ -248,10 +239,11 @@ body {
     overflow-y: auto;
     max-height: 500px;
     background: var(--white);
-    border-radius: 16px;
-    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
+    border-radius: 0;
+    box-shadow: none;
     width: 100%;
-    border: 1px solid rgba(196, 181, 253, 0.3);
+    border: none;
+    padding: 0 30px 30px 30px;
 }
 
 /* Estilo da scrollbar */
@@ -447,11 +439,17 @@ tr.radio-disabled .value-cell {
    GRÁFICOS
    ===================================================== */
 .section-header {
-    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 50%, #a78bfa 100%);
-    height: 8px;
-    border-radius: 4px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
+    padding: 16px 30px;
+    border-radius: 12px 12px 0 0;
+    margin: 0 0 20px 0;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+    color: var(--white);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: center;
 }
 
 .charts-grid {
@@ -471,25 +469,14 @@ tr.radio-disabled .value-cell {
     position: relative;
     height: 320px;
     background: var(--white);
-    border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
+    border-radius: 0;
+    padding: 30px;
+    box-shadow: none;
     transition: all 0.3s ease;
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(196, 181, 253, 0.3);
-}
-
-.chart-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
-    border-radius: 16px 16px 0 0;
+    border: none;
 }
 
 .chart-container:hover {
@@ -511,11 +498,17 @@ tr.radio-disabled .value-cell {
    CARDS DE ESTATÍSTICAS
    ===================================================== */
 .stats-header {
-    background: linear-gradient(90deg, #06055b 0%, #7c3aed 50%, #c4b5fd 100%);
-    height: 6px;
-    border-radius: 3px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
+    padding: 16px 30px;
+    border-radius: 12px;
+    margin: 0 0 20px 0;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+    color: var(--white);
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    text-align: center;
 }
 
 .stats-grid {
