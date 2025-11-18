@@ -560,7 +560,7 @@ function renderInvestmentChart() {
             labels: labels,
             datasets: [{
                 data: data,
-                backgroundColor: ['#ef4444', '#10b981'],
+                backgroundColor: ['#8b5cf6', '#06055b'],
                 borderColor: '#fff',
                 borderWidth: 2
             }]
