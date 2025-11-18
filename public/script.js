@@ -313,6 +313,7 @@ function renderSpotsTable() {
         // Cabeçalhos fixos
         headerRow.innerHTML = `
             <th style="width: 40px; min-width: 40px;">✓</th>
+            <th style="min-width: 60px;">Logo</th>
             <th style="min-width: 80px;">Região</th>
             <th style="min-width: 100px;">Praça</th>
             <th style="min-width: 140px;">Emissora</th>
@@ -361,6 +362,9 @@ function renderSpotsTable() {
                     style="cursor: pointer;"
                     checked
                 >
+            </td>
+            <td style="text-align: center; min-width: 60px;">
+                ${emissora.logo ? `<img src="${emissora.logo}" alt="${emissora.emissora}" style="max-height: 30px; max-width: 50px; object-fit: contain;">` : '-'}
             </td>
             <td>${emissora.uf || '-'}</td>
             <td>${emissora.praca || '-'}</td>

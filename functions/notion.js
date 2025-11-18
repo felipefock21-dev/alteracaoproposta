@@ -415,6 +415,62 @@ export async function onRequest(context) {
       console.log('═══════════════════════════════════════════════════════════');
       console.log('');
 
+      // ===== BUSCAR LOGOS DA PLANILHA DO GOOGLE =====
+      console.log('🔗 Buscando logos da planilha do Google...');
+      const googleSheetId = '1yi9kUa_ybRjHhpllE5YBp6X25fDLoFeirgj8GDccHrk';
+      const gid = '79237797';
+      const googleSheetUrl = `https://docs.google.com/spreadsheets/d/${googleSheetId}/export?format=csv&gid=${gid}`;
+      
+      try {
+        const sheetResponse = await fetch(googleSheetUrl);
+        if (sheetResponse.ok) {
+          const csvText = await sheetResponse.text();
+          console.log('✅ Planilha do Google baixada com sucesso');
+          
+          // Parse CSV simples
+          const lines = csvText.split('\n').filter(line => line.trim());
+          if (lines.length > 1) {
+            // Primeira linha é header
+            const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+            const emissoraIndex = headers.findIndex(h => h.includes('emissora'));
+            const logoIndex = headers.findIndex(h => h.includes('logo') || h.includes('imagem'));
+            
+            console.log(`📋 Headers encontrados:`, headers);
+            console.log(`📍 Index Emissora: ${emissoraIndex}, Logo: ${logoIndex}`);
+            
+            if (emissoraIndex !== -1 && logoIndex !== -1) {
+              // Criar mapa de emissoras -> logos
+              const logoMap = {};
+              for (let i = 1; i < lines.length; i++) {
+                const cells = lines[i].split(',').map(c => c.trim());
+                if (cells[emissoraIndex] && cells[logoIndex]) {
+                  logoMap[cells[emissoraIndex].toLowerCase()] = cells[logoIndex];
+                }
+              }
+              
+              console.log(`📊 Mapa de logos criado com ${Object.keys(logoMap).length} entradas`);
+              
+              // Adicionar logo a cada emissora
+              emissoras.forEach(emissora => {
+                const emissoraKey = (emissora.emissora || '').toLowerCase();
+                emissora.logo = logoMap[emissoraKey] || null;
+                if (emissora.logo) {
+                  console.log(`✅ Logo encontrada para: ${emissora.emissora}`);
+                } else {
+                  console.log(`⚠️ Logo NÃO encontrada para: ${emissora.emissora}`);
+                }
+              });
+            } else {
+              console.log('⚠️ Colunas de emissora ou logo não encontradas na planilha');
+            }
+          }
+        } else {
+          console.log(`⚠️ Erro ao buscar planilha: ${sheetResponse.status}`);
+        }
+      } catch (error) {
+        console.log(`⚠️ Erro ao processar planilha do Google:`, error.message);
+      }
+
       return new Response(JSON.stringify(emissoras), {
         status: 200,
         headers
