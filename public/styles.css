@@ -445,17 +445,17 @@ tr.radio-disabled .value-cell {
    GRÁFICOS
    ===================================================== */
 .section-header {
-    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
-    padding: 16px 30px;
+    background: #6d28d9;
+    padding: 12px 30px;
     border-radius: 12px 12px 0 0;
-    margin: 0 0 20px 0;
-    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+    margin: 0 0 0 0;
+    box-shadow: none;
     color: var(--white);
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
-    text-align: center;
+    text-align: left;
 }
 
 .charts-grid {
@@ -504,17 +504,17 @@ tr.radio-disabled .value-cell {
    CARDS DE ESTATÍSTICAS
    ===================================================== */
 .stats-header {
-    background: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 50%, #a78bfa 100%);
-    padding: 16px 30px;
+    background: #6d28d9;
+    padding: 12px 30px;
     border-radius: 12px;
     margin: 0 0 20px 0;
-    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.25);
+    box-shadow: none;
     color: var(--white);
     font-size: 1rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    text-align: center;
+    text-align: left;
 }
 
 .stats-grid {
@@ -623,11 +623,11 @@ tr.radio-disabled .value-cell {
    ===================================================== */
 .footer {
     text-align: center;
-    padding: 45px;
+    padding: 20px 30px;
     color: #e9d5ff;
-    margin: 50px -20px -30px -20px;
+    margin: 50px calc(-50vw + 50%) 0 calc(-50vw + 50%);
     background: linear-gradient(135deg, #1e1b4b 0%, #2d1b69 100%);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     border-top: 3px solid #8b5cf6;
 }
 
