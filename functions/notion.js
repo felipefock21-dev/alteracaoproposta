@@ -528,7 +528,15 @@ export async function onRequest(context) {
         console.error(error);
       }
 
-      return new Response(JSON.stringify(emissoras), {
+      return new Response(JSON.stringify({
+        emissoras: emissoras,
+        debug: {
+          logosFounded: emissoras.filter(e => e.logo).length,
+          logosNotFound: emissoras.filter(e => !e.logo).length,
+          sampleWithLogo: emissoras.find(e => e.logo),
+          sampleWithoutLogo: emissoras.find(e => !e.logo)
+        }
+      }), {
         status: 200,
         headers
       });

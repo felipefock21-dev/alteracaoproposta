@@ -165,15 +165,31 @@ async function loadProposalFromNotion(tableId) {
           throw new Error(`Erro da API: ${data.error}`);
         }
         
-        console.log(`📊 É array? ${Array.isArray(data)}`);
-        console.log(`📊 Tamanho: ${Array.isArray(data) ? data.length : 'N/A'}`);
+        // Se tem estrutura com debug, extrair emissoras
+        let emissoras = Array.isArray(data) ? data : (data.emissoras || []);
         
-        if (Array.isArray(data) && data.length > 0) {
-            console.log(`✅ Processando ${data.length} emissoras`);
-            console.log(`📋 Primeiro emissora: ${data[0].emissora || 'SEM NOME'}`);
+        // Log de debug das logos
+        if (data.debug) {
+          console.log(`📊 Debug info:`, data.debug);
+          console.log(`✅ Logos encontradas: ${data.debug.logosFounded}`);
+          console.log(`❌ Logos NÃO encontradas: ${data.debug.logosNotFound}`);
+          if (data.debug.sampleWithLogo) {
+            console.log(`📌 Exemplo com logo:`, data.debug.sampleWithLogo.emissora, '→', data.debug.sampleWithLogo.logo?.substring(0, 50));
+          }
+          if (data.debug.sampleWithoutLogo) {
+            console.log(`⚠️ Exemplo sem logo:`, data.debug.sampleWithoutLogo.emissora);
+          }
+        }
+        
+        console.log(`📊 É array? ${Array.isArray(emissoras)}`);
+        console.log(`📊 Tamanho: ${Array.isArray(emissoras) ? emissoras.length : 'N/A'}`);
+        
+        if (Array.isArray(emissoras) && emissoras.length > 0) {
+            console.log(`✅ Processando ${emissoras.length} emissoras`);
+            console.log(`📋 Primeiro emissora: ${emissoras[0].emissora || 'SEM NOME'}`);
             
             // Usar os dados diretamente do Notion, sem transformação
-            proposalData.emissoras = data;
+            proposalData.emissoras = emissoras;
             
             console.log(`✅ ${proposalData.emissoras.length} emissoras carregadas com sucesso!`);
         } else {
