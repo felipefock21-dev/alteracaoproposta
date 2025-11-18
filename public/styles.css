@@ -27,7 +27,7 @@
 /* BODY E CONTAINER */
 body {
     font-family: 'Roboto', sans-serif;
-    background: linear-gradient(135deg, #e8eef5 0%, #d6e0eb 100%);
+    background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
     color: var(--dark);
     min-height: 100vh;
 }
@@ -43,11 +43,30 @@ body {
    ===================================================== */
 .header {
     background: linear-gradient(135deg, #06055b 0%, #1a0f4f 100%);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 30px 40px;
     margin-bottom: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    border-left: 6px solid #8b5cf6;
+    box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2);
+    border-left: 6px solid #c4b5fd;
+    position: relative;
+    overflow: hidden;
+}
+
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(196, 181, 253, 0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+}
+
+.header > * {
+    position: relative;
+    z-index: 1;
 }
 
 .header-logo-section {
@@ -181,15 +200,29 @@ body {
    ===================================================== */
 .card {
     background: var(--white);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 30px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid rgba(196, 181, 253, 0.3);
+    position: relative;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+    border-radius: 16px 16px 0 0;
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(139, 92, 246, 0.15);
+    border-color: rgba(196, 181, 253, 0.5);
 }
 
 .card-title {
@@ -215,9 +248,10 @@ body {
     overflow-y: auto;
     max-height: 500px;
     background: var(--white);
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
     width: 100%;
+    border: 1px solid rgba(196, 181, 253, 0.3);
 }
 
 /* Estilo da scrollbar */
@@ -279,19 +313,20 @@ table td:nth-child(4) {
 }
 
 thead {
-    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
-    border-bottom: 2px solid var(--primary);
+    background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
+    border-bottom: 2px solid #8b5cf6;
 }
 
 th {
     padding: 16px 15px;
     text-align: left;
     font-weight: 700;
-    color: var(--primary);
+    color: #6366f1;
     font-size: 0.9rem;
     text-transform: uppercase;
     letter-spacing: 0.6px;
     font-family: 'Space Grotesk', sans-serif;
+    background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
 }
 
 td {
@@ -317,7 +352,7 @@ tbody tr:last-child td {
 
 /* INVESTMENT CELLS - Coloridas com contraste */
 .investment-tabela {
-    background: #f0f4ff;
+    background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
     color: #6366f1;
     font-weight: 700;
     text-align: right;
@@ -325,8 +360,8 @@ tbody tr:last-child td {
 }
 
 .investment-negociado {
-    background: #f0fdf4;
-    color: #10b981;
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    color: #7c3aed;
     font-weight: 700;
     text-align: right;
     min-width: 140px;
@@ -428,18 +463,31 @@ tr.radio-disabled .value-cell {
     position: relative;
     height: 320px;
     background: var(--white);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 25px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.08);
     transition: all 0.3s ease;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    border: 1px solid rgba(196, 181, 253, 0.3);
+}
+
+.chart-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
+    border-radius: 16px 16px 0 0;
 }
 
 .chart-container:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-6px);
+    box-shadow: 0 12px 35px rgba(139, 92, 246, 0.15);
+    border-color: rgba(196, 181, 253, 0.5);
 }
 
 .chart-title {
@@ -481,19 +529,20 @@ tr.radio-disabled .value-cell {
 
 .stat-card {
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 30px 20px;
     color: var(--white);
     text-align: center;
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.25);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px rgba(139, 92, 246, 0.35);
+    transform: translateY(-8px);
+    box-shadow: 0 16px 40px rgba(139, 92, 246, 0.4);
 }
 
 .stat-card::before {
@@ -510,22 +559,26 @@ tr.radio-disabled .value-cell {
 
 .stat-card.secondary {
     background: linear-gradient(135deg, #a78bfa 0%, #9f7aea 100%);
-    box-shadow: 0 6px 20px rgba(167, 139, 250, 0.25);
+    box-shadow: 0 8px 25px rgba(167, 139, 250, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stat-card.accent {
     background: linear-gradient(135deg, #c4b5fd 0%, #a8a0de 100%);
-    box-shadow: 0 6px 20px rgba(196, 181, 253, 0.25);
+    box-shadow: 0 8px 25px rgba(196, 181, 253, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stat-card.success {
     background: linear-gradient(135deg, #d8b4fe 0%, #c084fc 100%);
-    box-shadow: 0 6px 20px rgba(216, 180, 254, 0.25);
+    box-shadow: 0 8px 25px rgba(216, 180, 254, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stat-card.economy {
     background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.25);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .stat-value {
@@ -596,12 +649,14 @@ tr.radio-disabled .value-cell {
 
 .modal-content {
     background: var(--white);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 30px;
     max-width: 500px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(196, 181, 253, 0.3);
 }
 
 .modal-header {
