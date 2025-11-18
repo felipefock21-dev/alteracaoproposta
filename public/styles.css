@@ -42,7 +42,7 @@ body {
    HEADER
    ===================================================== */
 .header {
-    background: linear-gradient(135deg, #06055b 0%, #651e83 25%, #d51e83 50%, #921fac 75%, #541fac 100%);
+    background: linear-gradient(135deg, #06055b 0%, #1a0f4f 100%);
     border-radius: 16px;
     padding: 30px 40px;
     margin-bottom: 30px;
@@ -59,7 +59,7 @@ body {
     right: -10%;
     width: 500px;
     height: 500px;
-    background: radial-gradient(circle, rgba(213, 30, 131, 0.15) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(196, 181, 253, 0.1) 0%, transparent 70%);
     border-radius: 50%;
     z-index: 0;
 }
