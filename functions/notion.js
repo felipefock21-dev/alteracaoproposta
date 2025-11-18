@@ -125,9 +125,32 @@ export async function onRequest(context) {
       if (firstRecord?.properties) {
         console.log('');
         console.log('═══════════════════════════════════════════════════════════');
-        console.log('🔍 CAMPOS ENCONTRADOS NO NOTION (PRIMEIRO REGISTRO):');
+        console.log('🔍 TODOS OS CAMPOS ENCONTRADOS NO NOTION (PRIMEIRO REGISTRO):');
         console.log('═══════════════════════════════════════════════════════════');
         const fieldNames = Object.keys(firstRecord.properties).sort();
+        fieldNames.forEach(fieldName => {
+          const prop = firstRecord.properties[fieldName];
+          console.log(`  "${fieldName}" (tipo: ${prop.type})`);
+        });
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log('');
+        
+        // Log específico para campos que contêm "impacto"
+        console.log('🔍 PROCURANDO CAMPOS COM "IMPACTO":');
+        const impactFields = fieldNames.filter(f => f.toLowerCase().includes('impacto'));
+        if (impactFields.length > 0) {
+          impactFields.forEach(field => {
+            const prop = firstRecord.properties[field];
+            console.log(`  ✅ ENCONTRADO: "${field}" (tipo: ${prop.type})`);
+          });
+        } else {
+          console.log('  ❌ NENHUM CAMPO COM "IMPACTO" ENCONTRADO');
+        }
+        console.log('');
+        
+        console.log('═══════════════════════════════════════════════════════════');
+        console.log('🔍 VALORES DOS CAMPOS (PRIMEIRO REGISTRO):');
+        console.log('═══════════════════════════════════════════════════════════');
         fieldNames.forEach(fieldName => {
           const prop = firstRecord.properties[fieldName];
           let value = '(vazio)';
@@ -314,6 +337,16 @@ export async function onRequest(context) {
       });
 
       console.log('✅ Emissoras mapeadas:', emissoras);
+      
+      console.log('');
+      console.log('═══════════════════════════════════════════════════════════');
+      console.log('✅ EMISSORAS MAPEADAS - PRIMEIRA EMISSORA:');
+      console.log('═══════════════════════════════════════════════════════════');
+      if (emissoras.length > 0) {
+        console.log(JSON.stringify(emissoras[0], null, 2));
+      }
+      console.log('═══════════════════════════════════════════════════════════');
+      console.log('');
 
       return new Response(JSON.stringify(emissoras), {
         status: 200,
