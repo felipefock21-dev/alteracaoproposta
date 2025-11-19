@@ -599,6 +599,23 @@ function renderInvestmentChart() {
     });
 }
 
+// Calcula step size inteligente para eixo Y (valores redondos e legíveis)
+function calculateSmartStepSize(maxValue) {
+    if (maxValue === 0) return 1;
+    
+    // Define os degraus potenciais: 1, 2, 5, 10, 20, 50, 100, 200, 500, etc.
+    const magnitude = Math.pow(10, Math.floor(Math.log10(maxValue)));
+    const normalized = maxValue / magnitude;
+    
+    let step;
+    if (normalized <= 1) step = magnitude / 10;
+    else if (normalized <= 2) step = magnitude / 5;
+    else if (normalized <= 5) step = magnitude / 2;
+    else step = magnitude;
+    
+    return Math.max(step, 1);
+}
+
 function renderImpactsChart() {
     console.log('\n╔═══════════════════════════════════════════════════════════════╗');
     console.log('║ 📊 renderImpactsChart() INICIADA');
@@ -748,6 +765,7 @@ function renderImpactsChart() {
                     beginAtZero: true,
                     ticks: { 
                         font: { size: 12 },
+                        stepSize: calculateSmartStepSize(Math.max(...sortedData)),
                         callback: function(value) {
                             return value.toLocaleString('pt-BR', {
                                 minimumFractionDigits: 0,
