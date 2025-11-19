@@ -599,13 +599,27 @@ function renderInvestmentChart() {
     });
 }
 
-// Calcula step size inteligente para eixo Y (valores redondos e legíveis)
-function calculateSmartStepSize(maxValue) {
-    if (maxValue === 0) return 1;
+// Calcula step size inteligente baseado na DISTRIBUIÇÃO dos dados, não só no máximo
+function calculateSmartStepSize(dataArray) {
+    if (!dataArray || dataArray.length === 0) return 1;
     
-    // Define os degraus potenciais: 1, 2, 5, 10, 20, 50, 100, 200, 500, etc.
-    const magnitude = Math.pow(10, Math.floor(Math.log10(maxValue)));
-    const normalized = maxValue / magnitude;
+    // Remove zeros e valores muito pequenos para calcular a mediana
+    const nonZeroData = dataArray.filter(v => v > 0).sort((a, b) => a - b);
+    if (nonZeroData.length === 0) return 1;
+    
+    // Usa a mediana ou um percentil alto para criar uma escala mais balanceada
+    // Não usa o máximo absoluto para evitar que 1 outlier domine a escala
+    const median = nonZeroData[Math.floor(nonZeroData.length / 2)];
+    const percentil75 = nonZeroData[Math.floor(nonZeroData.length * 0.75)];
+    
+    // Usa o valor que melhor distribui os dados visualmente
+    const referenceValue = Math.max(median, percentil75 * 1.2);
+    
+    if (referenceValue === 0) return 1;
+    
+    // Define os degraus potenciais: 1, 2, 5, 10, 20, 50, 100, etc.
+    const magnitude = Math.pow(10, Math.floor(Math.log10(referenceValue)));
+    const normalized = referenceValue / magnitude;
     
     let step;
     if (normalized <= 1) step = magnitude / 10;
@@ -765,7 +779,7 @@ function renderImpactsChart() {
                     beginAtZero: true,
                     ticks: { 
                         font: { size: 12 },
-                        stepSize: calculateSmartStepSize(Math.max(...sortedData)),
+                        stepSize: calculateSmartStepSize(sortedData),
                         callback: function(value) {
                             return value.toLocaleString('pt-BR', {
                                 minimumFractionDigits: 0,
