@@ -477,13 +477,14 @@ tr.radio-disabled .value-cell {
 
 .chart-container {
     position: relative;
-    height: 700px;
+    height: 1200px;
     background: var(--white);
     border-radius: 0;
     padding: 30px;
     box-shadow: none;
     transition: all 0.3s ease;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     border: none;

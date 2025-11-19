@@ -637,6 +637,12 @@ function renderImpactsChart() {
     
     console.log('✅ Canvas #impactsChart encontrado');
     
+    // Ajusta a altura do canvas dinamicamente baseado no número de emissoras
+    // Cada emissora precisa de ~15px de altura para ser clicável
+    const numEmissoras = document.querySelectorAll('#spotsTableBody tr').length;
+    const minHeight = Math.max(1200, numEmissoras * 15);
+    ctx.parentElement.style.height = minHeight + 'px';
+    
     const canvasCtx = ctx.getContext('2d');
     
     const labels = [];
