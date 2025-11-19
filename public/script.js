@@ -697,6 +697,11 @@ function renderImpactsChart() {
         charts.impacts.destroy();
     }
     
+    // Calcula o valor máximo para ajustar escala dinamicamente
+    const maxValue = Math.max(...sortedData);
+    const minValue = Math.min(...sortedData);
+    const padding = (maxValue - minValue) * 0.15; // 15% de padding
+    
     charts.impacts = new Chart(canvasCtx, {
         type: 'bar',
         data: {
@@ -735,7 +740,9 @@ function renderImpactsChart() {
             },
             scales: {
                 y: {
-                    beginAtZero: true,
+                    beginAtZero: false,
+                    min: Math.max(0, minValue - padding),
+                    max: maxValue + padding,
                     ticks: { 
                         callback: function(value) {
                             return value.toLocaleString('pt-BR', {
