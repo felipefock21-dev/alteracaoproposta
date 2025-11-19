@@ -754,8 +754,7 @@ function renderImpactsChart() {
                                 maximumFractionDigits: 0
                             });
                         },
-                        padding: 10,
-                        stepSize: Math.ceil(Math.max(...sortedData) / 6)
+                        padding: 10
                     },
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 }
