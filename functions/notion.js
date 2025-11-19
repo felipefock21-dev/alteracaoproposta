@@ -508,7 +508,12 @@ export async function onRequest(context) {
         };
 
         const notionField = fieldMap[change.field];
-        if (!notionField) continue;
+        if (!notionField) {
+          console.error(`❌ Campo não mapeado: ${change.field}`);
+          continue;
+        }
+
+        console.log(`📤 Atualizando ${emissora.emissora} - Campo: "${notionField}" = ${change.new}`);
 
         const updateProperties = {};
         updateProperties[notionField] = { number: parseFloat(change.new) || 0 };
@@ -526,18 +531,23 @@ export async function onRequest(context) {
         const updateData = await updateResponse.json();
 
         if (!updateResponse.ok) {
-          console.error(`❌ Erro ao atualizar ${emissora.emissora}:`, updateResponse.status, updateData);
+          console.error(`❌ Erro ao atualizar ${emissora.emissora} (${notionField}):`, updateResponse.status, updateData);
           updatePromises.push({
             field: change.field,
+            notionField: notionField,
             emissoraId: emissora.id,
+            emissoraName: emissora.emissora,
             success: false,
-            error: updateData.message
+            status: updateResponse.status,
+            error: updateData.message || JSON.stringify(updateData)
           });
         } else {
-          console.log(`✅ ${emissora.emissora} - ${change.field} atualizado`);
+          console.log(`✅ ${emissora.emissora} - ${notionField} atualizado com sucesso`);
           updatePromises.push({
             field: change.field,
+            notionField: notionField,
             emissoraId: emissora.id,
+            emissoraName: emissora.emissora,
             success: true
           });
         }
