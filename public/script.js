@@ -696,6 +696,7 @@ function renderImpactsChart() {
     
     charts.impacts = new Chart(canvasCtx, {
         type: 'bar',
+        indexAxis: 'y',
         data: {
             labels: sortedLabels,
             datasets: [{
@@ -709,9 +710,9 @@ function renderImpactsChart() {
                 ],
                 borderColor: '#8b5cf6',
                 borderWidth: 2,
-                borderRadius: 8,
-                barPercentage: 0.7,
-                categoryPercentage: 0.8
+                borderRadius: 6,
+                barPercentage: 0.8,
+                categoryPercentage: 0.9
             }]
         },
         options: {
@@ -722,7 +723,7 @@ function renderImpactsChart() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const value = context.parsed.y;
+                            const value = context.parsed.x;
                             return `${value.toLocaleString('pt-BR', { 
                                 minimumFractionDigits: 0,
                                 maximumFractionDigits: 0
@@ -736,16 +737,7 @@ function renderImpactsChart() {
             },
             scales: {
                 x: {
-                    ticks: {
-                        font: { size: 13, weight: 'bold' },
-                        maxRotation: 45,
-                        minRotation: 45,
-                        padding: 8
-                    },
-                    grid: { display: false }
-                },
-                y: {
-                    type: 'logarithmic',
+                    beginAtZero: true,
                     ticks: { 
                         font: { size: 12 },
                         callback: function(value) {
@@ -757,6 +749,13 @@ function renderImpactsChart() {
                         padding: 10
                     },
                     grid: { color: 'rgba(0,0,0,0.05)' }
+                },
+                y: {
+                    ticks: {
+                        font: { size: 13, weight: 'bold' },
+                        padding: 8
+                    },
+                    grid: { display: false }
                 }
             }
         }
