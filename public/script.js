@@ -637,12 +637,6 @@ function renderImpactsChart() {
     
     console.log('✅ Canvas #impactsChart encontrado');
     
-    // Ajusta a altura do canvas dinamicamente baseado no número de emissoras
-    // Cada emissora precisa de ~15px de altura para ser clicável
-    const numEmissoras = document.querySelectorAll('#spotsTableBody tr').length;
-    const minHeight = Math.max(1200, numEmissoras * 15);
-    ctx.parentElement.style.height = minHeight + 'px';
-    
     const canvasCtx = ctx.getContext('2d');
     
     const labels = [];
@@ -720,6 +714,20 @@ function renderImpactsChart() {
     console.log('📊 Labels (após ordenar):', sortedLabels);
     console.log('📊 Dados (após ordenar):', sortedData);
     
+    // Calcula a altura mínima para as barras pequenas
+    // Se há muita diferença entre max e min, aumenta o y.min para dar espaço visual
+    const maxVal = Math.max(...sortedData);
+    const minVal = Math.min(...sortedData.filter(v => v > 0));
+    const ratio = maxVal / minVal;
+    
+    // Se a razão é grande, define um y.min que deixa espaço para as barras pequenas
+    let yMin = 0;
+    let yMax = calculateChartMax(sortedData);
+    if (ratio > 50) {
+        // A menor barra ocupará pelo menos 10% do gráfico
+        yMin = minVal * 0.5; // Espaço mínimo visual
+    }
+    
     // Destrói o gráfico anterior se existir
     if (charts.impacts) {
         charts.impacts.destroy();
@@ -777,7 +785,8 @@ function renderImpactsChart() {
                 },
                 y: {
                     beginAtZero: true,
-                    max: calculateChartMax(sortedData),
+                    min: yMin,
+                    max: yMax,
                     ticks: { 
                         font: { size: 12 },
                         callback: function(value) {
