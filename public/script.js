@@ -774,15 +774,8 @@ function renderImpactsChart() {
                 },
                 y: {
                     type: 'logarithmic',
-                    ticks: { 
-                        font: { size: 12 },
-                        callback: function(value) {
-                            return value.toLocaleString('pt-BR', {
-                                minimumFractionDigits: 0,
-                                maximumFractionDigits: 0
-                            });
-                        },
-                        padding: 10
+                    ticks: {
+                        display: false
                     },
                     grid: { color: 'rgba(0,0,0,0.05)' }
                 }
