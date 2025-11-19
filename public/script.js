@@ -773,8 +773,7 @@ function renderImpactsChart() {
                     grid: { display: false }
                 },
                 y: {
-                    beginAtZero: true,
-                    max: yMax,
+                    type: 'logarithmic',
                     ticks: { 
                         font: { size: 12 },
                         callback: function(value) {
