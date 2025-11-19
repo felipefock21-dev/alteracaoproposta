@@ -599,35 +599,29 @@ function renderInvestmentChart() {
     });
 }
 
-// Calcula step size inteligente baseado na DISTRIBUIÇÃO dos dados, não só no máximo
-function calculateSmartStepSize(dataArray) {
-    if (!dataArray || dataArray.length === 0) return 1;
+// Calcula o máximo de escala (max redondo) que garanta visualização de TODAS as barras
+function calculateChartMax(dataArray) {
+    if (!dataArray || dataArray.length === 0) return 100000;
     
-    // Remove zeros e valores muito pequenos para calcular a mediana
-    const nonZeroData = dataArray.filter(v => v > 0).sort((a, b) => a - b);
-    if (nonZeroData.length === 0) return 1;
+    // Pega o valor máximo real
+    const maxValue = Math.max(...dataArray);
+    if (maxValue === 0) return 100000;
     
-    // Usa a mediana ou um percentil alto para criar uma escala mais balanceada
-    // Não usa o máximo absoluto para evitar que 1 outlier domine a escala
-    const median = nonZeroData[Math.floor(nonZeroData.length / 2)];
-    const percentil75 = nonZeroData[Math.floor(nonZeroData.length * 0.75)];
+    // Calcula um máximo "redondo" que seja ~20% maior que o máximo
+    // Isso garante espaço no topo mas mantém escala legível
+    const targetMax = maxValue * 1.15;
     
-    // Usa o valor que melhor distribui os dados visualmente
-    const referenceValue = Math.max(median, percentil75 * 1.2);
+    // Arredonda para um valor "bonito": 100k, 200k, 500k, 1M, 2M, 5M, 10M, etc.
+    const magnitude = Math.pow(10, Math.floor(Math.log10(targetMax)));
+    const normalized = targetMax / magnitude;
     
-    if (referenceValue === 0) return 1;
+    let roundedMax;
+    if (normalized <= 1) roundedMax = magnitude;
+    else if (normalized <= 2) roundedMax = 2 * magnitude;
+    else if (normalized <= 5) roundedMax = 5 * magnitude;
+    else roundedMax = 10 * magnitude;
     
-    // Define os degraus potenciais: 1, 2, 5, 10, 20, 50, 100, etc.
-    const magnitude = Math.pow(10, Math.floor(Math.log10(referenceValue)));
-    const normalized = referenceValue / magnitude;
-    
-    let step;
-    if (normalized <= 1) step = magnitude / 10;
-    else if (normalized <= 2) step = magnitude / 5;
-    else if (normalized <= 5) step = magnitude / 2;
-    else step = magnitude;
-    
-    return Math.max(step, 1);
+    return roundedMax;
 }
 
 function renderImpactsChart() {
@@ -777,9 +771,9 @@ function renderImpactsChart() {
                 },
                 y: {
                     beginAtZero: true,
+                    max: calculateChartMax(sortedData),
                     ticks: { 
                         font: { size: 12 },
-                        stepSize: calculateSmartStepSize(sortedData),
                         callback: function(value) {
                             return value.toLocaleString('pt-BR', {
                                 minimumFractionDigits: 0,
