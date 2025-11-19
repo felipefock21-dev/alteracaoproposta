@@ -856,8 +856,13 @@ function calculateCPM() {
 // =====================================================
 
 function updateEmissora(index, field, value) {
+    console.log(`🔴 UPDATE: index=${index}, field=${field}, value=${value}`);
+    
     const emissora = proposalData.emissoras[index];
-    if (!emissora) return;
+    if (!emissora) {
+        console.error('❌ Emissora não encontrada:', index);
+        return;
+    }
     
     const oldValue = emissora[field];
     const newValue = parseFloat(value) || 0;
@@ -877,6 +882,7 @@ function updateEmissora(index, field, value) {
     }
     
     console.log(`📝 Emissora ${index} - ${field}: ${oldValue} → ${newValue}`);
+    console.log('📊 Changes agora:', proposalData.changes);
     
     // NÃO chama renderSpotsTable, apenas atualiza estatísticas e gráficos
     updateStats();
@@ -905,7 +911,12 @@ function showUnsavedChanges() {
 // =====================================================
 
 async function saveChanges() {
+    console.log('🔴 CLICOU EM SALVAR!');
+    console.log('📊 proposalData.changes:', proposalData.changes);
+    console.log('📊 Número de mudanças:', Object.keys(proposalData.changes).length);
+    
     if (Object.keys(proposalData.changes).length === 0) {
+        console.warn('⚠️ Nenhuma alteração para salvar!');
         alert('Nenhuma alteração para salvar!');
         return;
     }
@@ -915,15 +926,22 @@ async function saveChanges() {
     const changeCount = Object.keys(proposalData.changes).length;
     const confirmSave = confirm(`Deseja salvar ${changeCount} alteração(ões)?`);
     
-    if (!confirmSave) return;
+    if (!confirmSave) {
+        console.log('❌ Usuário cancelou o save');
+        return;
+    }
     
     try {
         const apiUrl = getApiUrl();
+        console.log('📡 API URL:', apiUrl);
+        
         const dataToSave = {
             tableId: proposalData.tableId,
             emissoras: proposalData.emissoras,
             changes: proposalData.changes
         };
+        
+        console.log('📤 Enviando dados:', dataToSave);
         
         const response = await fetch(`${apiUrl}?id=${proposalData.tableId}`, {
             method: 'PATCH',
@@ -931,8 +949,12 @@ async function saveChanges() {
             body: JSON.stringify(dataToSave)
         });
         
+        console.log('📥 Response status:', response.status);
+        console.log('📥 Response ok:', response.ok);
+        
         if (!response.ok) {
             const error = await response.json();
+            console.error('❌ Erro na resposta:', error);
             throw new Error(error.error || 'Erro ao salvar');
         }
         
