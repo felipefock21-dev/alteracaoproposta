@@ -1028,6 +1028,36 @@ function showConfirmModal() {
         html += '</div>';
     }
     
+    // Mostrar as emissoras que serão adicionadas (foram restauradas)
+    // São aquelas que estão em changedEmissoras mas NÃO estão em ocultasEmissoras
+    const emisssorasAdicionar = Array.from(proposalData.changedEmissoras).filter(
+        emissoraId => !proposalData.ocultasEmissoras.has(emissoraId) && 
+                      proposalData.initialOcultasEmissoras.has(emissoraId)
+    );
+    
+    if (emisssorasAdicionar.length > 0) {
+        html += `
+            <div class="change-group" style="border-left-color: #10b981; background-color: #f0fdf4;">
+                <div class="change-group-title" style="color: #10b981;">
+                    <i class="fas fa-plus-circle"></i> Emissoras a Adicionar
+                </div>
+        `;
+        
+        for (const emissoraId of emisssorasAdicionar) {
+            const emissora = proposalData.emissoras.find(e => e.id === emissoraId);
+            if (emissora) {
+                html += `
+                    <div class="change-item" style="padding: 8px 0; color: #10b981;">
+                        <strong>${emissora.emissora}</strong>
+                        <span style="font-size: 12px; color: #999;"> - será incluída na proposta</span>
+                    </div>
+                `;
+            }
+        }
+        
+        html += '</div>';
+    }
+    
     // Depois, mostrar as mudanças de valores
     for (const emissoraIndex in changesByEmissora) {
         const changes = changesByEmissora[emissoraIndex];
