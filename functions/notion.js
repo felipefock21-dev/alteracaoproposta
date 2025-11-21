@@ -525,7 +525,7 @@ export async function onRequest(context) {
               const emissora = emissoras.find(e => e.id === emissoraId);
               log(`  ↳ Processando: ${emissoraId} - ${emissora?.emissora || 'NÃO ENCONTRADA'}`);
               if (emissora) {
-                const result = await moveToAlternantes(notionToken, emissora, tableId, alternantesDbId);
+                const result = await moveToAlternantes(notionToken, emissora, tableId, alternantesDbId, log);
                 log(`  ↳ Resultado: ${result}`);
               } else {
                 log(`  ⚠️ Emissora ${emissoraId} não encontrada nos dados`);
@@ -965,12 +965,13 @@ async function createAlternantesDatabase(notionToken) {
 }
 
 
-async function moveToAlternantes(notionToken, emissora, mainTableId, alternantesDbId) {
-  console.log(`📤 Movendo emissora ${emissora.emissora} para alternantes...`);
+async function moveToAlternantes(notionToken, emissora, mainTableId, alternantesDbId, log) {
+  const logMsg = log || console.log;
+  logMsg(`📤 Movendo emissora ${emissora.emissora} para alternantes...`);
   
   try {
     // 1. Criar página na "Lista de alternantes" com todos os dados
-    console.log(`  1️⃣ Criando registro em alternantes...`);
+    logMsg(`  1️⃣ Criando registro em alternantes...`);
     const createResponse = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
       headers: {
@@ -1012,14 +1013,14 @@ async function moveToAlternantes(notionToken, emissora, mainTableId, alternantes
 
     if (!createResponse.ok) {
       const error = await createResponse.json();
-      console.error(`❌ Erro ao criar em alternantes:`, error);
+      logMsg(`❌ Erro ao criar em alternantes:` + JSON.stringify(error));
       return false;
     }
     
-    console.log(`  ✅ Registro criado em alternantes`);
+    logMsg(`  ✅ Registro criado em alternantes`);
 
     // 2. Deletar a página original da tabela principal
-    console.log(`  2️⃣ Deletando registro da tabela principal (ID: ${emissora.id})...`);
+    logMsg(`  2️⃣ Deletando registro da tabela principal (ID: ${emissora.id})...`);
     const deleteResponse = await fetch(`https://api.notion.com/v1/pages/${emissora.id}`, {
       method: 'PATCH',
       headers: {
@@ -1033,16 +1034,16 @@ async function moveToAlternantes(notionToken, emissora, mainTableId, alternantes
     });
 
     if (deleteResponse.ok) {
-      console.log(`  ✅ Emissora ${emissora.emissora} movida para alternantes com sucesso!`);
+      logMsg(`  ✅ Emissora ${emissora.emissora} movida para alternantes com sucesso!`);
       return true;
     } else {
       const error = await deleteResponse.json();
-      console.error(`⚠️ Erro ao arquivar da tabela principal:`, error);
+      logMsg(`⚠️ Erro ao arquivar da tabela principal:` + JSON.stringify(error));
       // Mesmo que falhe o arquivamento, consideramos sucesso pois está em alternantes
       return true;
     }
   } catch (error) {
-    console.error('❌ Erro na requisição:', error);
+    logMsg('❌ Erro na requisição: ' + error.message);
     return false;
   }
 }
