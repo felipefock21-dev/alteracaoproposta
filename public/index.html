@@ -151,6 +151,30 @@
                 <button class="btn btn-primary" onclick="closeSuccessModal()">
                     ✓ Fechar
                 </button>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    🔄 Atualizar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE REMOÇÃO DE EMISSORA -->
+    <div id="confirmRemovalModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚠️ Confirmar Remoção de Emissora</h2>
+                <button class="modal-close" onclick="closeConfirmRemovalModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="confirmRemovalModalBody">
+                <!-- Preenchido por JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeConfirmRemovalModal()">
+                    ← Cancelar
+                </button>
+                <button class="btn btn-danger" id="confirmRemovalBtn" onclick="confirmRemoval()">
+                    🗑️ Confirmar Remoção
+                </button>
             </div>
         </div>
     </div>

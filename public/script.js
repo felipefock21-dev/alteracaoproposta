@@ -932,21 +932,18 @@ function toggleOcultarEmissora(checkbox) {
         
         console.log(`✅ Emissora ${emissora?.emissora || emissoraId} VISÍVEL`);
     } else {
-        // Desmarcar = ocultar
-        proposalData.ocultasEmissoras.add(emissoraId);
-        
-        // Atualizar visual da linha
-        const row = document.getElementById(`emissora-row-${emissoraId}`);
-        if (row) {
-            row.classList.add('emissora-oculta');
-        }
-        
-        console.log(`🙈 Emissora ${emissora?.emissora || emissoraId} OCULTA`);
+        // Desmarcar = mostrar confirmação ANTES de ocultar
+        console.log(`⚠️ Mostrando confirmação para remover ${emissoraId}`);
+        showConfirmRemovalModal(checkbox, emissora, emissoraId);
+        return;  // NÃO continua aqui, espera confirmação
     }
     
     // Atualizar estatísticas
     updateStats();
     renderCharts();
+    
+    // Marcar como alteração (precisa salvar)
+    showUnsavedChanges();
 }
 
 // =====================================================
@@ -1092,6 +1089,96 @@ function showConfirmModal() {
 function closeConfirmModal() {
     console.log('❌ Fechando modal (editando novamente)');
     document.getElementById('confirmModal').style.display = 'none';
+}
+
+// =====================================================
+// MODAL DE CONFIRMAÇÃO DE REMOÇÃO
+// =====================================================
+
+let pendingRemovalData = null;
+
+function showConfirmRemovalModal(checkbox, emissora, emissoraId) {
+    console.log('📋 Abrindo modal de confirmação de remoção...');
+    
+    // Salvar dados para confirmação
+    pendingRemovalData = {
+        checkbox: checkbox,
+        emissora: emissora,
+        emissoraId: emissoraId
+    };
+    
+    const modal = document.getElementById('confirmRemovalModal');
+    const modalBody = document.getElementById('confirmRemovalModalBody');
+    
+    // Montar HTML do modal
+    const html = `
+        <div class="change-group" style="padding: 20px; background: #fff3cd; border-left: 4px solid #ff6b6b; border-radius: 4px;">
+            <div class="change-group-title" style="color: #d32f2f; margin-bottom: 12px;">
+                <i class="fas fa-exclamation-triangle"></i> Confirmar Remoção de Emissora
+            </div>
+            <p style="margin: 12px 0; font-size: 15px;">
+                Você está removendo a emissora <strong>${emissora.emissora}</strong> desta proposta.
+            </p>
+            <p style="margin: 12px 0; font-size: 14px; color: #666;">
+                Esta emissora será excluída e não será contabilizada. Você poderá restaurá-la marcando novamente depois.
+            </p>
+        </div>
+    `;
+    
+    modalBody.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function closeConfirmRemovalModal() {
+    console.log('❌ Cancelando remoção');
+    document.getElementById('confirmRemovalModal').style.display = 'none';
+    
+    // Restaurar checkbox para o estado anterior
+    if (pendingRemovalData) {
+        pendingRemovalData.checkbox.checked = true;
+    }
+    
+    pendingRemovalData = null;
+}
+
+function confirmRemoval() {
+    console.log('✅ Confirmando remoção de emissora...');
+    
+    if (!pendingRemovalData) return;
+    
+    const { checkbox, emissora, emissoraId } = pendingRemovalData;
+    
+    // Adicionar à lista de excluídas
+    proposalData.ocultasEmissoras.add(emissoraId);
+    console.log(`🗑️ Emissora ${emissoraId} REMOVIDA (marcada para exclusão)`);
+    
+    // Atualizar visual da linha
+    const row = document.getElementById(`emissora-row-${emissoraId}`);
+    if (row) {
+        row.classList.add('emissora-oculta');
+    }
+    
+    // Atualizar estatísticas
+    updateStats();
+    renderCharts();
+    
+    // Marcar como alteração (precisa salvar)
+    showUnsavedChanges();
+    
+    // Fechar modal
+    document.getElementById('confirmRemovalModal').style.display = 'none';
+    pendingRemovalData = null;
+    
+    console.log('📊 Emissoras removidas agora:', Array.from(proposalData.ocultasEmissoras));
+}
+
+function showUnsavedChanges() {
+    const saveBtn = document.getElementById('saveBtn');
+    if (saveBtn) {
+        const temMudancas = Object.keys(proposalData.changes).length > 0;
+        const temRemocoes = proposalData.ocultasEmissoras.size > 0;
+        saveBtn.style.display = (temMudancas || temRemocoes) ? 'block' : 'none';
+    }
 }
 
 
