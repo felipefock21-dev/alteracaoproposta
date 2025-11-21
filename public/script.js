@@ -397,7 +397,7 @@ function renderSpotsTable() {
                     data-emissora-id="${emissora.id}"
                     onchange="toggleOcultarEmissora(this)"
                     style="cursor: pointer;"
-                    ${!isOculta ? 'checked' : ''}
+                    ${isOculta ? 'checked' : ''}
                 >
             </td>
             <td>${emissora.uf || '-'}</td>
@@ -920,7 +920,7 @@ function updateRowSelection() {
     updateStats();
     renderCharts();
     
-    // Mostrar botão de salvar quando há seleção de linhas
+    // Marcar como alteração - seleção de linhas também é uma mudança!
     showUnsavedChanges();
 }
 
@@ -932,7 +932,16 @@ function toggleOcultarEmissora(checkbox) {
     console.log(`🔄 Alternando ocultamento de emissora: ${emissoraId}, marcado: ${checkbox.checked}`);
     
     if (checkbox.checked) {
-        // Marcar = mostrar (ativar/restaurar)
+        // Marcar = ocultar (remover da proposta)
+        // Marcar ANTES de mostrar o modal para que o botão apareça
+        proposalData.changedEmissoras.add(emissoraId);
+        showUnsavedChanges();  // Mostrar botão de salvar
+        
+        console.log(`⚠️ Mostrando confirmação para remover ${emissoraId}`);
+        showConfirmRemovalModal(checkbox, emissora, emissoraId);
+        return;  // NÃO continua aqui, espera confirmação
+    } else {
+        // Desmarcar = mostrar (restaurar)
         proposalData.ocultasEmissoras.delete(emissoraId);
         proposalData.changedEmissoras.add(emissoraId);  // Marcar como alterada
         
@@ -950,14 +959,8 @@ function toggleOcultarEmissora(checkbox) {
         
         // Mostrar botão de salvar
         showUnsavedChanges();
-    } else {
-        // Desmarcar = mostrar confirmação ANTES de ocultar
-        console.log(`⚠️ Mostrando confirmação para remover ${emissoraId}`);
-        showConfirmRemovalModal(checkbox, emissora, emissoraId);
-        return;  // NÃO continua aqui, espera confirmação
     }
 }
-
 // =====================================================
 // SALVAR ALTERAÇÕES
 // =====================================================
