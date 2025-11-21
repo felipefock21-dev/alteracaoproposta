@@ -12,6 +12,10 @@ let proposalData = {
     changedEmissoras: new Set()  // Rastreia quais emissoras tiveram mudanças no status "Excluir"
 };
 
+// Flag para ignorar o próximo evento de checkbox (evita double trigger)
+let ignoreNextCheckboxChange = false;
+
+
 // Definição de todos os produtos disponíveis
 const PRODUTOS = [
     { key: 'spots30', label: 'Spots 30"', tabelaKey: 'valorTabela30', negKey: 'valorNegociado30' },
@@ -925,6 +929,13 @@ function updateRowSelection() {
 }
 
 function toggleOcultarEmissora(checkbox) {
+    // Se a flag está ativa, ignora este evento e desativa a flag
+    if (ignoreNextCheckboxChange) {
+        console.log('⏭️ Ignorando evento de checkbox (double trigger prevention)');
+        ignoreNextCheckboxChange = false;
+        return;
+    }
+    
     const emissoraId = checkbox.getAttribute('data-emissora-id');
     const emissoraIndex = parseInt(checkbox.getAttribute('data-emissora-index'));
     const emissora = proposalData.emissoras[emissoraIndex];
@@ -1189,6 +1200,8 @@ function closeConfirmRemovalModal() {
     
     // Restaurar checkbox para o estado anterior
     if (pendingRemovalData) {
+        // Ativar flag para ignorar o próximo evento de checkbox
+        ignoreNextCheckboxChange = true;
         pendingRemovalData.checkbox.checked = true;
     }
     
