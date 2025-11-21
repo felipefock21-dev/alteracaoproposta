@@ -515,7 +515,7 @@ export async function onRequest(context) {
             for (const emissoraId of ocultasEmissoras) {
               const emissora = emissoras.find(e => e.id === emissoraId);
               if (emissora) {
-                await moveToAlternantes(notionToken, emissora, alternantesDbId);
+                await moveToAlternantes(notionToken, emissora, tableId, alternantesDbId);
               }
             }
           } else {
@@ -948,11 +948,12 @@ async function createAlternantesDatabase(notionToken) {
 }
 
 
-async function moveToAlternantes(notionToken, emissora, alternantesDbId) {
+async function moveToAlternantes(notionToken, emissora, mainTableId, alternantesDbId) {
   console.log(`📤 Movendo emissora ${emissora.emissora} para alternantes...`);
   
   try {
-    // Criar página na "Lista de alternantes"
+    // 1. Criar página na "Lista de alternantes" com todos os dados
+    console.log(`  1️⃣ Criando registro em alternantes...`);
     const createResponse = await fetch('https://api.notion.com/v1/pages', {
       method: 'POST',
       headers: {
@@ -992,13 +993,36 @@ async function moveToAlternantes(notionToken, emissora, alternantesDbId) {
       })
     });
 
-    if (createResponse.ok) {
-      console.log(`✅ Emissora ${emissora.emissora} adicionada aos alternantes`);
+    if (!createResponse.ok) {
+      const error = await createResponse.json();
+      console.error(`❌ Erro ao criar em alternantes:`, error);
+      return false;
+    }
+    
+    console.log(`  ✅ Registro criado em alternantes`);
+
+    // 2. Deletar a página original da tabela principal
+    console.log(`  2️⃣ Deletando registro da tabela principal (ID: ${emissora.id})...`);
+    const deleteResponse = await fetch(`https://api.notion.com/v1/pages/${emissora.id}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${notionToken.trim()}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        archived: true
+      })
+    });
+
+    if (deleteResponse.ok) {
+      console.log(`  ✅ Emissora ${emissora.emissora} movida para alternantes com sucesso!`);
       return true;
     } else {
-      const error = await createResponse.json();
-      console.error(`❌ Erro ao adicionar aos alternantes:`, error);
-      return false;
+      const error = await deleteResponse.json();
+      console.error(`⚠️ Erro ao arquivar da tabela principal:`, error);
+      // Mesmo que falhe o arquivamento, consideramos sucesso pois está em alternantes
+      return true;
     }
   } catch (error) {
     console.error('❌ Erro na requisição:', error);
