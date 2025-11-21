@@ -169,6 +169,7 @@ async function loadProposalFromNotion(tableId) {
         
         // Se tem estrutura com debug, extrair emissoras
         let emissoras = Array.isArray(data) ? data : (data.emissoras || []);
+        let ocultasEmissoras = data.ocultasEmissoras || [];
         
         // Log de debug das logos
         if (data.debug) {
@@ -185,6 +186,7 @@ async function loadProposalFromNotion(tableId) {
         
         console.log(`📊 É array? ${Array.isArray(emissoras)}`);
         console.log(`📊 Tamanho: ${Array.isArray(emissoras) ? emissoras.length : 'N/A'}`);
+        console.log(`👤 Emissoras ocultas: ${ocultasEmissoras.length}`);
         
         if (Array.isArray(emissoras) && emissoras.length > 0) {
             console.log(`✅ Processando ${emissoras.length} emissoras`);
@@ -192,6 +194,10 @@ async function loadProposalFromNotion(tableId) {
             
             // Usar os dados diretamente do Notion, sem transformação
             proposalData.emissoras = emissoras;
+            
+            // Carregar emissoras ocultas no Set
+            proposalData.ocultasEmissoras = new Set(ocultasEmissoras);
+            console.log(`👤 ${proposalData.ocultasEmissoras.size} emissoras marcadas como ocultas`);
             
             console.log(`✅ ${proposalData.emissoras.length} emissoras carregadas com sucesso!`);
         } else {
@@ -1081,10 +1087,12 @@ async function confirmAndSave() {
         const dataToSave = {
             tableId: proposalData.tableId,
             emissoras: proposalData.emissoras,
-            changes: proposalData.changes
+            changes: proposalData.changes,
+            ocultasEmissoras: Array.from(proposalData.ocultasEmissoras)  // Converter Set para Array
         };
         
         console.log('📤 Enviando dados:', dataToSave);
+        console.log('👤 Emissoras ocultas:', dataToSave.ocultasEmissoras);
         
         const response = await fetch(`${apiUrl}?id=${proposalData.tableId}`, {
             method: 'PATCH',

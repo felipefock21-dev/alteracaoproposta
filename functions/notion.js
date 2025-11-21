@@ -427,6 +427,16 @@ export async function onRequest(context) {
 
       console.log('✅ Emissoras mapeadas:', emissoras);
       
+      // Obter lista de emissoras nos alternantes
+      const notionToken = env.NOTION_API_KEY;
+      const alternantesDbId = await getOrCreateAlternantesDatabase(notionToken, 'e-radios');
+      const alternantesIds = alternantesDbId ? await getAlternantesEmissoraIds(notionToken, alternantesDbId) : [];
+      
+      // Marcar emissoras que estão nos alternantes
+      const ocultasEmissoras = emissoras
+        .filter(emissora => alternantesIds.includes(emissora.id))
+        .map(emissora => emissora.id);
+      
       console.log('');
       console.log('═══════════════════════════════════════════════════════════');
       console.log('✅ EMISSORAS MAPEADAS - PRIMEIRA EMISSORA:');
@@ -438,7 +448,8 @@ export async function onRequest(context) {
       console.log('');
 
       return new Response(JSON.stringify({
-        emissoras: emissoras
+        emissoras: emissoras,
+        ocultasEmissoras: ocultasEmissoras
       }), {
         status: 200,
         headers
@@ -473,7 +484,7 @@ export async function onRequest(context) {
       console.log('🔄 Atualizando múltiplas emissoras');
       console.log('📝 Dados recebidos:', requestBody);
 
-      const { emissoras, changes } = requestBody;
+      const { emissoras, changes, ocultasEmissoras } = requestBody;
       if (!emissoras || !Array.isArray(emissoras)) {
         return new Response(JSON.stringify({ 
           error: 'Emissoras deve ser um array' 
@@ -481,6 +492,23 @@ export async function onRequest(context) {
           status: 400,
           headers
         });
+      }
+
+      // Processar ocultamento de emissoras (Liga/desliga)
+      if (ocultasEmissoras && Array.isArray(ocultasEmissoras) && ocultasEmissoras.length > 0) {
+        console.log(`👤 Processando ${ocultasEmissoras.length} emissoras para alternantes...`);
+        
+        const notionToken = env.NOTION_API_KEY;
+        const alternantesDbId = await getOrCreateAlternantesDatabase(notionToken, 'e-radios');
+        
+        if (alternantesDbId) {
+          for (const emissoraId of ocultasEmissoras) {
+            const emissora = emissoras.find(e => e.id === emissoraId);
+            if (emissora) {
+              await moveToAlternantes(notionToken, emissora, alternantesDbId);
+            }
+          }
+        }
       }
 
       // Processar cada alteração
@@ -757,4 +785,250 @@ async function sendNotificationEmail(env, data) {
 
 function findEmissoraIndexById(id, emissoras) {
   return emissoras.findIndex(e => e.id === id);
+}
+
+async function getAlternantesEmissoraIds(notionToken, alternantesDbId) {
+  console.log('📤 Obtendo lista de IDs de alternantes...');
+  
+  try {
+    const response = await fetch(`https://api.notion.com/v1/databases/${alternantesDbId}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${notionToken.trim()}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        filter: {
+          property: 'archived',
+          checkbox: {
+            equals: false
+          }
+        }
+      })
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      const alternantesIds = [];
+      
+      for (const page of data.results) {
+        const idEmissoraField = page.properties['ID Emissora'];
+        if (idEmissoraField && idEmissoraField.rich_text && idEmissoraField.rich_text.length > 0) {
+          alternantesIds.push(idEmissoraField.rich_text[0].text.content);
+        }
+      }
+      
+      console.log(`✅ ${alternantesIds.length} emissoras encontradas nos alternantes`);
+      return alternantesIds;
+    }
+  } catch (error) {
+    console.error('❌ Erro ao obter alternantes:', error);
+  }
+  
+  return [];
+}
+
+// =====================================================
+// GERENCIAMENTO DE "LISTA DE ALTERNANTES"
+// =====================================================
+
+async function getOrCreateAlternantesDatabase(notionToken, workspaceId) {
+  console.log('🔍 Buscando ou criando database "Lista de alternantes"...');
+  
+  // Procura por database chamada "Lista de alternantes" no workspace
+  const searchResponse = await fetch('https://api.notion.com/v1/search', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${notionToken.trim()}`,
+      'Notion-Version': '2022-06-28',
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      query: 'Lista de alternantes',
+      filter: {
+        value: 'database',
+        property: 'object'
+      }
+    })
+  });
+
+  if (searchResponse.ok) {
+    const searchData = await searchResponse.json();
+    const existingDb = searchData.results.find(item => 
+      item.title && item.title[0]?.text.content === 'Lista de alternantes'
+    );
+    
+    if (existingDb) {
+      console.log('✅ Database "Lista de alternantes" encontrada:', existingDb.id);
+      return existingDb.id;
+    }
+  }
+
+  // Se não encontrou, criar nova database
+  console.log('📝 Criando nova database "Lista de alternantes"...');
+  try {
+    const createResponse = await fetch('https://api.notion.com/v1/databases', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${notionToken.trim()}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        parent: {
+          type: 'workspace',
+          workspace: true
+        },
+        title: [
+          {
+            type: 'text',
+            text: {
+              content: 'Lista de alternantes'
+            }
+          }
+        ],
+        properties: {
+          'Emissora': {
+            title: {}
+          },
+          'ID Emissora': {
+            rich_text: {}
+          },
+          'Data Adicionado': {
+            date: {}
+          }
+        }
+      })
+    });
+
+    if (createResponse.ok) {
+      const newDb = await createResponse.json();
+      console.log('✅ Database "Lista de alternantes" criada:', newDb.id);
+      return newDb.id;
+    } else {
+      const error = await createResponse.json();
+      console.error('❌ Erro ao criar database:', error);
+      return null;
+    }
+  } catch (error) {
+    console.error('❌ Erro na requisição de criação:', error);
+    return null;
+  }
+}
+
+async function moveToAlternantes(notionToken, emissora, alternantesDbId) {
+  console.log(`📤 Movendo emissora ${emissora.emissora} para alternantes...`);
+  
+  try {
+    // Criar página na "Lista de alternantes"
+    const createResponse = await fetch('https://api.notion.com/v1/pages', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${notionToken.trim()}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        parent: {
+          database_id: alternantesDbId
+        },
+        properties: {
+          'Emissora': {
+            title: [
+              {
+                text: {
+                  content: emissora.emissora
+                }
+              }
+            ]
+          },
+          'ID Emissora': {
+            rich_text: [
+              {
+                text: {
+                  content: emissora.id
+                }
+              }
+            ]
+          },
+          'Data Adicionado': {
+            date: {
+              start: new Date().toISOString().split('T')[0]
+            }
+          }
+        }
+      })
+    });
+
+    if (createResponse.ok) {
+      console.log(`✅ Emissora ${emissora.emissora} adicionada aos alternantes`);
+      return true;
+    } else {
+      const error = await createResponse.json();
+      console.error(`❌ Erro ao adicionar aos alternantes:`, error);
+      return false;
+    }
+  } catch (error) {
+    console.error('❌ Erro na requisição:', error);
+    return false;
+  }
+}
+
+async function removeFromAlternantes(notionToken, emissoraId, alternantesDbId) {
+  console.log(`🗑️ Removendo emissora ${emissoraId} dos alternantes...`);
+  
+  try {
+    // Procura a página com ID da emissora
+    const queryResponse = await fetch(`https://api.notion.com/v1/databases/${alternantesDbId}/query`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${notionToken.trim()}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        filter: {
+          property: 'ID Emissora',
+          rich_text: {
+            equals: emissoraId
+          }
+        }
+      })
+    });
+
+    if (queryResponse.ok) {
+      const queryData = await queryResponse.json();
+      
+      if (queryData.results.length > 0) {
+        const pageId = queryData.results[0].id;
+        
+        // Arquiva a página
+        const archiveResponse = await fetch(`https://api.notion.com/v1/pages/${pageId}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${notionToken.trim()}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            archived: true
+          })
+        });
+
+        if (archiveResponse.ok) {
+          console.log(`✅ Emissora ${emissoraId} removida dos alternantes`);
+          return true;
+        }
+      } else {
+        console.log(`⚠️ Emissora ${emissoraId} não encontrada nos alternantes`);
+        return true;
+      }
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('❌ Erro ao remover dos alternantes:', error);
+    return false;
+  }
 }
