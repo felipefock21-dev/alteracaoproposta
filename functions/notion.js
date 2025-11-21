@@ -472,39 +472,39 @@ export async function onRequest(context) {
 
         // Mapear campo para nome do Notion
         const fieldMap = {
-          'spots30': 'Spots 30"',
-          'valorTabela30': 'Valor spot 30" (Tabela)',
-          'valorNegociado30': 'Valor spot 30" (Negociado)',
-          'spots60': 'Spots 60"',
-          'valorTabela60': 'Valor spot 60" (Tabela)',
-          'valorNegociado60': 'Valor spot 60" (Negociado)',
+          'spots30': 'Spots 30ʺ',
+          'valorTabela30': 'Valor spot 30ʺ (Tabela)',
+          'valorNegociado30': 'Valor spot 30ʺ (Negociado)',
+          'spots60': 'Spots 60ʺ',
+          'valorTabela60': 'Valor spot 60ʺ (Tabela)',
+          'valorNegociado60': 'Valor spot 60ʺ (Negociado)',
           'spotsBlitz': 'Blitz',
           'valorTabelaBlitz': 'Valor Blitz (Tabela)',
           'valorNegociadoBlitz': 'Valor Blitz (Negociado)',
-          'spots15': 'Spots 15"',
-          'valorTabela15': 'Valor spot 15" (Tabela)',
-          'valorNegociado15': 'Valor spot 15" (Negociado)',
-          'spots5': 'Spots 5"',
-          'valorTabela5': 'Valor spot 5" (Tabela)',
-          'valorNegociado5': 'Valor spot 5" (Negociado)',
-          'spotsTest30': 'Test 30"',
-          'valorTabelaTest30': 'Valor Test 30" (Tabela)',
-          'valorNegociadoTest30': 'Valor Test 30" (Negociado)',
-          'spotsTest60': 'Test 60"',
-          'valorTabelaTest60': 'Valor Test 60" (Tabela)',
-          'valorNegociadoTest60': 'Valor Test 60" (Negociado)',
-          'spotsFlash30': 'Flash 30"',
-          'valorTabelaFlash30': 'Valor Flash 30" (Tabela)',
-          'valorNegociadoFlash30': 'Valor Flash 30" (Negociado)',
-          'spotsFlash60': 'Flash 60"',
-          'valorTabelaFlash60': 'Valor Flash 60" (Tabela)',
-          'valorNegociadoFlash60': 'Valor Flash 60" (Negociado)',
-          'spotsMensham30': 'Mensham 30"',
-          'valorTabelaMensham30': 'Valor Mensham 30" (Tabela)',
-          'valorNegociadoMensham30': 'Valor Mensham 30" (Negociado)',
-          'spotsMensham60': 'Mensham 60"',
-          'valorTabelaMensham60': 'Valor Mensham 60" (Tabela)',
-          'valorNegociadoMensham60': 'Valor Mensham 60" (Negociado)'
+          'spots15': 'Spots 15ʺ',
+          'valorTabela15': 'Valor spot 15ʺ (Tabela)',
+          'valorNegociado15': 'Valor spot 15ʺ (Negociado)',
+          'spots5': 'Spots 5ʺ',
+          'valorTabela5': 'Valor spot 5ʺ (Tabela)',
+          'valorNegociado5': 'Valor spot 5ʺ (Negociado)',
+          'spotsTest30': 'Test 30ʺ',
+          'valorTabelaTest30': 'Valor Test 30ʺ (Tabela)',
+          'valorNegociadoTest30': 'Valor Test 30ʺ (Negociado)',
+          'spotsTest60': 'Test 60ʺ',
+          'valorTabelaTest60': 'Valor Test 60ʺ (Tabela)',
+          'valorNegociadoTest60': 'Valor Test 60ʺ (Negociado)',
+          'spotsFlash30': 'Flash 30ʺ',
+          'valorTabelaFlash30': 'Valor Flash 30ʺ (Tabela)',
+          'valorNegociadoFlash30': 'Valor Flash 30ʺ (Negociado)',
+          'spotsFlash60': 'Flash 60ʺ',
+          'valorTabelaFlash60': 'Valor Flash 60ʺ (Tabela)',
+          'valorNegociadoFlash60': 'Valor Flash 60ʺ (Negociado)',
+          'spotsMensham30': 'Mensham 30ʺ',
+          'valorTabelaMensham30': 'Valor Mensham 30ʺ (Tabela)',
+          'valorNegociadoMensham30': 'Valor Mensham 30ʺ (Negociado)',
+          'spotsMensham60': 'Mensham 60ʺ',
+          'valorTabelaMensham60': 'Valor Mensham 60ʺ (Tabela)',
+          'valorNegociadoMensham60': 'Valor Mensham 60ʺ (Negociado)'
         };
 
         const notionField = fieldMap[change.field];
@@ -516,7 +516,13 @@ export async function onRequest(context) {
         console.log(`📤 Atualizando ${emissora.emissora} - Campo: "${notionField}" = ${change.new}`);
 
         const updateProperties = {};
-        updateProperties[notionField] = { number: parseFloat(change.new) || 0 };
+        updateProperties[notionField] = { 
+          rich_text: [{ 
+            text: { 
+              content: parseFloat(change.new).toString() || '0' 
+            } 
+          }] 
+        };
 
         const bodyToSend = JSON.stringify({ properties: updateProperties });
         console.log(`🔍 FIELD NAME (chave):`, notionField);
