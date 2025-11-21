@@ -509,24 +509,9 @@ export async function onRequest(context) {
           'spots5': 'Spots 5ʺ',
           'valorTabela5': 'Valor spot 5ʺ (Tabela)',
           'valorNegociado5': 'Valor spot 5ʺ (Negociado)',
-          'spotsTest30': 'Test 30ʺ',
-          'valorTabelaTest30': 'Valor Test 30ʺ (Tabela)',
-          'valorNegociadoTest30': 'Valor Test 30ʺ (Negociado)',
-          'spotsTest60': 'Test 60ʺ',
-          'valorTabelaTest60': 'Valor Test 60ʺ (Tabela)',
-          'valorNegociadoTest60': 'Valor Test 60ʺ (Negociado)',
-          'spotsFlash30': 'Flash 30ʺ',
-          'valorTabelaFlash30': 'Valor Flash 30ʺ (Tabela)',
-          'valorNegociadoFlash30': 'Valor Flash 30ʺ (Negociado)',
-          'spotsFlash60': 'Flash 60ʺ',
-          'valorTabelaFlash60': 'Valor Flash 60ʺ (Tabela)',
-          'valorNegociadoFlash60': 'Valor Flash 60ʺ (Negociado)',
-          'spotsMensham30': 'Mensham 30ʺ',
-          'valorTabelaMensham30': 'Valor Mensham 30ʺ (Tabela)',
-          'valorNegociadoMensham30': 'Valor Mensham 30ʺ (Negociado)',
-          'spotsMensham60': 'Mensham 60ʺ',
-          'valorTabelaMensham60': 'Valor Mensham 60ʺ (Tabela)',
-          'valorNegociadoMensham60': 'Valor Mensham 60ʺ (Negociado)'
+          'spotsTest60': 'Test. 60ʺ',
+          'valorTabelaTest60': 'Valor test. 60ʺ (Tabela)',
+          'valorNegociadoTest60': 'Valor test. 60ʺ (Negociado)'
         };
 
         const notionField = fieldMap[change.field];
@@ -538,13 +523,7 @@ export async function onRequest(context) {
         console.log(`📤 Atualizando ${emissora.emissora} - Campo: "${notionField}" = ${change.new}`);
 
         const updateProperties = {};
-        updateProperties[notionField] = { 
-          rich_text: [{ 
-            text: { 
-              content: parseFloat(change.new).toString() || '0' 
-            } 
-          }] 
-        };
+        updateProperties[notionField] = { number: parseFloat(change.new) || 0 };
 
         const bodyToSend = JSON.stringify({ properties: updateProperties });
         console.log(`🔍 FIELD NAME (chave):`, notionField);
