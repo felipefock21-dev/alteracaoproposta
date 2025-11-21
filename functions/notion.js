@@ -545,7 +545,9 @@ export async function onRequest(context) {
             emissoraName: emissora.emissora,
             success: false,
             status: updateResponse.status,
-            error: updateData.message || JSON.stringify(updateData)
+            error: updateData.message || JSON.stringify(updateData),
+            bodySent: bodyToSend,
+            notionResponse: updateData
           });
         } else {
           console.log(`✅ ${emissora.emissora} - ${notionField} atualizado com sucesso`);
