@@ -973,3 +973,79 @@ tr.radio-disabled .value-cell {
     color: var(--success);
     font-weight: 600;
 }
+
+/* =====================================================
+   MODAL DE SUCESSO
+   ===================================================== */
+.success-modal {
+    max-width: 500px;
+}
+
+.success-header {
+    background: linear-gradient(135deg, #06055b 0%, #1a0f4f 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 25px;
+    border: none;
+}
+
+.success-icon {
+    font-size: 4rem;
+    color: #10b981;
+    margin-bottom: 15px;
+    animation: scaleIn 0.5s ease;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-header h2 {
+    margin: 0;
+    text-align: center;
+    font-size: 1.6rem;
+}
+
+.success-body {
+    padding: 30px 25px;
+    text-align: center;
+}
+
+.success-body p {
+    color: var(--gray-dark);
+    margin-bottom: 25px;
+    line-height: 1.6;
+}
+
+.success-details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: #f0fdf4;
+    border-radius: 8px;
+    color: var(--success);
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.detail-item i {
+    font-size: 1.2rem;
+}

@@ -135,6 +135,36 @@
         </div>
     </div>
 
+    <!-- MODAL FINAL DE SUCESSO -->
+    <div id="successModal" class="modal" style="display: none;">
+        <div class="modal-content success-modal">
+            <div class="modal-header success-header">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Alterações Salvas com Sucesso!</h2>
+            </div>
+            <div class="modal-body success-body">
+                <p id="successMessage">Todas as alterações foram registradas no Notion e um email de confirmação foi enviado.</p>
+                <div class="success-details">
+                    <div class="detail-item">
+                        <i class="fas fa-check"></i>
+                        <span>Dados atualizados no banco de dados</span>
+                    </div>
+                    <div class="detail-item">
+                        <i class="fas fa-envelope"></i>
+                        <span>Email enviado para tatico5@hubradios.com</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeSuccessModal()">
+                    ✓ Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

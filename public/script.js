@@ -1061,11 +1061,29 @@ async function confirmAndSave() {
         proposalData.changes = {};
         showUnsavedChanges();
         
-        alert('✅ Proposta atualizada com sucesso no Notion!');
+        // Mostrar modal de sucesso
+        showSuccessModal();
     } catch (error) {
         console.error('❌ Erro:', error);
         alert(`Erro ao salvar: ${error.message}`);
     }
+}
+
+function showSuccessModal() {
+    console.log('🎉 Mostrando modal de sucesso...');
+    const successModal = document.getElementById('successModal');
+    successModal.style.display = 'flex';
+    
+    // Auto-fechar após 5 segundos (opcional)
+    setTimeout(() => {
+        // Comentado para o usuário controlar quando fechar
+        // closeSuccessModal();
+    }, 5000);
+}
+
+function closeSuccessModal() {
+    console.log('Fechando modal de sucesso');
+    document.getElementById('successModal').style.display = 'none';
 }
 
 // =====================================================
