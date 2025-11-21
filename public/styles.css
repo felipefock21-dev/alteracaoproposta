@@ -1025,3 +1025,15 @@ tr.radio-disabled .value-cell {
     margin-bottom: 25px;
     line-height: 1.6;
 }
+
+/* =====================================================
+   EMISSORAS OCULTAS
+   ===================================================== */
+.emissora-oculta {
+    opacity: 0.4;
+    background-color: rgba(107, 114, 128, 0.1);
+}
+
+.emissora-oculta td {
+    color: var(--gray-dark);
+}

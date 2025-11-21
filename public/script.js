@@ -6,7 +6,8 @@
 let proposalData = {
     tableId: null,
     emissoras: [],  // Array de emissoras
-    changes: {}
+    changes: {},
+    ocultasEmissoras: new Set()  // Rastreia emissoras ocultas (por ID)
 };
 
 // Definição de todos os produtos disponíveis
@@ -367,16 +368,25 @@ function renderSpotsTable() {
         
         const row = document.createElement('tr');
         row.className = 'spots-data-row';
+        row.id = `emissora-row-${emissora.id}`;  // ID único para CSS
+        row.setAttribute('data-emissora-id', emissora.id);  // Para rastreamento
+        
+        // Aplicar estilo se oculta
+        if (proposalData.ocultasEmissoras.has(emissora.id)) {
+            row.classList.add('emissora-oculta');
+        }
         
         // Colunas fixas
+        const isOculta = proposalData.ocultasEmissoras.has(emissora.id);
         row.innerHTML = `
             <td class="checkbox-cell">
                 <input 
                     type="checkbox" 
                     data-emissora-index="${emissoraIndex}"
-                    onchange="updateRowSelection()"
+                    data-emissora-id="${emissora.id}"
+                    onchange="toggleOcultarEmissora(this)"
                     style="cursor: pointer;"
-                    checked
+                    ${!isOculta ? 'checked' : ''}
                 >
             </td>
             <td>${emissora.uf || '-'}</td>
@@ -897,6 +907,42 @@ function updateRowSelection() {
     updateStats();
     renderCharts();
     showUnsavedChanges();
+}
+
+function toggleOcultarEmissora(checkbox) {
+    const emissoraId = checkbox.getAttribute('data-emissora-id');
+    const isChecked = checkbox.checked;
+    
+    console.log(`🔄 Alternando ocultamento de emissora: ${emissoraId}, marcado: ${isChecked}`);
+    
+    if (isChecked) {
+        // Marcar novamente = ativar
+        proposalData.ocultasEmissoras.delete(emissoraId);
+        console.log(`✅ Emissora ${emissoraId} ATIVADA (removida de ocultas)`);
+    } else {
+        // Desmarcar = ocultar
+        proposalData.ocultasEmissoras.add(emissoraId);
+        console.log(`❌ Emissora ${emissoraId} OCULTA (adicionada a ocultas)`);
+    }
+    
+    // Atualizar visual da linha
+    const row = document.getElementById(`emissora-row-${emissoraId}`);
+    if (row) {
+        if (isChecked) {
+            row.classList.remove('emissora-oculta');
+        } else {
+            row.classList.add('emissora-oculta');
+        }
+    }
+    
+    // Atualizar estatísticas
+    updateStats();
+    renderCharts();
+    
+    // Marcar como alteração (precisa salvar)
+    showUnsavedChanges();
+    
+    console.log('📊 Emissoras ocultas agora:', Array.from(proposalData.ocultasEmissoras));
 }
 
 function showUnsavedChanges() {
