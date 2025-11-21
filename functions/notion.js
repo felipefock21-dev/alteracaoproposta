@@ -427,15 +427,18 @@ export async function onRequest(context) {
 
       console.log('✅ Emissoras mapeadas:', emissoras);
       
-      // Obter lista de emissoras nos alternantes
-      const notionToken = env.NOTION_API_KEY;
-      const alternantesDbId = await getOrCreateAlternantesDatabase(notionToken, 'e-radios');
-      const alternantesIds = alternantesDbId ? await getAlternantesEmissoraIds(notionToken, alternantesDbId) : [];
-      
-      // Marcar emissoras que estão nos alternantes
-      const ocultasEmissoras = emissoras
-        .filter(emissora => alternantesIds.includes(emissora.id))
-        .map(emissora => emissora.id);
+      // Obter lista de emissoras nos alternantes (com tratamento de erro)
+      let ocultasEmissoras = [];
+      try {
+        const notionToken = env.NOTION_API_KEY;
+        const alternantesDbId = await getOrCreateAlternantesDatabase(notionToken, 'e-radios');
+        if (alternantesDbId) {
+          ocultasEmissoras = await getAlternantesEmissoraIds(notionToken, alternantesDbId);
+        }
+      } catch (alternantesError) {
+        console.warn('⚠️ Erro ao obter alternantes, continuando sem eles:', alternantesError.message);
+        ocultasEmissoras = [];
+      }
       
       console.log('');
       console.log('═══════════════════════════════════════════════════════════');
@@ -498,16 +501,29 @@ export async function onRequest(context) {
       if (ocultasEmissoras && Array.isArray(ocultasEmissoras) && ocultasEmissoras.length > 0) {
         console.log(`👤 Processando ${ocultasEmissoras.length} emissoras para alternantes...`);
         
-        const notionToken = env.NOTION_API_KEY;
-        const alternantesDbId = await getOrCreateAlternantesDatabase(notionToken, 'e-radios');
-        
-        if (alternantesDbId) {
-          for (const emissoraId of ocultasEmissoras) {
-            const emissora = emissoras.find(e => e.id === emissoraId);
-            if (emissora) {
-              await moveToAlternantes(notionToken, emissora, alternantesDbId);
-            }
+        try {
+          const notionToken = env.NOTION_API_KEY;
+          let alternantesDbId = await getOrCreateAlternantesDatabase(notionToken, 'e-radios');
+          
+          // Se não encontrou, criar agora
+          if (!alternantesDbId) {
+            console.log('📝 Criando database "Lista de alternantes" agora...');
+            alternantesDbId = await createAlternantesDatabase(notionToken);
           }
+          
+          if (alternantesDbId) {
+            for (const emissoraId of ocultasEmissoras) {
+              const emissora = emissoras.find(e => e.id === emissoraId);
+              if (emissora) {
+                await moveToAlternantes(notionToken, emissora, alternantesDbId);
+              }
+            }
+          } else {
+            console.error('❌ Não foi possível criar/obter database de alternantes');
+          }
+        } catch (ocultError) {
+          console.error('⚠️ Erro ao processar ocultamento:', ocultError.message);
+          // Continua mesmo se houver erro no ocultamento
         }
       }
 
@@ -834,38 +850,52 @@ async function getAlternantesEmissoraIds(notionToken, alternantesDbId) {
 // =====================================================
 
 async function getOrCreateAlternantesDatabase(notionToken, workspaceId) {
-  console.log('🔍 Buscando ou criando database "Lista de alternantes"...');
+  console.log('🔍 Buscando database "Lista de alternantes"...');
   
-  // Procura por database chamada "Lista de alternantes" no workspace
-  const searchResponse = await fetch('https://api.notion.com/v1/search', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${notionToken.trim()}`,
-      'Notion-Version': '2022-06-28',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      query: 'Lista de alternantes',
-      filter: {
-        value: 'database',
-        property: 'object'
-      }
-    })
-  });
-
-  if (searchResponse.ok) {
-    const searchData = await searchResponse.json();
-    const existingDb = searchData.results.find(item => 
-      item.title && item.title[0]?.text.content === 'Lista de alternantes'
-    );
-    
-    if (existingDb) {
-      console.log('✅ Database "Lista de alternantes" encontrada:', existingDb.id);
-      return existingDb.id;
-    }
+  if (!notionToken) {
+    console.warn('⚠️ Token Notion não disponível');
+    return null;
   }
+  
+  try {
+    // Procura por database chamada "Lista de alternantes" no workspace
+    const searchResponse = await fetch('https://api.notion.com/v1/search', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${notionToken.trim()}`,
+        'Notion-Version': '2022-06-28',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        query: 'Lista de alternantes',
+        filter: {
+          value: 'database',
+          property: 'object'
+        }
+      })
+    });
 
-  // Se não encontrou, criar nova database
+    if (searchResponse.ok) {
+      const searchData = await searchResponse.json();
+      const existingDb = searchData.results?.find(item => 
+        item.title && item.title[0]?.text?.content === 'Lista de alternantes'
+      );
+      
+      if (existingDb) {
+        console.log('✅ Database "Lista de alternantes" encontrada:', existingDb.id);
+        return existingDb.id;
+      }
+    }
+
+    console.log('ℹ️ Database "Lista de alternantes" não encontrada. Será criada ao primeiro ocultamento.');
+    return null;
+  } catch (error) {
+    console.error('⚠️ Erro ao buscar database:', error.message);
+    return null;
+  }
+}
+
+async function createAlternantesDatabase(notionToken) {
   console.log('📝 Criando nova database "Lista de alternantes"...');
   try {
     const createResponse = await fetch('https://api.notion.com/v1/databases', {
@@ -916,6 +946,7 @@ async function getOrCreateAlternantesDatabase(notionToken, workspaceId) {
     return null;
   }
 }
+
 
 async function moveToAlternantes(notionToken, emissora, alternantesDbId) {
   console.log(`📤 Movendo emissora ${emissora.emissora} para alternantes...`);
