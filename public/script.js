@@ -1061,8 +1061,7 @@ function showConfirmModal() {
     // Mostrar as emissoras que serão adicionadas (foram restauradas)
     // São aquelas que estão em changedEmissoras mas NÃO estão em ocultasEmissoras
     const emisssorasAdicionar = Array.from(proposalData.changedEmissoras).filter(
-        emissoraId => !proposalData.ocultasEmissoras.has(emissoraId) && 
-                      proposalData.initialOcultasEmissoras.has(emissoraId)
+        emissoraId => !proposalData.ocultasEmissoras.has(emissoraId)
     );
     
     if (emisssorasAdicionar.length > 0) {
