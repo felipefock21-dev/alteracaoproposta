@@ -430,7 +430,6 @@ export async function onRequest(context) {
       // Obter lista de emissoras nos alternantes (com tratamento de erro)
       let ocultasEmissoras = [];
       try {
-        const notionToken = env.NOTION_API_KEY;
         const alternantesDbId = await getOrCreateAlternantesDatabase(notionToken, 'e-radios');
         if (alternantesDbId) {
           ocultasEmissoras = await getAlternantesEmissoraIds(notionToken, alternantesDbId);
@@ -500,22 +499,29 @@ export async function onRequest(context) {
       // Processar ocultamento de emissoras (Liga/desliga)
       if (ocultasEmissoras && Array.isArray(ocultasEmissoras) && ocultasEmissoras.length > 0) {
         console.log(`👤 Processando ${ocultasEmissoras.length} emissoras para alternantes...`);
+        console.log(`📋 IDs a ocultar:`, ocultasEmissoras);
         
         try {
-          const notionToken = env.NOTION_API_KEY;
           let alternantesDbId = await getOrCreateAlternantesDatabase(notionToken, 'e-radios');
+          console.log(`🔎 alternantesDbId obtido:`, alternantesDbId);
           
           // Se não encontrou, criar agora
           if (!alternantesDbId) {
             console.log('📝 Criando database "Lista de alternantes" agora...');
             alternantesDbId = await createAlternantesDatabase(notionToken);
+            console.log(`✅ Database criada:`, alternantesDbId);
           }
           
           if (alternantesDbId) {
+            console.log(`🔄 Iniciando movimento de ${ocultasEmissoras.length} emissoras...`);
             for (const emissoraId of ocultasEmissoras) {
               const emissora = emissoras.find(e => e.id === emissoraId);
+              console.log(`  ↳ Processando: ${emissoraId} - ${emissora?.emissora || 'NÃO ENCONTRADA'}`);
               if (emissora) {
-                await moveToAlternantes(notionToken, emissora, tableId, alternantesDbId);
+                const result = await moveToAlternantes(notionToken, emissora, tableId, alternantesDbId);
+                console.log(`  ↳ Resultado:`, result);
+              } else {
+                console.warn(`  ⚠️ Emissora ${emissoraId} não encontrada nos dados`);
               }
             }
           } else {
@@ -523,8 +529,11 @@ export async function onRequest(context) {
           }
         } catch (ocultError) {
           console.error('⚠️ Erro ao processar ocultamento:', ocultError.message);
+          console.error('⚠️ Stack:', ocultError.stack);
           // Continua mesmo se houver erro no ocultamento
         }
+      } else {
+        console.log(`ℹ️ Nenhuma emissora para ocultar (${ocultasEmissoras?.length || 0})`);
       }
 
       // Processar cada alteração
