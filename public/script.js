@@ -978,11 +978,12 @@ async function saveChanges() {
     console.log('📊 proposalData.changes:', proposalData.changes);
     console.log('📊 Número de mudanças:', Object.keys(proposalData.changes).length);
     console.log('👤 Emissoras ocultas:', proposalData.ocultasEmissoras.size);
+    console.log('👤 Emissoras alteradas:', proposalData.changedEmissoras.size);
     
     const temMudancas = Object.keys(proposalData.changes).length > 0;
-    const temOcultamentos = proposalData.ocultasEmissoras.size > 0;
+    const temMudancasEmissoras = proposalData.changedEmissoras.size > 0;
     
-    if (!temMudancas && !temOcultamentos) {
+    if (!temMudancas && !temMudancasEmissoras) {
         console.warn('⚠️ Nenhuma alteração para salvar!');
         alert('Nenhuma alteração para salvar!');
         return;
