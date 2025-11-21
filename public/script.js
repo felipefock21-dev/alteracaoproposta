@@ -903,7 +903,6 @@ function updateEmissora(index, field, value) {
     // NÃO chama renderSpotsTable, apenas atualiza estatísticas e gráficos
     updateStats();
     renderCharts();
-    showUnsavedChanges();
 }
 
 function updateRowSelection() {
@@ -912,19 +911,17 @@ function updateRowSelection() {
     console.log('📝 Linha selecionada/desmarcada');
     updateStats();
     renderCharts();
-    showUnsavedChanges();
 }
 
 function toggleOcultarEmissora(checkbox) {
     const emissoraId = checkbox.getAttribute('data-emissora-id');
-    const isChecked = checkbox.checked;
     const emissoraIndex = parseInt(checkbox.getAttribute('data-emissora-index'));
     const emissora = proposalData.emissoras[emissoraIndex];
     
-    console.log(`🔄 Alternando ocultamento de emissora: ${emissoraId}, marcado: ${isChecked}`);
+    console.log(`🔄 Alternando ocultamento de emissora: ${emissoraId}, marcado: ${checkbox.checked}`);
     
-    if (isChecked) {
-        // Marcar novamente = ativar
+    if (checkbox.checked) {
+        // Marcar = mostrar (ativar)
         proposalData.ocultasEmissoras.delete(emissoraId);
         
         // Atualizar visual da linha
@@ -933,29 +930,23 @@ function toggleOcultarEmissora(checkbox) {
             row.classList.remove('emissora-oculta');
         }
         
-        console.log(`✅ Emissora ${emissoraId} ATIVADA (removida de ocultas)`);
+        console.log(`✅ Emissora ${emissora?.emissora || emissoraId} VISÍVEL`);
     } else {
-        // Desmarcar = mostrar confirmação ANTES de ocultar
-        console.log(`⚠️ Mostrando confirmação para ocultar ${emissoraId}`);
-        showConfirmOcultarModal(checkbox, emissora, emissoraId);
-        return;  // NÃO continua aqui, espera confirmação
+        // Desmarcar = ocultar
+        proposalData.ocultasEmissoras.add(emissoraId);
+        
+        // Atualizar visual da linha
+        const row = document.getElementById(`emissora-row-${emissoraId}`);
+        if (row) {
+            row.classList.add('emissora-oculta');
+        }
+        
+        console.log(`🙈 Emissora ${emissora?.emissora || emissoraId} OCULTA`);
     }
     
     // Atualizar estatísticas
     updateStats();
     renderCharts();
-    
-    // Marcar como alteração (precisa salvar)
-    showUnsavedChanges();
-}
-
-function showUnsavedChanges() {
-    const saveBtn = document.getElementById('saveBtn');
-    if (saveBtn) {
-        const temMudancas = Object.keys(proposalData.changes).length > 0;
-        const temOcultamentos = proposalData.ocultasEmissoras.size > 0;
-        saveBtn.style.display = (temMudancas || temOcultamentos) ? 'block' : 'none';
-    }
 }
 
 // =====================================================
@@ -1103,90 +1094,6 @@ function closeConfirmModal() {
     document.getElementById('confirmModal').style.display = 'none';
 }
 
-// =====================================================
-// MODAL DE CONFIRMAÇÃO DE OCULTAMENTO
-// =====================================================
-
-let pendingOcultarData = null;
-
-function showConfirmOcultarModal(checkbox, emissora, emissoraId) {
-    console.log('📋 Abrindo modal de confirmação de ocultamento...');
-    
-    // Salvar dados para confirmação
-    pendingOcultarData = {
-        checkbox: checkbox,
-        emissora: emissora,
-        emissoraId: emissoraId
-    };
-    
-    const modal = document.getElementById('confirmOcultarModal');
-    const modalBody = document.getElementById('confirmOcultarModalBody');
-    
-    // Montar HTML do modal
-    const html = `
-        <div class="change-group" style="padding: 20px; background: #fff3cd; border-left: 4px solid #ff6b6b; border-radius: 4px;">
-            <div class="change-group-title" style="color: #d32f2f; margin-bottom: 12px;">
-                <i class="fas fa-exclamation-triangle"></i> Confirmar Remoção de Emissora
-            </div>
-            <p style="margin: 12px 0; font-size: 15px;">
-                Você está removendo a emissora <strong>${emissora.emissora}</strong> da tabela principal.
-            </p>
-            <p style="margin: 12px 0; font-size: 14px; color: #666;">
-                Essa emissora será movida para "Lista de alternantes" e deixará de aparecer nos cálculos e gráficos.
-            </p>
-            <p style="margin: 12px 0; font-size: 14px;">
-                <strong>Você poderá marcar novamente depois para restaurá-la.</strong>
-            </p>
-        </div>
-    `;
-    
-    modalBody.innerHTML = html;
-    modal.style.display = 'flex';
-}
-
-function closeConfirmOcultarModal() {
-    console.log('❌ Cancelando ocultamento');
-    document.getElementById('confirmOcultarModal').style.display = 'none';
-    
-    // Restaurar checkbox para o estado anterior
-    if (pendingOcultarData) {
-        pendingOcultarData.checkbox.checked = true;
-    }
-    
-    pendingOcultarData = null;
-}
-
-function confirmAndOcultar() {
-    console.log('✅ Confirmando ocultamento de emissora...');
-    
-    if (!pendingOcultarData) return;
-    
-    const { checkbox, emissora, emissoraId } = pendingOcultarData;
-    
-    // Agora sim, adicionar à lista de ocultas
-    proposalData.ocultasEmissoras.add(emissoraId);
-    console.log(`❌ Emissora ${emissoraId} OCULTA (adicionada a ocultas)`);
-    
-    // Atualizar visual da linha
-    const row = document.getElementById(`emissora-row-${emissoraId}`);
-    if (row) {
-        row.classList.add('emissora-oculta');
-    }
-    
-    // Atualizar estatísticas
-    updateStats();
-    renderCharts();
-    
-    // Marcar como alteração
-    showUnsavedChanges();
-    
-    // Fechar modal
-    document.getElementById('confirmOcultarModal').style.display = 'none';
-    pendingOcultarData = null;
-    
-    console.log('📊 Emissoras ocultas agora:', Array.from(proposalData.ocultasEmissoras));
-}
-
 
 async function confirmAndSave() {
     console.log('✅ Confirmando e salvando alterações...');
@@ -1198,11 +1105,12 @@ async function confirmAndSave() {
         const apiUrl = getApiUrl();
         console.log('📡 API URL:', apiUrl);
         
+        // Nota: ocultasEmissoras agora é apenas filtro visual no cliente
+        // Não é enviado para o backend
         const dataToSave = {
             tableId: proposalData.tableId,
             emissoras: proposalData.emissoras,
-            changes: proposalData.changes,
-            ocultasEmissoras: Array.from(proposalData.ocultasEmissoras)  // Converter Set para Array
+            changes: proposalData.changes
         };
         
         console.log('📤 Enviando dados:', dataToSave);
@@ -1240,7 +1148,6 @@ async function confirmAndSave() {
         }
         
         proposalData.changes = {};
-        showUnsavedChanges();
         
         // Mostrar modal de sucesso
         showSuccessModal();
