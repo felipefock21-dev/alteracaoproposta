@@ -921,15 +921,112 @@ async function saveChanges() {
         return;
     }
     
-    console.log('💾 Salvando alterações...', proposalData.changes);
+    console.log('💾 Preparando alterações para visualização...');
     
-    const changeCount = Object.keys(proposalData.changes).length;
-    const confirmSave = confirm(`Deseja salvar ${changeCount} alteração(ões)?`);
+    // Montar o resumo das alterações agrupadas por emissora
+    showConfirmModal();
+}
+
+function showConfirmModal() {
+    console.log('📋 Abrindo modal de confirmação...');
     
-    if (!confirmSave) {
-        console.log('❌ Usuário cancelou o save');
-        return;
+    const modal = document.getElementById('confirmModal');
+    const modalBody = document.getElementById('confirmModalBody');
+    
+    // Agrupar alterações por emissora
+    const changesByEmissora = {};
+    
+    for (const changeKey in proposalData.changes) {
+        const change = proposalData.changes[changeKey];
+        const emissora = proposalData.emissoras[change.emissoraIndex];
+        
+        if (!changesByEmissora[change.emissoraIndex]) {
+            changesByEmissora[change.emissoraIndex] = [];
+        }
+        
+        changesByEmissora[change.emissoraIndex].push({
+            field: change.field,
+            old: change.old,
+            new: change.new,
+            emissora: emissora
+        });
     }
+    
+    // Montar HTML do modal
+    let html = '';
+    
+    for (const emissoraIndex in changesByEmissora) {
+        const changes = changesByEmissora[emissoraIndex];
+        const emissora = proposalData.emissoras[emissoraIndex];
+        const emissoraName = emissora?.emissora || 'Desconhecida';
+        
+        html += `
+            <div class="change-group">
+                <div class="change-group-title">
+                    <i class="fas fa-radio"></i> ${emissoraName}
+                </div>
+        `;
+        
+        changes.forEach(change => {
+            // Encontrar o label do produto
+            let fieldLabel = change.field;
+            const produto = PRODUTOS.find(p => 
+                p.key === change.field || 
+                p.tabelaKey === change.field || 
+                p.negKey === change.field
+            );
+            
+            if (produto) {
+                if (change.field === produto.key) {
+                    fieldLabel = `${produto.label}`;
+                } else if (change.field === produto.tabelaKey) {
+                    fieldLabel = `${produto.label} (Tabela)`;
+                } else if (change.field === produto.negKey) {
+                    fieldLabel = `${produto.label} (Negociado)`;
+                }
+            }
+            
+            // Formatar valores
+            let oldValue = change.old;
+            let newValue = change.new;
+            
+            // Se for valor monetário, formatar como moeda
+            if (change.field.includes('valor') || change.field.includes('investimento')) {
+                oldValue = formatCurrency(change.old);
+                newValue = formatCurrency(change.new);
+            }
+            
+            html += `
+                <div class="change-item">
+                    <span class="change-item-label">${fieldLabel}</span>
+                    <div style="display: flex; align-items: center;">
+                        <span class="change-old">${oldValue}</span>
+                        <span class="change-arrow">→</span>
+                        <span class="change-new">${newValue}</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+    }
+    
+    modalBody.innerHTML = html;
+    modal.style.display = 'flex';
+    
+    console.log('✅ Modal aberto com sucesso!');
+}
+
+function closeConfirmModal() {
+    console.log('❌ Fechando modal (editando novamente)');
+    document.getElementById('confirmModal').style.display = 'none';
+}
+
+async function confirmAndSave() {
+    console.log('✅ Confirmando e salvando alterações...');
+    
+    const modal = document.getElementById('confirmModal');
+    modal.style.display = 'none';
     
     try {
         const apiUrl = getApiUrl();
