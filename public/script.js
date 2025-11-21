@@ -939,19 +939,19 @@ function toggleOcultarEmissora(checkbox) {
         }
         
         console.log(`✅ Emissora ${emissora?.emissora || emissoraId} VISÍVEL`);
+        
+        // Atualizar estatísticas
+        updateStats();
+        renderCharts();
+        
+        // Mostrar botão de salvar
+        showUnsavedChanges();
     } else {
         // Desmarcar = mostrar confirmação ANTES de ocultar
         console.log(`⚠️ Mostrando confirmação para remover ${emissoraId}`);
         showConfirmRemovalModal(checkbox, emissora, emissoraId);
         return;  // NÃO continua aqui, espera confirmação
     }
-    
-    // Atualizar estatísticas
-    updateStats();
-    renderCharts();
-    
-    // Marcar como alteração (precisa salvar)
-    showUnsavedChanges();
 }
 
 // =====================================================
