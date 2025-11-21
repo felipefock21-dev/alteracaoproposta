@@ -1223,6 +1223,7 @@ async function confirmAndSave() {
         
         const result = await response.json();
         console.log('✅ Alterações salvas!', result);
+        console.log('🔍 debugLogs recebido:', result.debugLogs);
         
         // Exibir logs do servidor no console
         if (result.debugLogs && Array.isArray(result.debugLogs)) {
@@ -1231,6 +1232,8 @@ async function confirmAndSave() {
             console.log('═══════════════════════════════════════════════════════════');
             result.debugLogs.forEach(log => console.log(log));
             console.log('═══════════════════════════════════════════════════════════');
+        } else {
+            console.warn('⚠️ debugLogs vazio ou não é array:', result.debugLogs);
         }
         
         proposalData.changes = {};

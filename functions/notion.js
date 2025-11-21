@@ -492,6 +492,7 @@ export async function onRequest(context) {
 
       log('🔄 Atualizando múltiplas emissoras');
       log('📝 Dados recebidos: ' + JSON.stringify(requestBody));
+      log('📝 ocultasEmissoras recebido: ' + JSON.stringify(ocultasEmissoras));
 
       const { emissoras, changes, ocultasEmissoras } = requestBody;
       if (!emissoras || !Array.isArray(emissoras)) {
@@ -638,9 +639,12 @@ export async function onRequest(context) {
         });
       } catch (emailError) {
         console.error('⚠️ Erro ao enviar email:', emailError.message);
+        log('⚠️ Erro ao enviar email: ' + emailError.message);
         // Não interrompe o fluxo se falhar o email
       }
 
+      console.log('📤 Retornando resposta com debugLogs:', debugLogs.length, 'mensagens');
+      
       return new Response(JSON.stringify({ 
         success: true, 
         message: 'Alterações processadas',
