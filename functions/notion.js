@@ -519,7 +519,10 @@ export async function onRequest(context) {
         updateProperties[notionField] = { number: parseFloat(change.new) || 0 };
 
         const bodyToSend = JSON.stringify({ properties: updateProperties });
+        console.log(`🔍 FIELD NAME (chave):`, notionField);
+        console.log(`🔍 FIELD NAME (type):`, typeof notionField);
         console.log(`🔍 BODY sendo enviado para Notion:`, bodyToSend);
+        console.log(`🔍 updateProperties objeto:`, updateProperties);
 
         const updateResponse = await fetch(`https://api.notion.com/v1/pages/${emissora.id}`, {
           method: 'PATCH',
