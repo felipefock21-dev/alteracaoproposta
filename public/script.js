@@ -932,23 +932,14 @@ function toggleOcultarEmissora(checkbox) {
     console.log(`🔄 Alternando ocultamento de emissora: ${emissoraId}, marcado: ${checkbox.checked}`);
     
     if (checkbox.checked) {
-        // Marcar = mostrar (ativar/restaurar)
-        // Marcar ANTES de continuar para que o botão apareça
-        proposalData.ocultasEmissoras.delete(emissoraId);
-        proposalData.changedEmissoras.add(emissoraId);  // Marcar como alterada
+        // Marcar = mostrar/adicionar (ativar/restaurar)
+        // Marcar ANTES de mostrar o modal para que o botão apareça
+        proposalData.changedEmissoras.add(emissoraId);
         showUnsavedChanges();  // Mostrar botão de salvar
         
-        // Atualizar visual da linha
-        const row = document.getElementById(`emissora-row-${emissoraId}`);
-        if (row) {
-            row.classList.remove('emissora-oculta');
-        }
-        
-        console.log(`✅ Emissora ${emissora?.emissora || emissoraId} RESTAURADA (será desmarcada no Notion)`);
-        
-        // Atualizar estatísticas
-        updateStats();
-        renderCharts();
+        console.log(`✅ Mostrando confirmação para adicionar ${emissoraId}`);
+        showConfirmAdditionModal(checkbox, emissora, emissoraId);
+        return;  // NÃO continua aqui, espera confirmação
     } else {
         // Desmarcar = mostrar confirmação ANTES de ocultar
         // Marcar ANTES de mostrar o modal para que o botão apareça
@@ -1186,6 +1177,89 @@ function confirmRemoval() {
     
     console.log('📊 Emissoras removidas agora:', Array.from(proposalData.ocultasEmissoras));
 }
+
+// =====================================================
+// MODAL DE CONFIRMAÇÃO DE ADIÇÃO
+// =====================================================
+
+let pendingAdditionData = null;
+
+function showConfirmAdditionModal(checkbox, emissora, emissoraId) {
+    console.log('📋 Abrindo modal de confirmação de adição...');
+    
+    // Salvar dados para confirmação
+    pendingAdditionData = {
+        checkbox: checkbox,
+        emissora: emissora,
+        emissoraId: emissoraId
+    };
+    
+    const modal = document.getElementById('confirmAdditionModal');
+    const modalBody = document.getElementById('confirmAdditionModalBody');
+    
+    // Montar HTML do modal
+    const html = `
+        <div class="change-group" style="padding: 20px; background: #f0fdf4; border-left: 4px solid #10b981; border-radius: 4px;">
+            <div class="change-group-title" style="color: #10b981; margin-bottom: 12px;">
+                <i class="fas fa-check-circle"></i> Confirmar Adição de Emissora
+            </div>
+            <p style="margin: 12px 0; font-size: 15px;">
+                Você está adicionando a emissora <strong>${emissora.emissora}</strong> a esta proposta.
+            </p>
+            <p style="margin: 12px 0; font-size: 14px; color: #666;">
+                Esta emissora será incluída nos cálculos. Você poderá removê-la depois marcando novamente.
+            </p>
+        </div>
+    `;
+    
+    modalBody.innerHTML = html;
+    modal.style.display = 'flex';
+}
+
+function closeConfirmAdditionModal() {
+    console.log('❌ Cancelando adição');
+    document.getElementById('confirmAdditionModal').style.display = 'none';
+    
+    // Restaurar checkbox para o estado anterior
+    if (pendingAdditionData) {
+        pendingAdditionData.checkbox.checked = false;
+    }
+    
+    pendingAdditionData = null;
+}
+
+function confirmAddition() {
+    console.log('✅ Confirmando adição de emissora...');
+    
+    if (!pendingAdditionData) return;
+    
+    const { checkbox, emissora, emissoraId } = pendingAdditionData;
+    
+    // Remover da lista de excluídas
+    proposalData.ocultasEmissoras.delete(emissoraId);
+    proposalData.changedEmissoras.add(emissoraId);  // Marcar como alterada
+    console.log(`➕ Emissora ${emissoraId} ADICIONADA (será restaurada no Notion)`);
+    
+    // Atualizar visual da linha
+    const row = document.getElementById(`emissora-row-${emissoraId}`);
+    if (row) {
+        row.classList.remove('emissora-oculta');
+    }
+    
+    // Atualizar estatísticas
+    updateStats();
+    renderCharts();
+    
+    // Marcar como alteração (precisa salvar)
+    showUnsavedChanges();
+    
+    // Fechar modal
+    document.getElementById('confirmAdditionModal').style.display = 'none';
+    pendingAdditionData = null;
+    
+    console.log('📊 Emissoras ocultas agora:', Array.from(proposalData.ocultasEmissoras));
+}
+
 
 function showUnsavedChanges() {
     const saveBtn = document.getElementById('saveBtn');
