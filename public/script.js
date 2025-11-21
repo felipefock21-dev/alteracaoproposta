@@ -281,6 +281,8 @@ function renderInterface() {
     updateStats();
     console.log('🎯 Chamando renderCharts...');
     renderCharts();
+    console.log('🎯 Garantindo que botão de salvar está oculto (sem alterações)...');
+    showUnsavedChanges();
     console.log('✅ renderInterface() finalizado!');
 }
 
@@ -1249,6 +1251,9 @@ async function confirmAndSave() {
         }
         
         proposalData.changes = {};
+        
+        // Ocultar botão de salvar já que não há mais alterações
+        showUnsavedChanges();
         
         // Mostrar modal de sucesso
         showSuccessModal();
