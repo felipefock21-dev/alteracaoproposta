@@ -316,6 +316,7 @@ export async function onRequest(context) {
           emissora: extractValue(properties, '', 'Emissora', 'Emissora'),
           praca: extractValue(properties, '', 'Praça', 'Praça', 'Praca'),
           dial: extractValue(properties, '', 'Dial', 'Dial'),
+          linkLogo: extractValue(properties, '', 'linkLogo', 'linkLogo', 'Link Logo', 'Link da Logo', 'Logo URL', 'URL Logo'),
           uf: extractValue(properties, '', 'UF', 'UF'),
           impactos: (() => {
             // Função especial para extrair impactos que aceita QUALQUER tipo de dados
