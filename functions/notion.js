@@ -539,6 +539,19 @@ export async function onRequest(context) {
             } else {
               const error = await excludeResponse.json();
               log(`    ❌ Erro ao atualizar Excluir: ${JSON.stringify(error)}`);
+              console.error(`    ❌ Erro completo:`, error);
+              
+              // ⚠️ IMPORTANTE: Rastrear falha de atualização de exclusão
+              updatePromises.push({
+                field: 'Excluir',
+                notionField: 'Excluir',
+                emissoraId: emissora.id,
+                emissoraName: emissora.emissora,
+                success: false,
+                status: excludeResponse.status,
+                error: error.message || JSON.stringify(error),
+                notionResponse: error
+              });
             }
           }
         }
@@ -645,16 +658,25 @@ export async function onRequest(context) {
 
       console.log('📤 Retornando resposta com debugLogs:', debugLogs.length, 'mensagens');
       
-      return new Response(JSON.stringify({ 
-        success: true, 
-        message: 'Alterações processadas',
+      const failedUpdates = updatePromises.filter(p => !p.success).length;
+      const hasFailed = failedUpdates > 0;
+      
+      // ⚠️ IMPORTANTE: Se houver qualquer falha, retornar sucesso falso
+      // Isso garante que o frontend saiba que algo não funcionou
+      const responseData = { 
+        success: !hasFailed,  // ✅ Retorna false se houver falhas
+        message: hasFailed ? 'Algumas alterações falharam' : 'Alterações processadas com sucesso',
         totalChanges: Object.keys(changes).length,
         successfulUpdates: updatePromises.filter(p => p.success).length,
-        failedUpdates: updatePromises.filter(p => !p.success).length,
+        failedUpdates: failedUpdates,
         details: updatePromises,
         debugLogs: debugLogs
-      }), {
-        status: 200,
+      };
+      
+      console.log('📤 Response data:', responseData);
+      
+      return new Response(JSON.stringify(responseData), {
+        status: hasFailed ? 400 : 200,  // ✅ Retorna 400 se houver falhas
         headers
       });
     }

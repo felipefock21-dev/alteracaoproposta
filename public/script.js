@@ -908,6 +908,7 @@ function toggleOcultarEmissora(checkbox) {
     const emissora = proposalData.emissoras[emissoraIndex];
     
     console.log(`🔄 Alternando ocultamento de emissora: ${emissoraId}, marcado: ${checkbox.checked}`);
+    console.log(`   Estado anterior - ocultasEmissoras:`, Array.from(proposalData.ocultasEmissoras));
     
     if (checkbox.checked) {
         // Marcar = REMOVER da lista (quando está marcado, mostra na proposta)
@@ -917,6 +918,8 @@ function toggleOcultarEmissora(checkbox) {
         // Fazer a mudança IMEDIATAMENTE
         proposalData.ocultasEmissoras.delete(emissoraId);
         proposalData.changedEmissoras.add(emissoraId);
+        
+        console.log(`   Estado novo - ocultasEmissoras:`, Array.from(proposalData.ocultasEmissoras));
         
         // Atualizar visual da linha
         const row = document.getElementById(`emissora-row-${emissoraId}`);
@@ -946,6 +949,39 @@ function toggleOcultarEmissora(checkbox) {
         showConfirmRemovalModal(checkbox, emissora, emissoraId);
         return;  // NÃO continua aqui, espera confirmação
     }
+}
+
+// ✅ FUNÇÃO DE SINCRONIZAÇÃO: Força o estado correto dos checkboxes baseado no proposalData
+function syncCheckboxState() {
+    console.log('🔄 SINCRONIZANDO ESTADO DOS CHECKBOXES...');
+    console.log('   Emissoras ocultas no estado:', Array.from(proposalData.ocultasEmissoras));
+    
+    proposalData.emissoras.forEach((emissora, index) => {
+        const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+        if (checkbox) {
+            const deveEstarVisivel = !proposalData.ocultasEmissoras.has(emissora.id);
+            const estaChecked = checkbox.checked;
+            
+            console.log(`   ${emissora.emissora}: deveEstarVisivel=${deveEstarVisivel}, estaChecked=${estaChecked}`);
+            
+            if (deveEstarVisivel !== estaChecked) {
+                console.log(`      ⚠️ DESSINCRONIZADO! Corrigindo...`);
+                ignoreNextCheckboxChange = true;
+                checkbox.checked = deveEstarVisivel;
+                
+                const row = document.getElementById(`emissora-row-${emissora.id}`);
+                if (row) {
+                    if (deveEstarVisivel) {
+                        row.classList.remove('emissora-oculta');
+                    } else {
+                        row.classList.add('emissora-oculta');
+                    }
+                }
+            }
+        }
+    });
+    
+    console.log('✅ Sincronização completa');
 }
 // =====================================================
 // SALVAR ALTERAÇÕES
@@ -1177,19 +1213,32 @@ function closeConfirmRemovalModal() {
 function confirmRemoval() {
     console.log('✅ Confirmando remoção de emissora...');
     
-    if (!pendingRemovalData) return;
+    if (!pendingRemovalData) {
+        console.error('❌ pendingRemovalData é nulo!');
+        return;
+    }
     
     const { checkbox, emissora, emissoraId } = pendingRemovalData;
+    
+    console.log(`   Estado ANTES de confirmar remoção:`);
+    console.log(`   - ocultasEmissoras: ${Array.from(proposalData.ocultasEmissoras)}`);
+    console.log(`   - checkbox.checked: ${checkbox.checked}`);
     
     // Adicionar à lista de excluídas
     proposalData.ocultasEmissoras.add(emissoraId);
     proposalData.changedEmissoras.add(emissoraId);  // Marcar como alterada
+    
+    console.log(`   Estado DEPOIS de confirmar remoção:`);
+    console.log(`   - ocultasEmissoras: ${Array.from(proposalData.ocultasEmissoras)}`);
     console.log(`🗑️ Emissora ${emissoraId} REMOVIDA (marcada para exclusão)`);
     
     // Atualizar visual da linha
     const row = document.getElementById(`emissora-row-${emissoraId}`);
     if (row) {
         row.classList.add('emissora-oculta');
+        console.log(`   ✅ Linha visual atualizada: ${emissoraId}`);
+    } else {
+        console.warn(`   ⚠️ Linha não encontrada para ${emissoraId}`);
     }
     
     // Atualizar estatísticas
@@ -1235,6 +1284,12 @@ async function confirmAndSave() {
     const modal = document.getElementById('confirmModal');
     modal.style.display = 'none';
     
+    // ⚠️ BACKUP DOS ESTADOS ANTES DE SALVAR (para rollback em caso de erro)
+    const backupOcultasEmissoras = new Set(proposalData.ocultasEmissoras);
+    const backupChangedEmissoras = new Set(proposalData.changedEmissoras);
+    const backupChanges = JSON.parse(JSON.stringify(proposalData.changes));
+    const backupEmissoras = proposalData.emissoras.map(e => ({...e}));
+    
     try {
         const apiUrl = getApiUrl();
         console.log('📡 API URL:', apiUrl);
@@ -1259,14 +1314,141 @@ async function confirmAndSave() {
         console.log('📥 Response status:', response.status);
         console.log('📥 Response ok:', response.ok);
         
+        // ⚠️ VALIDAÇÃO RIGOROSA DA RESPOSTA
         if (!response.ok) {
-            const error = await response.json();
-            console.error('❌ Erro na resposta:', error);
-            console.error('❌ Erro completo:', JSON.stringify(error, null, 2));
-            throw new Error(error.error || error.message || 'Erro ao salvar');
+            const errorData = await response.json();
+            console.error('❌ Erro na resposta:', errorData);
+            console.error('❌ Erro completo:', JSON.stringify(errorData, null, 2));
+            
+            // 🔄 ROLLBACK: Restaurar estado anterior
+            console.log('🔄 FAZENDO ROLLBACK DO ESTADO...');
+            proposalData.ocultasEmissoras = backupOcultasEmissoras;
+            proposalData.changedEmissoras = backupChangedEmissoras;
+            proposalData.changes = backupChanges;
+            proposalData.emissoras = backupEmissoras;
+            
+            // Restaurar visualmente todos os checkboxes
+            proposalData.emissoras.forEach((emissora, index) => {
+                const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+                if (checkbox) {
+                    const shouldBeChecked = !backupOcultasEmissoras.has(emissora.id);
+                    checkbox.checked = shouldBeChecked;
+                    
+                    const row = document.getElementById(`emissora-row-${emissora.id}`);
+                    if (row) {
+                        if (shouldBeChecked) {
+                            row.classList.remove('emissora-oculta');
+                        } else {
+                            row.classList.add('emissora-oculta');
+                        }
+                    }
+                }
+            });
+            
+            updateStats();
+            renderCharts();
+            showUnsavedChanges();
+            
+            throw new Error(errorData.error || errorData.message || 'Erro ao salvar');
         }
         
         const result = await response.json();
+        
+        // ⚠️ VALIDAÇÃO: Verificar se resposta contém dados válidos
+        if (!result || result.success === false) {
+            console.error('❌ Resposta indicou falha:', result);
+            
+            // 🔄 ROLLBACK: Restaurar estado anterior
+            console.log('🔄 FAZENDO ROLLBACK DO ESTADO...');
+            proposalData.ocultasEmissoras = backupOcultasEmissoras;
+            proposalData.changedEmissoras = backupChangedEmissoras;
+            proposalData.changes = backupChanges;
+            proposalData.emissoras = backupEmissoras;
+            
+            // Restaurar visualmente todos os checkboxes
+            proposalData.emissoras.forEach((emissora, index) => {
+                const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+                if (checkbox) {
+                    const shouldBeChecked = !backupOcultasEmissoras.has(emissora.id);
+                    checkbox.checked = shouldBeChecked;
+                    
+                    const row = document.getElementById(`emissora-row-${emissora.id}`);
+                    if (row) {
+                        if (shouldBeChecked) {
+                            row.classList.remove('emissora-oculta');
+                        } else {
+                            row.classList.add('emissora-oculta');
+                        }
+                    }
+                }
+            });
+            
+            updateStats();
+            renderCharts();
+            showUnsavedChanges();
+            
+            throw new Error(result.message || 'Falha desconhecida ao salvar');
+        }
+        
+        // ⚠️ VALIDAÇÃO EXTRA: Verificar se houve FALHAS NAS ATUALIZAÇÕES ESPECÍFICAS
+        // Mesmo que success: true, pode haver failedUpdates
+        const failedUpdates = result.failedUpdates || 0;
+        const details = result.details || [];
+        
+        console.log('📊 Resultado da operação:');
+        console.log(`   - Sucesso total: ${result.success}`);
+        console.log(`   - Atualizações bem-sucedidas: ${result.successfulUpdates || 0}`);
+        console.log(`   - Atualizações falhadas: ${failedUpdates}`);
+        console.log(`   - Detalhes:`, details);
+        
+        if (failedUpdates > 0) {
+            console.error('❌ ATENÇÃO: Algumas atualizações falharam!');
+            
+            // Mostrar quais falharam
+            details.forEach(detail => {
+                if (!detail.success) {
+                    console.error(`   ❌ ${detail.emissoraName} - Campo "${detail.field}" FALHOU:`, detail.error);
+                }
+            });
+            
+            // 🔄 ROLLBACK PARCIAL: Restaurar estado anterior
+            console.log('🔄 FAZENDO ROLLBACK DO ESTADO (falhas detectadas)...');
+            proposalData.ocultasEmissoras = backupOcultasEmissoras;
+            proposalData.changedEmissoras = backupChangedEmissoras;
+            proposalData.changes = backupChanges;
+            proposalData.emissoras = backupEmissoras;
+            
+            // Restaurar visualmente todos os checkboxes
+            proposalData.emissoras.forEach((emissora, index) => {
+                const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+                if (checkbox) {
+                    const shouldBeChecked = !backupOcultasEmissoras.has(emissora.id);
+                    checkbox.checked = shouldBeChecked;
+                    
+                    const row = document.getElementById(`emissora-row-${emissora.id}`);
+                    if (row) {
+                        if (shouldBeChecked) {
+                            row.classList.remove('emissora-oculta');
+                        } else {
+                            row.classList.add('emissora-oculta');
+                        }
+                    }
+                }
+            });
+            
+            updateStats();
+            renderCharts();
+            showUnsavedChanges();
+            
+            // Mostrar erro com detalhes
+            const failedEmissoras = details
+                .filter(d => !d.success)
+                .map(d => `${d.emissoraName} (${d.field})`)
+                .join(', ');
+            
+            throw new Error(`Erro ao salvar alguns campos: ${failedEmissoras}. Estado foi revertido. Tente novamente.`);
+        }
+        
         console.log('✅ Alterações salvas!', result);
         console.log('🔍 debugLogs recebido:', result.debugLogs);
         
@@ -1281,9 +1463,8 @@ async function confirmAndSave() {
             console.warn('⚠️ debugLogs vazio ou não é array:', result.debugLogs);
         }
         
+        // ✅ SÓ LIMPA ESTADO APÓS CONFIRMAÇÃO DE SUCESSO
         proposalData.changes = {};
-        
-        // Atualizar estado inicial das emissoras ocultas após salvar
         proposalData.initialOcultasEmissoras = new Set(proposalData.ocultasEmissoras);
         proposalData.changedEmissoras = new Set();  // Limpar emissoras alteradas
         
@@ -1316,13 +1497,18 @@ async function confirmAndSave() {
         // Mostrar modal de sucesso
         showSuccessModal();
     } catch (error) {
-        console.error('❌ Erro:', error);
+        console.error('❌ Erro ao salvar:', error);
         alert(`Erro ao salvar: ${error.message}`);
     }
 }
 
 function showSuccessModal() {
     console.log('🎉 Mostrando modal de sucesso...');
+    
+    // ✅ Sincronizar estado dos checkboxes após sucesso confirmado
+    console.log('🔄 Sincronizando estado após sucesso...');
+    syncCheckboxState();
+    
     const successModal = document.getElementById('successModal');
     successModal.style.display = 'flex';
     
@@ -1336,6 +1522,60 @@ function showSuccessModal() {
 function closeSuccessModal() {
     console.log('Fechando modal de sucesso');
     document.getElementById('successModal').style.display = 'none';
+}
+
+// ✅ FUNÇÃO DE DEBUG: Exibir estado atual completo
+function debugState() {
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('🔍 DEBUG STATE - Estado Completo da Aplicação');
+    console.log('═══════════════════════════════════════════════════════════');
+    console.log('📊 proposalData.changes:', proposalData.changes);
+    console.log('👤 proposalData.ocultasEmissoras:', Array.from(proposalData.ocultasEmissoras));
+    console.log('👤 proposalData.changedEmissoras:', Array.from(proposalData.changedEmissoras));
+    console.log('📋 proposalData.initialOcultasEmissoras:', Array.from(proposalData.initialOcultasEmissoras));
+    
+    console.log('\n📋 ESTADO DOS CHECKBOXES:');
+    proposalData.emissoras.forEach((emissora, index) => {
+        const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+        const isOculta = proposalData.ocultasEmissoras.has(emissora.id);
+        const checkboxValue = checkbox ? checkbox.checked : 'NOT FOUND';
+        const deveEstarVisivel = !isOculta;
+        const estaSincronizado = checkboxValue === deveEstarVisivel;
+        
+        console.log(`   [${estaSincronizado ? '✅' : '❌'}] ${emissora.emissora}:`);
+        console.log(`       - Checkbox: ${checkboxValue}`);
+        console.log(`       - Deve estar visível: ${deveEstarVisivel}`);
+        console.log(`       - Está oculta no estado: ${isOculta}`);
+    });
+    
+    console.log('\n📱 ESTADO DO BOTÃO SALVAR:');
+    const saveBtn = document.getElementById('saveBtn');
+    console.log(`   - Visível: ${saveBtn ? saveBtn.style.display !== 'none' : 'NOT FOUND'}`);
+    console.log(`   - Display: ${saveBtn ? saveBtn.style.display : 'NOT FOUND'}`);
+    
+    console.log('═══════════════════════════════════════════════════════════');
+}
+
+// ✅ FUNÇÃO DE FORÇA-SINCRONIZAÇÃO: Chamar manualmente se algo ficar dessincronizado
+function forceSync() {
+    console.log('🔴 FORÇA-SINCRONIZAÇÃO MANUAL ACIONADA!');
+    console.log('   Estado ANTES:');
+    proposalData.emissoras.forEach((emissora, index) => {
+        const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+        console.log(`   - ${emissora.emissora}: checkbox=${checkbox?.checked}, oculta=${proposalData.ocultasEmissoras.has(emissora.id)}`);
+    });
+    
+    syncCheckboxState();
+    updateStats();
+    renderCharts();
+    
+    console.log('   Estado DEPOIS:');
+    proposalData.emissoras.forEach((emissora, index) => {
+        const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+        console.log(`   - ${emissora.emissora}: checkbox=${checkbox?.checked}, oculta=${proposalData.ocultasEmissoras.has(emissora.id)}`);
+    });
+    
+    alert('✅ Sincronização forçada realizada! Verifique o console para detalhes.');
 }
 
 // =====================================================
