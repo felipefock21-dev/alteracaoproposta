@@ -206,8 +206,8 @@ body {
     background: var(--white);
     padding: 24px 32px;
     border-radius: 12px;
-    margin-top: 80px !important;
-    margin-bottom: 40px;
+    margin-top: 40px !important;
+    margin-bottom: 60px;
     border-left: 4px solid var(--primary-color);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
     width: 100%;
