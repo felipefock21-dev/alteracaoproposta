@@ -103,7 +103,7 @@ body {
 .header {
     background: linear-gradient(135deg, #06055b 0%, #1a0f4f 100%);
     border-radius: 16px;
-    padding: 30px 40px;
+    padding: 50px 40px;
     margin-bottom: 30px;
     box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2);
     border-left: 6px solid #c4b5fd;
@@ -132,12 +132,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 25px;
-    min-height: 70px;
+    margin-bottom: 40px;
+    min-height: 100px;
 }
 
 .header-logo {
-    max-height: 70px;
+    max-height: 90px;
     width: auto;
     object-fit: contain;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
@@ -148,12 +148,13 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 0;
-    padding-top: 15px;
+    padding-top: 25px;
+    padding-bottom: 15px;
     border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .header-title {
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 700;
     color: #c4b5fd;
     font-family: 'Space Grotesk', sans-serif;
