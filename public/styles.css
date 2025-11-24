@@ -357,10 +357,11 @@ body {
 }
 
 /* Content wrapper - removido pois container agora tem max-width adequado */
-.container > * {
-    width: auto;
-    padding: 0;
-    margin: 0;
+.container > .header,
+.container > .active-products-section {
+    width: 100%;
+    padding: inherit;
+    margin: inherit;
 }
 
 .info-item {
