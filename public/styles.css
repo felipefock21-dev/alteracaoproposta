@@ -165,7 +165,7 @@ body {
 .header {
     background: var(--gradient-primary);
     border-radius: 16px;
-    padding: 35px 40px;
+    padding: 35px 400px;
     margin-bottom: 32px;
     box-shadow: 0 8px 32px rgba(99, 102, 241, 0.15);
     position: relative;
@@ -243,7 +243,7 @@ body {
    ===================================================== */
 .active-products-section {
     background: var(--white);
-    padding: 6px 46px;
+    padding: 6px 460px;
     border-radius: 12px;
     margin-bottom: 32px;
     border-left: 4px solid var(--primary-color);
