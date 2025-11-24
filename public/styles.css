@@ -51,42 +51,42 @@ body {
 /* Responsivo com zoom-out mantendo proporções */
 @media (max-width: 1920px) {
     body {
-        transform: scale(1);
+        transform: scale(0.95);
         transform-origin: top center;
     }
 }
 
 @media (max-width: 1600px) {
     body {
-        transform: scale(0.83);
+        transform: scale(0.80);
         transform-origin: top center;
     }
 }
 
 @media (max-width: 1440px) {
     body {
-        transform: scale(0.75);
+        transform: scale(0.72);
         transform-origin: top center;
     }
 }
 
 @media (max-width: 1280px) {
     body {
-        transform: scale(0.67);
+        transform: scale(0.64);
         transform-origin: top center;
     }
 }
 
 @media (max-width: 1024px) {
     body {
-        transform: scale(0.53);
+        transform: scale(0.50);
         transform-origin: top center;
     }
 }
 
 @media (max-width: 768px) {
     body {
-        transform: scale(0.4);
+        transform: scale(0.38);
         transform-origin: top center;
     }
 }
