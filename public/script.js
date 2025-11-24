@@ -62,9 +62,32 @@ function getLogoUrl(linkLogoField) {
     return null;
 }
 
-// Função de debug visual - removida
-// Todos os debugs agora vão apenas para console
+// =====================================================
+// GERENCIAMENTO DE SALDO ANTERIOR (ÚLTIMA PROPOSTA SALVA)
+// =====================================================
 
+function getSaldoAnterior() {
+    const saldoAnteriorStr = localStorage.getItem('saldoAnterior');
+    if (saldoAnteriorStr) {
+        try {
+            return JSON.parse(saldoAnteriorStr);
+        } catch (e) {
+            console.error('Erro ao parsear saldoAnterior do localStorage:', e);
+            return { negociado: 0, tabela: 0 };
+        }
+    }
+    return { negociado: 0, tabela: 0 };
+}
+
+function setSaldoAnterior(negociado, tabela) {
+    const saldoAnterior = {
+        negociado: negociado,
+        tabela: tabela,
+        timestamp: new Date().toISOString()
+    };
+    localStorage.setItem('saldoAnterior', JSON.stringify(saldoAnterior));
+    console.log('✅ Saldo anterior salvo:', saldoAnterior);
+}
 
 // =====================================================
 // INICIALIZAÇÃO
@@ -630,9 +653,10 @@ function updateComparisonTable(negociado, tabela) {
     const compTabela = document.getElementById('compTabela');
     const compTabelaAtual = document.getElementById('compTabelaAtual');
     
-    // Valor anterior (sempre 0 ou pode vir de proposalData se existir dados anteriores)
-    const negociadoAnterior = proposalData.negociadoAnterior || 0;
-    const tabelaAnterior = proposalData.tabelaAnterior || 0;
+    // Obtém o saldo anterior do localStorage
+    const saldoAnterior = getSaldoAnterior();
+    const negociadoAnterior = saldoAnterior.negociado || 0;
+    const tabelaAnterior = saldoAnterior.tabela || 0;
     
     // Atualiza os valores
     if (compNegociado) compNegociado.textContent = formatCurrency(negociadoAnterior);
@@ -1262,6 +1286,29 @@ async function confirmAndSave() {
         // Atualizar estado inicial das emissoras ocultas após salvar
         proposalData.initialOcultasEmissoras = new Set(proposalData.ocultasEmissoras);
         proposalData.changedEmissoras = new Set();  // Limpar emissoras alteradas
+        
+        // ✅ SALVAR O SALDO ATUAL COMO "SALDO ANTERIOR" PARA A PRÓXIMA PROPOSTA
+        let totalInvestimentoTabela = 0;
+        let totalInvestimentoNegociado = 0;
+        
+        proposalData.emissoras.forEach((emissora, index) => {
+            const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
+            if (checkbox && checkbox.checked) {
+                PRODUTOS.forEach(produto => {
+                    const spots = emissora[produto.key] || 0;
+                    if (spots > 0) {
+                        const valorTabela = emissora[produto.tabelaKey] || 0;
+                        const valorNegociado = emissora[produto.negKey] || 0;
+                        totalInvestimentoTabela += spots * valorTabela;
+                        totalInvestimentoNegociado += spots * valorNegociado;
+                    }
+                });
+            }
+        });
+        
+        // Salvar no localStorage como "saldo anterior"
+        setSaldoAnterior(totalInvestimentoNegociado, totalInvestimentoTabela);
+        console.log('💾 Saldo anterior atualizado para próxima edição');
         
         // Ocultar botão de salvar já que não há mais alterações
         showUnsavedChanges();
