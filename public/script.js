@@ -314,10 +314,14 @@ function renderSpotsTable() {
     
     // LOG: Verificar se campo 'impactos' existe nos dados
     console.log('\n╔═══════════════════════════════════════════════════════════════╗');
-    console.log('║ 🔍 VERIFICANDO CAMPO IMPACTOS NOS DADOS');
+    console.log('║ 🔍 VERIFICANDO CAMPOS NOS DADOS');
     console.log('╚═══════════════════════════════════════════════════════════════╝');
     proposalData.emissoras.forEach((emissora, idx) => {
-        console.log(`  [${idx}] ${emissora.emissora}: impactos = "${emissora.impactos}" (tipo: ${typeof emissora.impactos})`);
+        console.log(`  [${idx}] ${emissora.emissora}:`);
+        console.log(`       - impactos: "${emissora.impactos}"`);
+        console.log(`       - linkLogo: "${emissora.linkLogo}"`);
+        console.log(`       - logo: "${emissora.logo}"`);
+        console.log(`       - Todas as chaves:`, Object.keys(emissora));
     });
     
     // Encontra quais produtos têm dados (spots > 0) em qualquer emissora
