@@ -42,11 +42,12 @@ body {
     align-items: center;
     padding-top: 0;
     margin: 0;
+    width: 100%;
 }
 
 .container {
-    width: 1920px;
-    max-width: 1920px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     padding: 0;
     flex: 1;
@@ -54,7 +55,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-}
+}}
 
 /* Responsivo com zoom-out mantendo proporções */
 @media (max-width: 1920px) {
@@ -105,7 +106,7 @@ body {
 .header {
     background: linear-gradient(135deg, #06055b 0%, #1a0f4f 100%);
     border-radius: 0;
-    padding: 30px 40px;
+    padding: 30px calc((100% - 1920px) / 2 + 40px);
     margin-bottom: 30px;
     box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2);
     border-left: none;
@@ -114,11 +115,21 @@ body {
     width: 100%;
     box-sizing: border-box;
     display: flex;
+    justify-content: center;
+    align-items: center;
+}}
+
+.header-inner {
+    display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 1920px;
+    max-width: 1920px;
+    box-sizing: border-box;
+    gap: 20px;
 }
 
-.header::before {
+
     content: '';
     position: absolute;
     top: -50%;
@@ -256,10 +267,12 @@ body {
     max-width: 1920px;
     padding: 0 40px;
     box-sizing: border-box;
+    margin: 0 auto;
 }
 
 .container > .stats-grid {
     padding: 30px 40px;
+    margin: 0 auto;
 }
 
 .container > .card {
