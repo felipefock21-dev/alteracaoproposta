@@ -1,5 +1,5 @@
-// =====================================================
-// PROPOSTA DE MÍDIA - JavaScript (MÚLTIPLAS EMISSORAS)
+﻿// =====================================================
+// PROPOSTA DE MÃDIA - JavaScript (MÃšLTIPLAS EMISSORAS)
 // Build: 2025-11-19
 // =====================================================
 
@@ -8,9 +8,9 @@ let proposalData = {
     emissoras: [],  // Array de emissoras
     changes: {},
     ocultasEmissoras: new Set(),  // Rastreia emissoras ocultas (por ID)
-    initialOcultasEmissoras: new Set(),  // Estado inicial para detectar mudanças
-    changedEmissoras: new Set(),  // Rastreia quais emissoras tiveram mudanças no status "Excluir"
-    // Backup do último estado salvo com sucesso (para rollback em caso de erro)
+    initialOcultasEmissoras: new Set(),  // Estado inicial para detectar mudanÃ§as
+    changedEmissoras: new Set(),  // Rastreia quais emissoras tiveram mudanÃ§as no status "Excluir"
+    // Backup do Ãºltimo estado salvo com sucesso (para rollback em caso de erro)
     lastSuccessfulState: {
         ocultasEmissoras: new Set(),
         changes: {},
@@ -18,11 +18,11 @@ let proposalData = {
     }
 };
 
-// Flag para ignorar o próximo evento de checkbox (evita double trigger)
+// Flag para ignorar o prÃ³ximo evento de checkbox (evita double trigger)
 let ignoreNextCheckboxChange = false;
 
 
-// Definição de todos os produtos disponíveis
+// DefiniÃ§Ã£o de todos os produtos disponÃ­veis
 const PRODUTOS = [
     { key: 'spots30', label: 'Spots 30"', tabelaKey: 'valorTabela30', negKey: 'valorNegociado30' },
     { key: 'spots60', label: 'Spots 60"', tabelaKey: 'valorTabela60', negKey: 'valorNegociado60' },
@@ -41,7 +41,7 @@ let charts = {
     investment: null
 };
 
-// Função para extrair o link da logo (pode vir como string, array ou objeto)
+// FunÃ§Ã£o para extrair o link da logo (pode vir como string, array ou objeto)
 function getLogoUrl(linkLogoField) {
     if (!linkLogoField) return null;
     
@@ -69,7 +69,7 @@ function getLogoUrl(linkLogoField) {
 }
 
 // =====================================================
-// GERENCIAMENTO DE SALDO ANTERIOR (ÚLTIMA PROPOSTA SALVA)
+// GERENCIAMENTO DE SALDO ANTERIOR (ÃšLTIMA PROPOSTA SALVA)
 // =====================================================
 
 function getSaldoAnterior() {
@@ -92,20 +92,20 @@ function setSaldoAnterior(negociado, tabela) {
         timestamp: new Date().toISOString()
     };
     localStorage.setItem('saldoAnterior', JSON.stringify(saldoAnterior));
-    console.log('✅ Saldo anterior salvo:', saldoAnterior);
+    console.log('âœ… Saldo anterior salvo:', saldoAnterior);
 }
 
 // =====================================================
-// INICIALIZAÇÃO
+// INICIALIZAÃ‡ÃƒO
 // =====================================================
 
-console.log('═══════════════════════════════════════════════════════════════');
-console.log('🔥 script.js CARREGADO!');
-console.log('═══════════════════════════════════════════════════════════════');
+console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+console.log('ðŸ”¥ script.js CARREGADO!');
+console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('\n🎯 DOMContentLoaded DISPARADO!');
-    console.log('🚀 Inicializando página de proposta...');
+    console.log('\nðŸŽ¯ DOMContentLoaded DISPARADO!');
+    console.log('ðŸš€ Inicializando pÃ¡gina de proposta...');
     
     try {
         const params = new URLSearchParams(window.location.search);
@@ -118,9 +118,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         await loadProposalFromNotion(proposalData.tableId);
         renderInterface();
-        console.log('✅ Página carregada com sucesso!');
+        console.log('âœ… PÃ¡gina carregada com sucesso!');
     } catch (error) {
-        console.error('❌ Erro ao carregar:', error);
+        console.error('âŒ Erro ao carregar:', error);
         showError(error.message);
     }
 });
@@ -131,14 +131,14 @@ function showWelcomeMessage() {
         container.innerHTML = `
             <div style="text-align: center; padding: 60px 20px;">
                 <h1 style="font-size: 2.5rem; color: #6366f1; margin-bottom: 20px;">
-                    📋 E-MÍDIAS
+                    ðŸ“‹ E-MÃDIAS
                 </h1>
                 <p style="font-size: 1.1rem; color: #6b7280; margin-bottom: 30px;">
-                    Plataforma de Gestão de Propostas Radiofônicas
+                    Plataforma de GestÃ£o de Propostas RadiofÃ´nicas
                 </p>
                 <div style="background: #f3f4f6; padding: 30px; border-radius: 12px; max-width: 600px; margin: 0 auto;">
                     <p style="color: #374151; font-size: 1rem; line-height: 1.6; margin-bottom: 25px;">
-                        ℹ️ Nenhuma proposta foi carregada.
+                        â„¹ï¸ Nenhuma proposta foi carregada.
                     </p>
                     <div style="background: white; padding: 20px; border-radius: 8px;">
                         <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 10px;">
@@ -154,11 +154,11 @@ function showWelcomeMessage() {
                             onclick="loadFromWelcome()" 
                             style="width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;"
                         >
-                            ✅ Carregar Proposta
+                            âœ… Carregar Proposta
                         </button>
                     </div>
                     <p style="color: #6b7280; font-size: 0.9rem; margin-top: 15px;">
-                        💡 Ou acesse a URL com o ID: <code style="background: white; padding: 5px 8px; border-radius: 4px;">?id=SEU_ID_AQUI</code>
+                        ðŸ’¡ Ou acesse a URL com o ID: <code style="background: white; padding: 5px 8px; border-radius: 4px;">?id=SEU_ID_AQUI</code>
                     </p>
                 </div>
             </div>
@@ -169,7 +169,7 @@ function showWelcomeMessage() {
 function loadFromWelcome() {
     const tableId = document.getElementById('tableIdInput')?.value?.trim();
     if (!tableId) {
-        alert('⚠️ Por favor, insira o ID da tabela');
+        alert('âš ï¸ Por favor, insira o ID da tabela');
         return;
     }
     window.location.href = `?id=${encodeURIComponent(tableId)}`;
@@ -180,36 +180,36 @@ function loadFromWelcome() {
 // =====================================================
 
 async function loadProposalFromNotion(tableId) {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: loadProposalFromNotion()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('Parâmetro tableId:', tableId);
+    console.log('\nâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—');
+    console.log('â•‘ ðŸ“ INICIANDO: loadProposalFromNotion()');
+    console.log('â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+    console.log('ParÃ¢metro tableId:', tableId);
     
     const apiUrl = getApiUrl();
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : apiUrl + '/';
     const finalUrl = `${baseUrl}?id=${tableId}`;
     
-    console.log(`📡 URL final: ${finalUrl}`);
+    console.log(`ðŸ“¡ URL final: ${finalUrl}`);
     
     try {
         const response = await fetch(finalUrl);
         
-        console.log(`📊 Status HTTP: ${response.status}`);
-        console.log(`✅ OK: ${response.ok}`);
+        console.log(`ðŸ“Š Status HTTP: ${response.status}`);
+        console.log(`âœ… OK: ${response.ok}`);
         
         if (!response.ok) {
             const errorBody = await response.json().catch(() => ({}));
-            console.log(`❌ Erro: ${JSON.stringify(errorBody)}`);
+            console.log(`âŒ Erro: ${JSON.stringify(errorBody)}`);
             throw new Error(`Erro ao carregar dados: ${response.status}`);
         }
 
         const data = await response.json();
         
-        // Log detalhado no console para diagnóstico
+        // Log detalhado no console para diagnÃ³stico
         console.log('');
-        console.log('╔════════════════════════════════════════════════════════╗');
-        console.log('║  RESPOSTA BRUTA DA API - PRIMEIRO REGISTRO COMPLETO   ║');
-        console.log('╚════════════════════════════════════════════════════════╝');
+        console.log('â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—');
+        console.log('â•‘  RESPOSTA BRUTA DA API - PRIMEIRO REGISTRO COMPLETO   â•‘');
+        console.log('â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
         if (Array.isArray(data) && data.length > 0) {
             console.log(data[0]);
         } else {
@@ -217,14 +217,14 @@ async function loadProposalFromNotion(tableId) {
         }
         console.log('');
         
-        console.log(`📦 Dados tipo: ${typeof data}`);
-        console.log(`📦 Dados é array? ${Array.isArray(data)}`);
-        console.log(`📦 Dados tem .error? ${'error' in data}`);
+        console.log(`ðŸ“¦ Dados tipo: ${typeof data}`);
+        console.log(`ðŸ“¦ Dados Ã© array? ${Array.isArray(data)}`);
+        console.log(`ðŸ“¦ Dados tem .error? ${'error' in data}`);
         
         // Se recebeu erro, mostrar
         if (data.error) {
-          console.log(`❌ API retornou erro: ${data.error}`);
-          console.log(`📋 Debug info: ${JSON.stringify(data.debug || {})}`);
+          console.log(`âŒ API retornou erro: ${data.error}`);
+          console.log(`ðŸ“‹ Debug info: ${JSON.stringify(data.debug || {})}`);
           throw new Error(`Erro da API: ${data.error}`);
         }
         
@@ -234,40 +234,40 @@ async function loadProposalFromNotion(tableId) {
         
         // Log de debug das logos
         if (data.debug) {
-          console.log(`📊 Debug info:`, data.debug);
-          console.log(`✅ Logos encontradas: ${data.debug.logosFounded}`);
-          console.log(`❌ Logos NÃO encontradas: ${data.debug.logosNotFound}`);
+          console.log(`ðŸ“Š Debug info:`, data.debug);
+          console.log(`âœ… Logos encontradas: ${data.debug.logosFounded}`);
+          console.log(`âŒ Logos NÃƒO encontradas: ${data.debug.logosNotFound}`);
           if (data.debug.sampleWithLogo) {
-            console.log(`📌 Exemplo com logo:`, data.debug.sampleWithLogo.emissora, '→', data.debug.sampleWithLogo.logo?.substring(0, 50));
+            console.log(`ðŸ“Œ Exemplo com logo:`, data.debug.sampleWithLogo.emissora, 'â†’', data.debug.sampleWithLogo.logo?.substring(0, 50));
           }
           if (data.debug.sampleWithoutLogo) {
-            console.log(`⚠️ Exemplo sem logo:`, data.debug.sampleWithoutLogo.emissora);
+            console.log(`âš ï¸ Exemplo sem logo:`, data.debug.sampleWithoutLogo.emissora);
           }
         }
         
-        console.log(`📊 É array? ${Array.isArray(emissoras)}`);
-        console.log(`📊 Tamanho: ${Array.isArray(emissoras) ? emissoras.length : 'N/A'}`);
-        console.log(`👤 Emissoras ocultas: ${ocultasEmissoras.length}`);
+        console.log(`ðŸ“Š Ã‰ array? ${Array.isArray(emissoras)}`);
+        console.log(`ðŸ“Š Tamanho: ${Array.isArray(emissoras) ? emissoras.length : 'N/A'}`);
+        console.log(`ðŸ‘¤ Emissoras ocultas: ${ocultasEmissoras.length}`);
         
         if (Array.isArray(emissoras) && emissoras.length > 0) {
-            console.log(`✅ Processando ${emissoras.length} emissoras`);
-            console.log(`📋 Primeiro emissora: ${emissoras[0].emissora || 'SEM NOME'}`);
+            console.log(`âœ… Processando ${emissoras.length} emissoras`);
+            console.log(`ðŸ“‹ Primeiro emissora: ${emissoras[0].emissora || 'SEM NOME'}`);
             
-            // Usar os dados diretamente do Notion, sem transformação
+            // Usar os dados diretamente do Notion, sem transformaÃ§Ã£o
             proposalData.emissoras = emissoras;
             
             // Carregar emissoras ocultas no Set
             proposalData.ocultasEmissoras = new Set(ocultasEmissoras);
             proposalData.initialOcultasEmissoras = new Set(ocultasEmissoras);  // Guardar estado inicial
-            console.log(`👤 ${proposalData.ocultasEmissoras.size} emissoras marcadas como ocultas`);
+            console.log(`ðŸ‘¤ ${proposalData.ocultasEmissoras.size} emissoras marcadas como ocultas`);
             
-            console.log(`✅ ${proposalData.emissoras.length} emissoras carregadas com sucesso!`);
+            console.log(`âœ… ${proposalData.emissoras.length} emissoras carregadas com sucesso!`);
         } else {
-            console.log('⚠️ Array vazio ou inválido');
+            console.log('âš ï¸ Array vazio ou invÃ¡lido');
             throw new Error('Nenhuma emissora encontrada');
         }
     } catch (error) {
-        console.log(`❌ Erro na função: ${error.message}`);
+        console.log(`âŒ Erro na funÃ§Ã£o: ${error.message}`);
         console.error(error);
         throw error;
     }
@@ -296,20 +296,20 @@ function getApiUrl() {
 }
 
 // =====================================================
-// RENDERIZAÇÃO
+// RENDERIZAÃ‡ÃƒO
 // =====================================================
 
 function renderInterface() {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: renderInterface()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
+    console.log('\nâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—');
+    console.log('â•‘ ðŸ“ INICIANDO: renderInterface()');
+    console.log('â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
     console.log('proposalData.emissoras.length:', proposalData.emissoras.length);
     
-    console.log('🎨 Renderizando interface...');
-    console.log('📊 Emissoras disponíveis:', proposalData.emissoras.length);
+    console.log('ðŸŽ¨ Renderizando interface...');
+    console.log('ðŸ“Š Emissoras disponÃ­veis:', proposalData.emissoras.length);
     
     // Buscar o nome da proposta
-    let proposalName = 'Proposta de Mídia';
+    let proposalName = 'Proposta de MÃ­dia';
     
     if (proposalData.emissoras && proposalData.emissoras.length > 0) {
         const firstEmissora = proposalData.emissoras[0];
@@ -317,85 +317,85 @@ function renderInterface() {
         // Tenta encontrar o nome da proposta nos campos
         if (firstEmissora.proposta && firstEmissora.proposta.trim()) {
             proposalName = firstEmissora.proposta;
-            console.log('✅ Nome da proposta encontrado:', proposalName);
+            console.log('âœ… Nome da proposta encontrado:', proposalName);
         } else if (firstEmissora.empresa && firstEmissora.empresa.trim()) {
             proposalName = firstEmissora.empresa;
-            console.log('✅ Nome da empresa encontrado:', proposalName);
+            console.log('âœ… Nome da empresa encontrado:', proposalName);
         } else {
             // Fallback: usa a primeira emissora
-            proposalName = firstEmissora.emissora || 'Proposta de Mídia';
-            console.log('⚠️ Usando emissora como nome:', proposalName);
+            proposalName = firstEmissora.emissora || 'Proposta de MÃ­dia';
+            console.log('âš ï¸ Usando emissora como nome:', proposalName);
         }
     }
     
-    console.log('🏢 Nome da proposta:', proposalName);
-    // Título não é mais atualizado dinamicamente
+    console.log('ðŸ¢ Nome da proposta:', proposalName);
+    // TÃ­tulo nÃ£o Ã© mais atualizado dinamicamente
     
-    // Remover a seção de localização (já não será exibida)
+    // Remover a seÃ§Ã£o de localizaÃ§Ã£o (jÃ¡ nÃ£o serÃ¡ exibida)
     const locationInfo = document.getElementById('locationInfo');
     if (locationInfo && locationInfo.parentElement) {
         locationInfo.parentElement.style.display = 'none';
     }
     
-    console.log('🎯 Chamando renderSpotsTable...');
+    console.log('ðŸŽ¯ Chamando renderSpotsTable...');
     renderSpotsTable();
-    console.log('🎯 Chamando updateStats...');
+    console.log('ðŸŽ¯ Chamando updateStats...');
     updateStats();
-    console.log('🎯 Chamando renderCharts...');
+    console.log('ðŸŽ¯ Chamando renderCharts...');
     renderCharts();
     
-    // 💾 Criar backup do estado inicial (para rollback em caso de erro)
+    // ðŸ’¾ Criar backup do estado inicial (para rollback em caso de erro)
     proposalData.lastSuccessfulState = {
         ocultasEmissoras: new Set(proposalData.ocultasEmissoras),
         changes: JSON.parse(JSON.stringify(proposalData.changes)),
         emissoras: proposalData.emissoras.map(e => ({...e}))
     };
-    console.log('💾 Estado inicial salvo para rollback:', {
+    console.log('ðŸ’¾ Estado inicial salvo para rollback:', {
         ocultasEmissoras: Array.from(proposalData.lastSuccessfulState.ocultasEmissoras),
         changesCount: Object.keys(proposalData.lastSuccessfulState.changes).length
     });
     
-    console.log('🎯 Garantindo que botão de salvar está oculto (sem alterações)...');
+    console.log('ðŸŽ¯ Garantindo que botÃ£o de salvar estÃ¡ oculto (sem alteraÃ§Ãµes)...');
     showUnsavedChanges();
-    console.log('✅ renderInterface() finalizado!');
+    console.log('âœ… renderInterface() finalizado!');
 }
 
 function renderSpotsTable() {
-    console.log('\n🎯🎯🎯 renderSpotsTable() INICIADA 🎯🎯🎯');
+    console.log('\nðŸŽ¯ðŸŽ¯ðŸŽ¯ renderSpotsTable() INICIADA ðŸŽ¯ðŸŽ¯ðŸŽ¯');
     
     const tbody = document.getElementById('spotsTableBody');
     const table = document.getElementById('spotsTable');
     
-    console.log('✅ Procurando tbody #spotsTableBody...');
-    console.log('✅ tbody encontrado?', !!tbody);
-    console.log('✅ proposalData.emissoras.length:', proposalData.emissoras.length);
+    console.log('âœ… Procurando tbody #spotsTableBody...');
+    console.log('âœ… tbody encontrado?', !!tbody);
+    console.log('âœ… proposalData.emissoras.length:', proposalData.emissoras.length);
     
     if (!tbody || !table) {
-        console.error('❌ CRÍTICO: Elementos da tabela não encontrados no DOM!');
+        console.error('âŒ CRÃTICO: Elementos da tabela nÃ£o encontrados no DOM!');
         return;
     }
     
     if (!proposalData.emissoras || proposalData.emissoras.length === 0) {
-        console.error('❌ CRÍTICO: proposalData.emissoras vazio ou indefinido!');
+        console.error('âŒ CRÃTICO: proposalData.emissoras vazio ou indefinido!');
         return;
     }
     
     // LOG: Verificar se campo 'impactos' existe nos dados
-    console.log('\n╔═══════════════════════════════════════════════════════════════╗');
-    console.log('║ 🔍 VERIFICANDO CAMPOS NOS DADOS');
-    console.log('╚═══════════════════════════════════════════════════════════════╝');
+    console.log('\nâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—');
+    console.log('â•‘ ðŸ” VERIFICANDO CAMPOS NOS DADOS');
+    console.log('â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
     proposalData.emissoras.forEach((emissora, idx) => {
         const logoUrl = getLogoUrl(emissora.linkLogo);
         console.log(`  [${idx}] ${emissora.emissora}:`);
         console.log(`       - impactos: "${emissora.impactos}"`);
         console.log(`       - linkLogo (raw): ${JSON.stringify(emissora.linkLogo)}`);
         console.log(`       - linkLogo (tipo): ${typeof emissora.linkLogo}`);
-        console.log(`       - linkLogo (extraído): "${logoUrl}"`);
+        console.log(`       - linkLogo (extraÃ­do): "${logoUrl}"`);
         console.log(`       - logo: "${emissora.logo}"`);
         console.log(`       - Todas as chaves:`, Object.keys(emissora));
     });
     
-    // Encontra quais produtos têm dados (spots > 0) em qualquer emissora
+    // Encontra quais produtos tÃªm dados (spots > 0) em qualquer emissora
     const produtosAtivos = new Set();
     proposalData.emissoras.forEach(emissora => {
         PRODUTOS.forEach(produto => {
@@ -406,26 +406,26 @@ function renderSpotsTable() {
         });
     });
     
-    console.log('🔍 Produtos com dados encontrados:', Array.from(produtosAtivos).map(pk => {
+    console.log('ðŸ” Produtos com dados encontrados:', Array.from(produtosAtivos).map(pk => {
         const p = PRODUTOS.find(x => x.key === pk);
         return p ? p.label : pk;
     }));
     
-    // RECONSTRÓI os cabeçalhos da tabela
+    // RECONSTRÃ“I os cabeÃ§alhos da tabela
     const thead = table.querySelector('thead');
     if (thead) {
         thead.innerHTML = '';
         const headerRow = document.createElement('tr');
         
-        // Cabeçalhos fixos
+        // CabeÃ§alhos fixos
         headerRow.innerHTML = `
-            <th style="width: 40px; min-width: 40px;">✓</th>
-            <th style="min-width: 80px;">Região</th>
-            <th style="min-width: 100px;">Praça</th>
+            <th style="width: 40px; min-width: 40px;">âœ“</th>
+            <th style="min-width: 80px;">RegiÃ£o</th>
+            <th style="min-width: 100px;">PraÃ§a</th>
             <th style="min-width: 140px;">Emissora</th>
         `;
         
-        // Cabeçalhos dinâmicos por produto
+        // CabeÃ§alhos dinÃ¢micos por produto
         produtosAtivos.forEach(produtoKey => {
             const produto = PRODUTOS.find(p => p.key === produtoKey);
             headerRow.innerHTML += `
@@ -450,14 +450,14 @@ function renderSpotsTable() {
     
     // Renderiza uma linha por emissora
     proposalData.emissoras.forEach((emissora, emissoraIndex) => {
-        console.log(`📍 Processando emissora ${emissoraIndex}: ${emissora.emissora}`);
+        console.log(`ðŸ“ Processando emissora ${emissoraIndex}: ${emissora.emissora}`);
         
         let investimentoTabelaEmissora = 0;
         let investimentoNegociadoEmissora = 0;
         
         const row = document.createElement('tr');
         row.className = 'spots-data-row';
-        row.id = `emissora-row-${emissora.id}`;  // ID único para CSS
+        row.id = `emissora-row-${emissora.id}`;  // ID Ãºnico para CSS
         row.setAttribute('data-emissora-id', emissora.id);  // Para rastreamento
         
         // Aplicar estilo se oculta
@@ -490,7 +490,7 @@ function renderSpotsTable() {
             </td>
         `;
         
-        // Colunas dinâmicas por produto
+        // Colunas dinÃ¢micas por produto
         produtosAtivos.forEach(produtoKey => {
             const produto = PRODUTOS.find(p => p.key === produtoKey);
             const spots = emissora[produto.key] || 0;
@@ -529,9 +529,9 @@ function renderSpotsTable() {
         totalLinhasAdicionadas++;
     });
     
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log(`✅ Tabela renderizada com sucesso! ${totalLinhasAdicionadas} emissoras exibidas`);
-    console.log('═══════════════════════════════════════════════════════════');
+    console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+    console.log(`âœ… Tabela renderizada com sucesso! ${totalLinhasAdicionadas} emissoras exibidas`);
+    console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
 }
 
 function updateActiveProducts() {
@@ -578,21 +578,21 @@ function updateActiveProducts() {
 }
 
 function updateStats() {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: updateStats()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('✅ Iniciando cálculos apenas das emissoras SELECIONADAS...');
+    console.log('\nâ•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—');
+    console.log('â•‘ ðŸ“ INICIANDO: updateStats()');
+    console.log('â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+    console.log('âœ… Iniciando cÃ¡lculos apenas das emissoras SELECIONADAS...');
     
     // Calcula o investimento total APENAS das emissoras checadas
     let totalInvestimentoTabela = 0;
     let totalInvestimentoNegociado = 0;
     let totalSpots = 0;
     
-    // Percorre apenas as linhas que estão selecionadas (checkbox marcado)
+    // Percorre apenas as linhas que estÃ£o selecionadas (checkbox marcado)
     proposalData.emissoras.forEach((emissora, index) => {
         const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
         
-        // Se a checkbox está checada, inclui no cálculo
+        // Se a checkbox estÃ¡ checada, inclui no cÃ¡lculo
         if (checkbox && checkbox.checked) {
             PRODUTOS.forEach(produto => {
                 const spots = emissora[produto.key] || 0;
@@ -628,12 +628,12 @@ function updateStats() {
         ? ((economia / totalInvestimentoTabela) * 100).toFixed(2)
         : 0;
     
-    console.log('📊 Total Spots:', totalSpots);
-    console.log('💰 Total Investimento Tabela:', totalInvestimentoTabela);
-    console.log('💰 Total Investimento Negociado:', totalInvestimentoNegociado);
-    console.log('📈 Total Impactos:', totalImpactos);
-    console.log('💵 Economia (R$):', economia);
-    console.log('💵 Desconto (%):', percentualDesconto);
+    console.log('ðŸ“Š Total Spots:', totalSpots);
+    console.log('ðŸ’° Total Investimento Tabela:', totalInvestimentoTabela);
+    console.log('ðŸ’° Total Investimento Negociado:', totalInvestimentoNegociado);
+    console.log('ðŸ“ˆ Total Impactos:', totalImpactos);
+    console.log('ðŸ’µ Economia (R$):', economia);
+    console.log('ðŸ’µ Desconto (%):', percentualDesconto);
     
     const statTotalSpots = document.getElementById('statTotalSpots');
     const statTabelaValue = document.getElementById('statTabelaValue');
@@ -641,7 +641,7 @@ function updateStats() {
     const statTotalImpacts = document.getElementById('statTotalImpacts');
     const statEconomia = document.getElementById('statEconomia');
     
-    console.log('🔍 Elementos encontrados:', {
+    console.log('ðŸ” Elementos encontrados:', {
         statTotalSpots: !!statTotalSpots,
         statTabelaValue: !!statTabelaValue,
         statNegociadoValue: !!statNegociadoValue,
@@ -661,17 +661,17 @@ function updateStats() {
     // Atualizar tabela comparativa "Sua Proposta"
     updateComparisonTable(totalInvestimentoNegociado, totalInvestimentoTabela);
     
-    console.log('✅ Estatísticas atualizadas!\n');
+    console.log('âœ… EstatÃ­sticas atualizadas!\n');
 }
 
 function updateComparisonTable(negociado, tabela) {
-    // Obtém os elementos da tabela
+    // ObtÃ©m os elementos da tabela
     const compNegociado = document.getElementById('compNegociado');
     const compNegociadoAtual = document.getElementById('compNegociadoAtual');
     const compTabela = document.getElementById('compTabela');
     const compTabelaAtual = document.getElementById('compTabelaAtual');
     
-    // Obtém o saldo anterior do localStorage
+    // ObtÃ©m o saldo anterior do localStorage
     const saldoAnterior = getSaldoAnterior();
     const negociadoAnterior = saldoAnterior.negociado || 0;
     const tabelaAnterior = saldoAnterior.tabela || 0;
@@ -684,26 +684,26 @@ function updateComparisonTable(negociado, tabela) {
 }
 
 function renderCharts() {
-    console.log('📊 Renderizando gráficos...');
+    console.log('ðŸ“Š Renderizando grÃ¡ficos...');
     
     try {
-        // Destroi os gráficos antigos se existirem
+        // Destroi os grÃ¡ficos antigos se existirem
         if (charts.investment) {
             charts.investment.destroy();
             charts.investment = null;
         }
         
         renderInvestmentChart();
-        console.log('✅ Gráficos renderizados com sucesso!');
+        console.log('âœ… GrÃ¡ficos renderizados com sucesso!');
     } catch (error) {
-        console.error('⚠️ Erro ao renderizar gráficos (não crítico):', error);
+        console.error('âš ï¸ Erro ao renderizar grÃ¡ficos (nÃ£o crÃ­tico):', error);
     }
 }
 
 function renderInvestmentChart() {
     const ctx = document.getElementById('investmentChart');
     if (!ctx) {
-        console.warn('⚠️ Elemento investmentChart não encontrado');
+        console.warn('âš ï¸ Elemento investmentChart nÃ£o encontrado');
         return;
     }
     
@@ -717,10 +717,10 @@ function renderInvestmentChart() {
     rows.forEach(row => {
         const checkbox = row.querySelector('input[type="checkbox"]');
         if (checkbox && checkbox.checked) {
-            // Encontra as células de investimento nesta linha
+            // Encontra as cÃ©lulas de investimento nesta linha
             const cells = row.querySelectorAll('td');
             if (cells.length >= 2) {
-                // Pega as últimas 2 células (investimento tabela e negociado)
+                // Pega as Ãºltimas 2 cÃ©lulas (investimento tabela e negociado)
                 const investTabelaCell = cells[cells.length - 2];
                 const investNegociadoCell = cells[cells.length - 1];
                 
@@ -738,7 +738,7 @@ function renderInvestmentChart() {
     const labels = ['Tabela', 'Negociado'];
     const data = [totalTabela, totalNegociado];
     
-    console.log('📊 Gráfico investimento - Tabela:', totalTabela, 'Negociado:', totalNegociado);
+    console.log('ðŸ“Š GrÃ¡fico investimento - Tabela:', totalTabela, 'Negociado:', totalNegociado);
     
     charts.investment = new Chart(canvasCtx, {
         type: 'doughnut',
@@ -768,16 +768,16 @@ function renderInvestmentChart() {
     });
 }
 
-// Calcula o máximo de escala (max redondo) que garanta visualização de TODAS as barras
+// Calcula o mÃ¡ximo de escala (max redondo) que garanta visualizaÃ§Ã£o de TODAS as barras
 function calculateChartMax(dataArray) {
     if (!dataArray || dataArray.length === 0) return 100000;
     
-    // Pega o valor máximo real
+    // Pega o valor mÃ¡ximo real
     const maxValue = Math.max(...dataArray);
     if (maxValue === 0) return 100000;
     
-    // Calcula um máximo "redondo" que seja ~20% maior que o máximo
-    // Isso garante espaço no topo mas mantém escala legível
+    // Calcula um mÃ¡ximo "redondo" que seja ~20% maior que o mÃ¡ximo
+    // Isso garante espaÃ§o no topo mas mantÃ©m escala legÃ­vel
     const targetMax = maxValue * 1.15;
     
     // Arredonda para um valor "bonito": 100k, 200k, 500k, 1M, 2M, 5M, 10M, etc.
@@ -795,19 +795,19 @@ function calculateChartMax(dataArray) {
 
 
 // =====================================================
-// CÁLCULOS
+// CÃLCULOS
 // =====================================================
 
 function getSelectedRows() {
-    console.log('  ↳ getSelectedRows() chamada');
+    console.log('  â†³ getSelectedRows() chamada');
     // Retorna array de checkboxes selecionados
     const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]:checked');
-    console.log('  ↳ Checkboxes selecionados:', checkboxes.length);
+    console.log('  â†³ Checkboxes selecionados:', checkboxes.length);
     return checkboxes;
 }
 
 function calculateTotalSpots() {
-    console.log('  ↳ calculateTotalSpots() chamada');
+    console.log('  â†³ calculateTotalSpots() chamada');
     let total = 0;
     getSelectedRows().forEach(checkbox => {
         const row = checkbox.closest('tr');
@@ -816,12 +816,12 @@ function calculateTotalSpots() {
             total += parseFloat(input.value) || 0;
         }
     });
-    console.log('  ↳ Total spots calculado:', total);
+    console.log('  â†³ Total spots calculado:', total);
     return total;
 }
 
 function calculateTotalInvestimentoTabela() {
-    console.log('  ↳ calculateTotalInvestimentoTabela() chamada');
+    console.log('  â†³ calculateTotalInvestimentoTabela() chamada');
     let total = 0;
     getSelectedRows().forEach(checkbox => {
         const row = checkbox.closest('tr');
@@ -831,12 +831,12 @@ function calculateTotalInvestimentoTabela() {
             total += parseFloat(value) || 0;
         }
     });
-    console.log('  ↳ Total investimento tabela calculado:', total);
+    console.log('  â†³ Total investimento tabela calculado:', total);
     return total;
 }
 
 function calculateTotalInvestimentoNegociado() {
-    console.log('  ↳ calculateTotalInvestimentoNegociado() chamada');
+    console.log('  â†³ calculateTotalInvestimentoNegociado() chamada');
     let total = 0;
     getSelectedRows().forEach(checkbox => {
         const row = checkbox.closest('tr');
@@ -846,31 +846,31 @@ function calculateTotalInvestimentoNegociado() {
             total += parseFloat(value) || 0;
         }
     });
-    console.log('  ↳ Total investimento negociado calculado:', total);
+    console.log('  â†³ Total investimento negociado calculado:', total);
     return total;
 }
 
 function calculateCPM() {
-    console.log('  ↳ calculateCPM() chamada');
+    console.log('  â†³ calculateCPM() chamada');
     const totalSpots = calculateTotalSpots();
     const totalInvestimento = calculateTotalInvestimentoNegociado();
     
-    console.log('  ↳ CPM: spots=', totalSpots, 'investimento=', totalInvestimento);
+    console.log('  â†³ CPM: spots=', totalSpots, 'investimento=', totalInvestimento);
     
     if (totalSpots === 0 || totalInvestimento === 0) return 0;
     return (totalInvestimento / totalSpots) * 1000;
 }
 
 // =====================================================
-// EDIÇÃO E ATUALIZAÇÃO
+// EDIÃ‡ÃƒO E ATUALIZAÃ‡ÃƒO
 // =====================================================
 
 function updateEmissora(index, field, value) {
-    console.log(`🔴 UPDATE: index=${index}, field=${field}, value=${value}`);
+    console.log(`ðŸ”´ UPDATE: index=${index}, field=${field}, value=${value}`);
     
     const emissora = proposalData.emissoras[index];
     if (!emissora) {
-        console.error('❌ Emissora não encontrada:', index);
+        console.error('âŒ Emissora nÃ£o encontrada:', index);
         return;
     }
     
@@ -891,32 +891,32 @@ function updateEmissora(index, field, value) {
         proposalData.changes[changeKey].new = newValue;
     }
     
-    console.log(`📝 Emissora ${index} - ${field}: ${oldValue} → ${newValue}`);
-    console.log('📊 Changes agora:', proposalData.changes);
+    console.log(`ðŸ“ Emissora ${index} - ${field}: ${oldValue} â†’ ${newValue}`);
+    console.log('ðŸ“Š Changes agora:', proposalData.changes);
     
-    // NÃO chama renderSpotsTable, apenas atualiza estatísticas e gráficos
+    // NÃƒO chama renderSpotsTable, apenas atualiza estatÃ­sticas e grÃ¡ficos
     updateStats();
     renderCharts();
     
-    // Mostrar botão de salvar quando há alterações
+    // Mostrar botÃ£o de salvar quando hÃ¡ alteraÃ§Ãµes
     showUnsavedChanges();
 }
 
 function updateRowSelection() {
-    // Função chamada quando um checkbox é marcado/desmarcado
+    // FunÃ§Ã£o chamada quando um checkbox Ã© marcado/desmarcado
     // Recalcula os totais baseado nas linhas selecionadas
-    console.log('📝 Linha selecionada/desmarcada');
+    console.log('ðŸ“ Linha selecionada/desmarcada');
     updateStats();
     renderCharts();
     
-    // Marcar como alteração - seleção de linhas também é uma mudança!
+    // Marcar como alteraÃ§Ã£o - seleÃ§Ã£o de linhas tambÃ©m Ã© uma mudanÃ§a!
     showUnsavedChanges();
 }
 
 function toggleOcultarEmissora(checkbox) {
-    // Se a flag está ativa, ignora este evento e desativa a flag
+    // Se a flag estÃ¡ ativa, ignora este evento e desativa a flag
     if (ignoreNextCheckboxChange) {
-        console.log('⏭️ Ignorando evento de checkbox (double trigger prevention)');
+        console.log('â­ï¸ Ignorando evento de checkbox (double trigger prevention)');
         ignoreNextCheckboxChange = false;
         return;
     }
@@ -925,7 +925,7 @@ function toggleOcultarEmissora(checkbox) {
     const emissoraIndex = parseInt(checkbox.getAttribute('data-emissora-index'));
     const emissora = proposalData.emissoras[emissoraIndex];
     
-    console.log(`\n🔄 TOGGLE EMISSORA: ${emissora?.emissora || emissoraId}`);
+    console.log(`\nðŸ”„ TOGGLE EMISSORA: ${emissora?.emissora || emissoraId}`);
     console.log(`   ID: ${emissoraId}`);
     console.log(`   Checkbox.checked: ${checkbox.checked}`);
     console.log(`   Estado ANTES:`);
@@ -933,10 +933,10 @@ function toggleOcultarEmissora(checkbox) {
     console.log(`     - changedEmissoras: [${Array.from(proposalData.changedEmissoras).join(', ')}]`);
     
     if (checkbox.checked) {
-        // ✅ MARCAR = REMOVER da lista de ocultas (mostra na proposta)
-        console.log(`   → Ação: REMOVER de ocultasEmissoras (ADICIONAR à proposta)`);
+        // âœ… MARCAR = REMOVER da lista de ocultas (mostra na proposta)
+        console.log(`   â†’ AÃ§Ã£o: REMOVER de ocultasEmissoras (ADICIONAR Ã  proposta)`);
         
-        // Só faz algo se estava realmente oculto
+        // SÃ³ faz algo se estava realmente oculto
         if (proposalData.ocultasEmissoras.has(emissoraId)) {
             proposalData.ocultasEmissoras.delete(emissoraId);
             proposalData.changedEmissoras.add(emissoraId);
@@ -948,24 +948,24 @@ function toggleOcultarEmissora(checkbox) {
             renderCharts();
             showUnsavedChanges();
             
-            console.log(`   ✅ REMOVIDO de ocultasEmissoras`);
+            console.log(`   âœ… REMOVIDO de ocultasEmissoras`);
         } else {
-            console.log(`   ⚠️ Já estava visível, nada a fazer`);
+            console.log(`   âš ï¸ JÃ¡ estava visÃ­vel, nada a fazer`);
         }
     } else {
-        // ❌ DESMARCAR = ADICIONAR à lista de ocultas (esconde da proposta)
-        console.log(`   → Ação: ADICIONAR a ocultasEmissoras (REMOVER da proposta)`);
+        // âŒ DESMARCAR = ADICIONAR Ã  lista de ocultas (esconde da proposta)
+        console.log(`   â†’ AÃ§Ã£o: ADICIONAR a ocultasEmissoras (REMOVER da proposta)`);
         
-        // Só faz algo se estava realmente visível
+        // SÃ³ faz algo se estava realmente visÃ­vel
         if (!proposalData.ocultasEmissoras.has(emissoraId)) {
             proposalData.changedEmissoras.add(emissoraId);
-            showUnsavedChanges();  // Mostrar botão de salvar
+            showUnsavedChanges();  // Mostrar botÃ£o de salvar
             
-            console.log(`   → Abrindo modal de confirmação...`);
+            console.log(`   â†’ Abrindo modal de confirmaÃ§Ã£o...`);
             showConfirmRemovalModal(checkbox, emissora, emissoraId);
-            return;  // Espera confirmação do usuário
+            return;  // Espera confirmaÃ§Ã£o do usuÃ¡rio
         } else {
-            console.log(`   ⚠️ Já estava oculto, nada a fazer`);
+            console.log(`   âš ï¸ JÃ¡ estava oculto, nada a fazer`);
         }
     }
     
@@ -974,9 +974,9 @@ function toggleOcultarEmissora(checkbox) {
     console.log(`     - changedEmissoras: [${Array.from(proposalData.changedEmissoras).join(', ')}]\n`);
 }
 
-// ✅ FUNÇÃO DE SINCRONIZAÇÃO: Força o estado correto dos checkboxes baseado no proposalData
+// âœ… FUNÃ‡ÃƒO DE SINCRONIZAÃ‡ÃƒO: ForÃ§a o estado correto dos checkboxes baseado no proposalData
 function syncCheckboxState() {
-    console.log('🔄 SINCRONIZANDO ESTADO DOS CHECKBOXES...');
+    console.log('ðŸ”„ SINCRONIZANDO ESTADO DOS CHECKBOXES...');
     console.log('   Emissoras ocultas no estado:', Array.from(proposalData.ocultasEmissoras));
     
     proposalData.emissoras.forEach((emissora, index) => {
@@ -988,7 +988,7 @@ function syncCheckboxState() {
             console.log(`   ${emissora.emissora}: deveEstarVisivel=${deveEstarVisivel}, estaChecked=${estaChecked}`);
             
             if (deveEstarVisivel !== estaChecked) {
-                console.log(`      ⚠️ DESSINCRONIZADO! Corrigindo...`);
+                console.log(`      âš ï¸ DESSINCRONIZADO! Corrigindo...`);
                 ignoreNextCheckboxChange = true;
                 checkbox.checked = deveEstarVisivel;
                 
@@ -1004,41 +1004,41 @@ function syncCheckboxState() {
         }
     });
     
-    console.log('✅ Sincronização completa');
+    console.log('âœ… SincronizaÃ§Ã£o completa');
 }
 // =====================================================
-// SALVAR ALTERAÇÕES
+// SALVAR ALTERAÃ‡Ã•ES
 // =====================================================
 
 async function saveChanges() {
-    console.log('🔴 CLICOU EM SALVAR!');
-    console.log('📊 proposalData.changes:', proposalData.changes);
-    console.log('📊 Número de mudanças:', Object.keys(proposalData.changes).length);
-    console.log('👤 Emissoras ocultas:', proposalData.ocultasEmissoras.size);
-    console.log('👤 Emissoras alteradas:', proposalData.changedEmissoras.size);
+    console.log('ðŸ”´ CLICOU EM SALVAR!');
+    console.log('ðŸ“Š proposalData.changes:', proposalData.changes);
+    console.log('ðŸ“Š NÃºmero de mudanÃ§as:', Object.keys(proposalData.changes).length);
+    console.log('ðŸ‘¤ Emissoras ocultas:', proposalData.ocultasEmissoras.size);
+    console.log('ðŸ‘¤ Emissoras alteradas:', proposalData.changedEmissoras.size);
     
     const temMudancas = Object.keys(proposalData.changes).length > 0;
     const temMudancasEmissoras = proposalData.changedEmissoras.size > 0;
     
     if (!temMudancas && !temMudancasEmissoras) {
-        console.warn('⚠️ Nenhuma alteração para salvar!');
-        alert('Nenhuma alteração para salvar!');
+        console.warn('âš ï¸ Nenhuma alteraÃ§Ã£o para salvar!');
+        alert('Nenhuma alteraÃ§Ã£o para salvar!');
         return;
     }
     
-    console.log('💾 Preparando alterações para visualização...');
+    console.log('ðŸ’¾ Preparando alteraÃ§Ãµes para visualizaÃ§Ã£o...');
     
-    // Montar o resumo das alterações agrupadas por emissora
+    // Montar o resumo das alteraÃ§Ãµes agrupadas por emissora
     showConfirmModal();
 }
 
 function showConfirmModal() {
-    console.log('📋 Abrindo modal de confirmação...');
+    console.log('ðŸ“‹ Abrindo modal de confirmaÃ§Ã£o...');
     
     const modal = document.getElementById('confirmModal');
     const modalBody = document.getElementById('confirmModalBody');
     
-    // Agrupar alterações por emissora
+    // Agrupar alteraÃ§Ãµes por emissora
     const changesByEmissora = {};
     
     for (const changeKey in proposalData.changes) {
@@ -1060,7 +1060,7 @@ function showConfirmModal() {
     // Montar HTML do modal
     let html = '';
     
-    // Primeiro, mostrar as emissoras que serão removidas (ocultas)
+    // Primeiro, mostrar as emissoras que serÃ£o removidas (ocultas)
     if (proposalData.ocultasEmissoras.size > 0) {
         html += `
             <div class="change-group" style="border-left-color: #dc2626; background-color: #fef2f2;">
@@ -1075,7 +1075,7 @@ function showConfirmModal() {
                 html += `
                     <div class="change-item" style="padding: 8px 0; color: #dc2626;">
                         <strong>${emissora.emissora}</strong>
-                        <span style="font-size: 12px; color: #999;"> - será movida para "Lista de alternantes"</span>
+                        <span style="font-size: 12px; color: #999;"> - serÃ¡ movida para "Lista de alternantes"</span>
                     </div>
                 `;
             }
@@ -1084,8 +1084,8 @@ function showConfirmModal() {
         html += '</div>';
     }
     
-    // Mostrar as emissoras que serão adicionadas (foram restauradas)
-    // São aquelas que estão em changedEmissoras mas NÃO estão em ocultasEmissoras
+    // Mostrar as emissoras que serÃ£o adicionadas (foram restauradas)
+    // SÃ£o aquelas que estÃ£o em changedEmissoras mas NÃƒO estÃ£o em ocultasEmissoras
     const emisssorasAdicionar = Array.from(proposalData.changedEmissoras).filter(
         emissoraId => !proposalData.ocultasEmissoras.has(emissoraId)
     );
@@ -1104,7 +1104,7 @@ function showConfirmModal() {
                 html += `
                     <div class="change-item" style="padding: 8px 0; color: #10b981;">
                         <strong>${emissora.emissora}</strong>
-                        <span style="font-size: 12px; color: #999;"> - será incluída na proposta</span>
+                        <span style="font-size: 12px; color: #999;"> - serÃ¡ incluÃ­da na proposta</span>
                     </div>
                 `;
             }
@@ -1113,7 +1113,7 @@ function showConfirmModal() {
         html += '</div>';
     }
     
-    // Depois, mostrar as mudanças de valores
+    // Depois, mostrar as mudanÃ§as de valores
     for (const emissoraIndex in changesByEmissora) {
         const changes = changesByEmissora[emissoraIndex];
         const emissora = proposalData.emissoras[emissoraIndex];
@@ -1149,7 +1149,7 @@ function showConfirmModal() {
             let oldValue = change.old;
             let newValue = change.new;
             
-            // Se for valor monetário, formatar como moeda
+            // Se for valor monetÃ¡rio, formatar como moeda
             if (change.field.includes('valor') || change.field.includes('investimento')) {
                 oldValue = formatCurrency(change.old);
                 newValue = formatCurrency(change.new);
@@ -1160,7 +1160,7 @@ function showConfirmModal() {
                     <span class="change-item-label">${fieldLabel}</span>
                     <div style="display: flex; align-items: center;">
                         <span class="change-old">${oldValue}</span>
-                        <span class="change-arrow">→</span>
+                        <span class="change-arrow">â†’</span>
                         <span class="change-new">${newValue}</span>
                     </div>
                 </div>
@@ -1173,24 +1173,24 @@ function showConfirmModal() {
     modalBody.innerHTML = html;
     modal.style.display = 'flex';
     
-    console.log('✅ Modal aberto com sucesso!');
+    console.log('âœ… Modal aberto com sucesso!');
 }
 
 function closeConfirmModal() {
-    console.log('❌ Fechando modal (editando novamente)');
+    console.log('âŒ Fechando modal (editando novamente)');
     document.getElementById('confirmModal').style.display = 'none';
 }
 
 // =====================================================
-// MODAL DE CONFIRMAÇÃO DE REMOÇÃO
+// MODAL DE CONFIRMAÃ‡ÃƒO DE REMOÃ‡ÃƒO
 // =====================================================
 
 let pendingRemovalData = null;
 
 function showConfirmRemovalModal(checkbox, emissora, emissoraId) {
-    console.log('📋 Abrindo modal de confirmação de remoção...');
+    console.log('ðŸ“‹ Abrindo modal de confirmaÃ§Ã£o de remoÃ§Ã£o...');
     
-    // Salvar dados para confirmação
+    // Salvar dados para confirmaÃ§Ã£o
     pendingRemovalData = {
         checkbox: checkbox,
         emissora: emissora,
@@ -1204,13 +1204,13 @@ function showConfirmRemovalModal(checkbox, emissora, emissoraId) {
     const html = `
         <div class="change-group" style="padding: 20px; background: #fff3cd; border-left: 4px solid #ff6b6b; border-radius: 4px;">
             <div class="change-group-title" style="color: #d32f2f; margin-bottom: 12px;">
-                <i class="fas fa-exclamation-triangle"></i> Confirmar Remoção de Emissora
+                <i class="fas fa-exclamation-triangle"></i> Confirmar RemoÃ§Ã£o de Emissora
             </div>
             <p style="margin: 12px 0; font-size: 15px;">
-                Você está removendo a emissora <strong>${emissora.emissora}</strong> desta proposta.
+                VocÃª estÃ¡ removendo a emissora <strong>${emissora.emissora}</strong> desta proposta.
             </p>
             <p style="margin: 12px 0; font-size: 14px; color: #666;">
-                Esta emissora será excluída e não será contabilizada. Você poderá restaurá-la marcando novamente depois.
+                Esta emissora serÃ¡ excluÃ­da e nÃ£o serÃ¡ contabilizada. VocÃª poderÃ¡ restaurÃ¡-la marcando novamente depois.
             </p>
         </div>
     `;
@@ -1220,40 +1220,40 @@ function showConfirmRemovalModal(checkbox, emissora, emissoraId) {
 }
 
 function closeConfirmRemovalModal() {
-    console.log('❌ Cancelando remoção');
+    console.log('âŒ Cancelando remoÃ§Ã£o');
     document.getElementById('confirmRemovalModal').style.display = 'none';
     
     // Restaurar checkbox para o estado anterior
     if (pendingRemovalData) {
         const { checkbox, emissoraId } = pendingRemovalData;
         
-        // ⚠️ IMPORTANTE: Remover do changedEmissoras porque estamos cancelando
+        // âš ï¸ IMPORTANTE: Remover do changedEmissoras porque estamos cancelando
         proposalData.changedEmissoras.delete(emissoraId);
         
-        // Ativar flag para ignorar o próximo evento de checkbox
+        // Ativar flag para ignorar o prÃ³ximo evento de checkbox
         ignoreNextCheckboxChange = true;
         checkbox.checked = true;
         
-        // Sincronizar visual também
+        // Sincronizar visual tambÃ©m
         const row = document.getElementById(`emissora-row-${emissoraId}`);
         if (row) {
             row.classList.remove('emissora-oculta');
         }
         
-        // Atualizar estado do botão salvar
+        // Atualizar estado do botÃ£o salvar
         showUnsavedChanges();
         
-        console.log(`   ✅ Estado do cancelamento sincronizado`);
+        console.log(`   âœ… Estado do cancelamento sincronizado`);
     }
     
     pendingRemovalData = null;
 }
 
 function confirmRemoval() {
-    console.log('\n✅ CONFIRMANDO REMOÇÃO DE EMISSORA');
+    console.log('\nâœ… CONFIRMANDO REMOÃ‡ÃƒO DE EMISSORA');
     
     if (!pendingRemovalData) {
-        console.error('❌ pendingRemovalData é nulo!');
+        console.error('âŒ pendingRemovalData Ã© nulo!');
         return;
     }
     
@@ -1265,35 +1265,35 @@ function confirmRemoval() {
     console.log(`     - changedEmissoras: [${Array.from(proposalData.changedEmissoras).join(', ')}]`);
     console.log(`     - checkbox.checked: ${checkbox.checked}`);
     
-    // Validação: só adiciona à lista de ocultas se ainda não está lá
+    // ValidaÃ§Ã£o: sÃ³ adiciona Ã  lista de ocultas se ainda nÃ£o estÃ¡ lÃ¡
     if (!proposalData.ocultasEmissoras.has(emissoraId)) {
         proposalData.ocultasEmissoras.add(emissoraId);
-        console.log(`   ✅ Adicionado a ocultasEmissoras`);
+        console.log(`   âœ… Adicionado a ocultasEmissoras`);
     } else {
-        console.log(`   ⚠️ Já estava em ocultasEmissoras`);
+        console.log(`   âš ï¸ JÃ¡ estava em ocultasEmissoras`);
     }
     
-    // Garantir que está em changedEmissoras
+    // Garantir que estÃ¡ em changedEmissoras
     proposalData.changedEmissoras.add(emissoraId);
     
     // Atualizar visual da linha
     const row = document.getElementById(`emissora-row-${emissoraId}`);
     if (row) {
         row.classList.add('emissora-oculta');
-        console.log(`   ✅ Linha visual marcada como oculta`);
+        console.log(`   âœ… Linha visual marcada como oculta`);
     } else {
-        console.warn(`   ⚠️ Linha não encontrada: ${emissoraId}`);
+        console.warn(`   âš ï¸ Linha nÃ£o encontrada: ${emissoraId}`);
     }
     
-    // ⚠️ CRUCIAL: Atualizar o checkbox visualmente mas com flag para não trigger novamente
+    // âš ï¸ CRUCIAL: Atualizar o checkbox visualmente mas com flag para nÃ£o trigger novamente
     ignoreNextCheckboxChange = true;
     checkbox.checked = false;
     
-    // Atualizar estatísticas
+    // Atualizar estatÃ­sticas
     updateStats();
     renderCharts();
     
-    // Mostrar botão salvar e marcar como alteração
+    // Mostrar botÃ£o salvar e marcar como alteraÃ§Ã£o
     showUnsavedChanges();
     
     // Fechar modal
@@ -1314,42 +1314,42 @@ function showUnsavedChanges() {
         
         const shouldShow = temMudancas || temMudancasEmissoras;
         
-        console.log(`💾 showUnsavedChanges:`);
-        console.log(`   Mudanças em campos: ${temMudancas}`);
-        console.log(`   Mudanças em emissoras: ${temMudancasEmissoras} (${proposalData.changedEmissoras.size})`);
-        console.log(`   Mostrar botão: ${shouldShow}`);
+        console.log(`ðŸ’¾ showUnsavedChanges:`);
+        console.log(`   MudanÃ§as em campos: ${temMudancas}`);
+        console.log(`   MudanÃ§as em emissoras: ${temMudancasEmissoras} (${proposalData.changedEmissoras.size})`);
+        console.log(`   Mostrar botÃ£o: ${shouldShow}`);
         console.log(`   Changes: ${JSON.stringify(proposalData.changes)}`);
         console.log(`   Emissoras alteradas: ${Array.from(proposalData.changedEmissoras)}`);
         
         saveBtn.style.display = shouldShow ? 'block' : 'none';
     } else {
-        console.warn('❌ Botão saveBtn não encontrado!');
+        console.warn('âŒ BotÃ£o saveBtn nÃ£o encontrado!');
     }
 }
 
 
 async function confirmAndSave() {
-    console.log('✅ Confirmando e salvando alterações...');
+    console.log('âœ… Confirmando e salvando alteraÃ§Ãµes...');
     
     const modal = document.getElementById('confirmModal');
     modal.style.display = 'none';
     
-    // ⚠️ USAR O ÚLTIMO ESTADO SALVO COM SUCESSO PARA ROLLBACK
-    // Não criamos backup aqui, usamos o lastSuccessfulState que foi salvo
-    // na última operação bem-sucedida (ou no carregamento inicial)
-    console.log('🔄 Estado atual antes de salvar:', {
+    // âš ï¸ USAR O ÃšLTIMO ESTADO SALVO COM SUCESSO PARA ROLLBACK
+    // NÃ£o criamos backup aqui, usamos o lastSuccessfulState que foi salvo
+    // na Ãºltima operaÃ§Ã£o bem-sucedida (ou no carregamento inicial)
+    console.log('ðŸ”„ Estado atual antes de salvar:', {
         ocultasEmissoras: Array.from(proposalData.ocultasEmissoras),
         changedEmissoras: Array.from(proposalData.changedEmissoras),
         changesCount: Object.keys(proposalData.changes).length
     });
-    console.log('💾 Último estado salvo com sucesso (fallback):', {
+    console.log('ðŸ’¾ Ãšltimo estado salvo com sucesso (fallback):', {
         ocultasEmissoras: Array.from(proposalData.lastSuccessfulState.ocultasEmissoras),
         changesCount: Object.keys(proposalData.lastSuccessfulState.changes).length
     });
     
     try {
         const apiUrl = getApiUrl();
-        console.log('📡 API URL:', apiUrl);
+        console.log('ðŸ“¡ API URL:', apiUrl);
         
         // Sincronizar o estado "Excluir" com o Notion
         const dataToSave = {
@@ -1359,8 +1359,8 @@ async function confirmAndSave() {
             ocultasEmissoras: Array.from(proposalData.ocultasEmissoras)  // Converter Set para Array
         };
         
-        console.log('📤 Enviando dados:', dataToSave);
-        console.log('👤 Emissoras ocultas:', dataToSave.ocultasEmissoras);
+        console.log('ðŸ“¤ Enviando dados:', dataToSave);
+        console.log('ðŸ‘¤ Emissoras ocultas:', dataToSave.ocultasEmissoras);
         
         const response = await fetch(`${apiUrl}?id=${proposalData.tableId}`, {
             method: 'PATCH',
@@ -1368,19 +1368,19 @@ async function confirmAndSave() {
             body: JSON.stringify(dataToSave)
         });
         
-        console.log('📥 Response status:', response.status);
-        console.log('📥 Response ok:', response.ok);
+        console.log('ðŸ“¥ Response status:', response.status);
+        console.log('ðŸ“¥ Response ok:', response.ok);
         
-        // ⚠️ VALIDAÇÃO RIGOROSA DA RESPOSTA
+        // âš ï¸ VALIDAÃ‡ÃƒO RIGOROSA DA RESPOSTA
         if (!response.ok) {
             const errorData = await response.json();
-            console.error('❌ Erro na resposta:', errorData);
-            console.error('❌ Erro completo:', JSON.stringify(errorData, null, 2));
+            console.error('âŒ Erro na resposta:', errorData);
+            console.error('âŒ Erro completo:', JSON.stringify(errorData, null, 2));
             
-            // 🔄 ROLLBACK: Restaurar último estado salvo com sucesso
-            console.log('🔄 FAZENDO ROLLBACK PARA ÚLTIMO ESTADO SALVO...');
+            // ðŸ”„ ROLLBACK: Restaurar Ãºltimo estado salvo com sucesso
+            console.log('ðŸ”„ FAZENDO ROLLBACK PARA ÃšLTIMO ESTADO SALVO...');
             proposalData.ocultasEmissoras = new Set(proposalData.lastSuccessfulState.ocultasEmissoras);
-            proposalData.changedEmissoras = new Set();  // Limpar mudanças pendentes
+            proposalData.changedEmissoras = new Set();  // Limpar mudanÃ§as pendentes
             proposalData.changes = JSON.parse(JSON.stringify(proposalData.lastSuccessfulState.changes));
             proposalData.emissoras = proposalData.lastSuccessfulState.emissoras.map(e => ({...e}));
             
@@ -1389,7 +1389,7 @@ async function confirmAndSave() {
                 changesCount: Object.keys(proposalData.changes).length
             });
             
-            // Restaurar visualmente todos os checkboxes baseado no último estado salvo
+            // Restaurar visualmente todos os checkboxes baseado no Ãºltimo estado salvo
             proposalData.emissoras.forEach((emissora, index) => {
                 const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
                 if (checkbox) {
@@ -1417,14 +1417,14 @@ async function confirmAndSave() {
         
         const result = await response.json();
         
-        // ⚠️ VALIDAÇÃO: Verificar se resposta contém dados válidos
+        // âš ï¸ VALIDAÃ‡ÃƒO: Verificar se resposta contÃ©m dados vÃ¡lidos
         if (!result || result.success === false) {
-            console.error('❌ Resposta indicou falha:', result);
+            console.error('âŒ Resposta indicou falha:', result);
             
-            // 🔄 ROLLBACK: Restaurar último estado salvo com sucesso
-            console.log('🔄 FAZENDO ROLLBACK PARA ÚLTIMO ESTADO SALVO...');
+            // ðŸ”„ ROLLBACK: Restaurar Ãºltimo estado salvo com sucesso
+            console.log('ðŸ”„ FAZENDO ROLLBACK PARA ÃšLTIMO ESTADO SALVO...');
             proposalData.ocultasEmissoras = new Set(proposalData.lastSuccessfulState.ocultasEmissoras);
-            proposalData.changedEmissoras = new Set();  // Limpar mudanças pendentes
+            proposalData.changedEmissoras = new Set();  // Limpar mudanÃ§as pendentes
             proposalData.changes = JSON.parse(JSON.stringify(proposalData.lastSuccessfulState.changes));
             proposalData.emissoras = proposalData.lastSuccessfulState.emissoras.map(e => ({...e}));
             
@@ -1433,7 +1433,7 @@ async function confirmAndSave() {
                 changesCount: Object.keys(proposalData.changes).length
             });
             
-            // Restaurar visualmente todos os checkboxes baseado no último estado salvo
+            // Restaurar visualmente todos os checkboxes baseado no Ãºltimo estado salvo
             proposalData.emissoras.forEach((emissora, index) => {
                 const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
                 if (checkbox) {
@@ -1459,31 +1459,31 @@ async function confirmAndSave() {
             throw new Error(result.message || 'Falha desconhecida ao salvar');
         }
         
-        // ⚠️ VALIDAÇÃO EXTRA: Verificar se houve FALHAS NAS ATUALIZAÇÕES ESPECÍFICAS
+        // âš ï¸ VALIDAÃ‡ÃƒO EXTRA: Verificar se houve FALHAS NAS ATUALIZAÃ‡Ã•ES ESPECÃFICAS
         // Mesmo que success: true, pode haver failedUpdates
         const failedUpdates = result.failedUpdates || 0;
         const details = result.details || [];
         
-        console.log('📊 Resultado da operação:');
+        console.log('ðŸ“Š Resultado da operaÃ§Ã£o:');
         console.log(`   - Sucesso total: ${result.success}`);
-        console.log(`   - Atualizações bem-sucedidas: ${result.successfulUpdates || 0}`);
-        console.log(`   - Atualizações falhadas: ${failedUpdates}`);
+        console.log(`   - AtualizaÃ§Ãµes bem-sucedidas: ${result.successfulUpdates || 0}`);
+        console.log(`   - AtualizaÃ§Ãµes falhadas: ${failedUpdates}`);
         console.log(`   - Detalhes:`, details);
         
         if (failedUpdates > 0) {
-            console.error('❌ ATENÇÃO: Algumas atualizações falharam!');
+            console.error('âŒ ATENÃ‡ÃƒO: Algumas atualizaÃ§Ãµes falharam!');
             
             // Mostrar quais falharam
             details.forEach(detail => {
                 if (!detail.success) {
-                    console.error(`   ❌ ${detail.emissoraName} - Campo "${detail.field}" FALHOU:`, detail.error);
+                    console.error(`   âŒ ${detail.emissoraName} - Campo "${detail.field}" FALHOU:`, detail.error);
                 }
             });
             
-            // 🔄 ROLLBACK PARCIAL: Restaurar último estado salvo com sucesso
-            console.log('🔄 FAZENDO ROLLBACK PARA ÚLTIMO ESTADO SALVO (falhas detectadas)...');
+            // ðŸ”„ ROLLBACK PARCIAL: Restaurar Ãºltimo estado salvo com sucesso
+            console.log('ðŸ”„ FAZENDO ROLLBACK PARA ÃšLTIMO ESTADO SALVO (falhas detectadas)...');
             proposalData.ocultasEmissoras = new Set(proposalData.lastSuccessfulState.ocultasEmissoras);
-            proposalData.changedEmissoras = new Set();  // Limpar mudanças pendentes
+            proposalData.changedEmissoras = new Set();  // Limpar mudanÃ§as pendentes
             proposalData.changes = JSON.parse(JSON.stringify(proposalData.lastSuccessfulState.changes));
             proposalData.emissoras = proposalData.lastSuccessfulState.emissoras.map(e => ({...e}));
             
@@ -1492,7 +1492,7 @@ async function confirmAndSave() {
                 changesCount: Object.keys(proposalData.changes).length
             });
             
-            // Restaurar visualmente todos os checkboxes baseado no último estado salvo
+            // Restaurar visualmente todos os checkboxes baseado no Ãºltimo estado salvo
             proposalData.emissoras.forEach((emissora, index) => {
                 const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
                 if (checkbox) {
@@ -1524,37 +1524,37 @@ async function confirmAndSave() {
             throw new Error(`Erro ao salvar alguns campos: ${failedEmissoras}. Estado foi revertido. Tente novamente.`);
         }
         
-        console.log('✅ Alterações salvas!', result);
-        console.log('🔍 debugLogs recebido:', result.debugLogs);
+        console.log('âœ… AlteraÃ§Ãµes salvas!', result);
+        console.log('ðŸ” debugLogs recebido:', result.debugLogs);
         
         // Exibir logs do servidor no console
         if (result.debugLogs && Array.isArray(result.debugLogs)) {
-            console.log('═══════════════════════════════════════════════════════════');
-            console.log('📋 LOGS DO SERVIDOR (Notion.js):');
-            console.log('═══════════════════════════════════════════════════════════');
+            console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+            console.log('ðŸ“‹ LOGS DO SERVIDOR (Notion.js):');
+            console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
             result.debugLogs.forEach(log => console.log(log));
-            console.log('═══════════════════════════════════════════════════════════');
+            console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
         } else {
-            console.warn('⚠️ debugLogs vazio ou não é array:', result.debugLogs);
+            console.warn('âš ï¸ debugLogs vazio ou nÃ£o Ã© array:', result.debugLogs);
         }
         
-        // ✅ SÓ LIMPA ESTADO APÓS CONFIRMAÇÃO DE SUCESSO
+        // âœ… SÃ“ LIMPA ESTADO APÃ“S CONFIRMAÃ‡ÃƒO DE SUCESSO
         proposalData.changes = {};
         proposalData.initialOcultasEmissoras = new Set(proposalData.ocultasEmissoras);
         proposalData.changedEmissoras = new Set();  // Limpar emissoras alteradas
         
-        // 💾 ATUALIZAR BACKUP DO ÚLTIMO ESTADO SALVO COM SUCESSO
+        // ðŸ’¾ ATUALIZAR BACKUP DO ÃšLTIMO ESTADO SALVO COM SUCESSO
         proposalData.lastSuccessfulState = {
             ocultasEmissoras: new Set(proposalData.ocultasEmissoras),
             changes: JSON.parse(JSON.stringify(proposalData.changes)),
             emissoras: proposalData.emissoras.map(e => ({...e}))
         };
-        console.log('💾 Novo estado salvo como backup para rollback futuro:', {
+        console.log('ðŸ’¾ Novo estado salvo como backup para rollback futuro:', {
             ocultasEmissoras: Array.from(proposalData.lastSuccessfulState.ocultasEmissoras),
             changesCount: Object.keys(proposalData.lastSuccessfulState.changes).length
         });
         
-        // ✅ SALVAR O SALDO ATUAL COMO "SALDO ANTERIOR" PARA A PRÓXIMA PROPOSTA
+        // âœ… SALVAR O SALDO ATUAL COMO "SALDO ANTERIOR" PARA A PRÃ“XIMA PROPOSTA
         let totalInvestimentoTabela = 0;
         let totalInvestimentoNegociado = 0;
         
@@ -1575,32 +1575,32 @@ async function confirmAndSave() {
         
         // Salvar no localStorage como "saldo anterior"
         setSaldoAnterior(totalInvestimentoNegociado, totalInvestimentoTabela);
-        console.log('💾 Saldo anterior atualizado para próxima edição');
+        console.log('ðŸ’¾ Saldo anterior atualizado para prÃ³xima ediÃ§Ã£o');
         
-        // Ocultar botão de salvar já que não há mais alterações
+        // Ocultar botÃ£o de salvar jÃ¡ que nÃ£o hÃ¡ mais alteraÃ§Ãµes
         showUnsavedChanges();
         
         // Mostrar modal de sucesso
         showSuccessModal();
     } catch (error) {
-        console.error('❌ Erro ao salvar:', error);
+        console.error('âŒ Erro ao salvar:', error);
         alert(`Erro ao salvar: ${error.message}`);
     }
 }
 
 function showSuccessModal() {
-    console.log('🎉 Mostrando modal de sucesso...');
+    console.log('ðŸŽ‰ Mostrando modal de sucesso...');
     
-    // ✅ Sincronizar estado dos checkboxes após sucesso confirmado
-    console.log('🔄 Sincronizando estado após sucesso...');
+    // âœ… Sincronizar estado dos checkboxes apÃ³s sucesso confirmado
+    console.log('ðŸ”„ Sincronizando estado apÃ³s sucesso...');
     syncCheckboxState();
     
     const successModal = document.getElementById('successModal');
     successModal.style.display = 'flex';
     
-    // Auto-fechar após 5 segundos (opcional)
+    // Auto-fechar apÃ³s 5 segundos (opcional)
     setTimeout(() => {
-        // Comentado para o usuário controlar quando fechar
+        // Comentado para o usuÃ¡rio controlar quando fechar
         // closeSuccessModal();
     }, 5000);
 }
@@ -1610,17 +1610,17 @@ function closeSuccessModal() {
     document.getElementById('successModal').style.display = 'none';
 }
 
-// ✅ FUNÇÃO DE DEBUG: Exibir estado atual completo
+// âœ… FUNÃ‡ÃƒO DE DEBUG: Exibir estado atual completo
 function debugState() {
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log('🔍 DEBUG STATE - Estado Completo da Aplicação');
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log('📊 proposalData.changes:', proposalData.changes);
-    console.log('👤 proposalData.ocultasEmissoras:', Array.from(proposalData.ocultasEmissoras));
-    console.log('👤 proposalData.changedEmissoras:', Array.from(proposalData.changedEmissoras));
-    console.log('📋 proposalData.initialOcultasEmissoras:', Array.from(proposalData.initialOcultasEmissoras));
+    console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+    console.log('ðŸ” DEBUG STATE - Estado Completo da AplicaÃ§Ã£o');
+    console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+    console.log('ðŸ“Š proposalData.changes:', proposalData.changes);
+    console.log('ðŸ‘¤ proposalData.ocultasEmissoras:', Array.from(proposalData.ocultasEmissoras));
+    console.log('ðŸ‘¤ proposalData.changedEmissoras:', Array.from(proposalData.changedEmissoras));
+    console.log('ðŸ“‹ proposalData.initialOcultasEmissoras:', Array.from(proposalData.initialOcultasEmissoras));
     
-    console.log('\n📋 ESTADO DOS CHECKBOXES:');
+    console.log('\nðŸ“‹ ESTADO DOS CHECKBOXES:');
     proposalData.emissoras.forEach((emissora, index) => {
         const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
         const isOculta = proposalData.ocultasEmissoras.has(emissora.id);
@@ -1628,23 +1628,23 @@ function debugState() {
         const deveEstarVisivel = !isOculta;
         const estaSincronizado = checkboxValue === deveEstarVisivel;
         
-        console.log(`   [${estaSincronizado ? '✅' : '❌'}] ${emissora.emissora}:`);
+        console.log(`   [${estaSincronizado ? 'âœ…' : 'âŒ'}] ${emissora.emissora}:`);
         console.log(`       - Checkbox: ${checkboxValue}`);
-        console.log(`       - Deve estar visível: ${deveEstarVisivel}`);
-        console.log(`       - Está oculta no estado: ${isOculta}`);
+        console.log(`       - Deve estar visÃ­vel: ${deveEstarVisivel}`);
+        console.log(`       - EstÃ¡ oculta no estado: ${isOculta}`);
     });
     
-    console.log('\n📱 ESTADO DO BOTÃO SALVAR:');
+    console.log('\nðŸ“± ESTADO DO BOTÃƒO SALVAR:');
     const saveBtn = document.getElementById('saveBtn');
-    console.log(`   - Visível: ${saveBtn ? saveBtn.style.display !== 'none' : 'NOT FOUND'}`);
+    console.log(`   - VisÃ­vel: ${saveBtn ? saveBtn.style.display !== 'none' : 'NOT FOUND'}`);
     console.log(`   - Display: ${saveBtn ? saveBtn.style.display : 'NOT FOUND'}`);
     
-    console.log('═══════════════════════════════════════════════════════════');
+    console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
 }
 
-// ✅ FUNÇÃO DE FORÇA-SINCRONIZAÇÃO: Chamar manualmente se algo ficar dessincronizado
+// âœ… FUNÃ‡ÃƒO DE FORÃ‡A-SINCRONIZAÃ‡ÃƒO: Chamar manualmente se algo ficar dessincronizado
 function forceSync() {
-    console.log('🔴 FORÇA-SINCRONIZAÇÃO MANUAL ACIONADA!');
+    console.log('ðŸ”´ FORÃ‡A-SINCRONIZAÃ‡ÃƒO MANUAL ACIONADA!');
     console.log('   Estado ANTES:');
     proposalData.emissoras.forEach((emissora, index) => {
         const checkbox = document.querySelector(`input[type="checkbox"][data-emissora-index="${index}"]`);
@@ -1661,11 +1661,11 @@ function forceSync() {
         console.log(`   - ${emissora.emissora}: checkbox=${checkbox?.checked}, oculta=${proposalData.ocultasEmissoras.has(emissora.id)}`);
     });
     
-    alert('✅ Sincronização forçada realizada! Verifique o console para detalhes.');
+    alert('âœ… SincronizaÃ§Ã£o forÃ§ada realizada! Verifique o console para detalhes.');
 }
 
 // =====================================================
-// UTILITÁRIOS
+// UTILITÃRIOS
 // =====================================================
 
 function formatCurrency(value) {
@@ -1676,7 +1676,7 @@ function formatCurrency(value) {
 }
 
 function showError(message) {
-    console.error('❌', message);
+    console.error('âŒ', message);
     alert(`Erro: ${message}`);
 }
 
@@ -1689,3 +1689,4 @@ window.addEventListener('resize', () => {
         if (chart) chart.resize();
     });
 });
+
