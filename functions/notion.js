@@ -1,4 +1,4 @@
-// Cloudflare Pages Function - NOTION API GATEWAY
+﻿// Cloudflare Pages Function - NOTION API GATEWAY
 
 export async function onRequest(context) {
   const { request, env } = context;
@@ -27,15 +27,15 @@ export async function onRequest(context) {
     console.log('=== DEBUG CLOUDFLARE ===');
     console.log('1. Token existe?', !!notionToken);
     console.log('2. Usando token de env?', !!env.NOTION_TOKEN);
-    console.log('3. Método:', request.method);
+    console.log('3. MÃ©todo:', request.method);
     console.log('4. URL:', request.url);
     console.log('========================');
     
     if (!notionToken) {
       return new Response(JSON.stringify({ 
-        error: 'Token do Notion não configurado',
+        error: 'Token do Notion nÃ£o configurado',
         debug: {
-          message: 'Variável NOTION_TOKEN não encontrada',
+          message: 'VariÃ¡vel NOTION_TOKEN nÃ£o encontrada',
           env_keys: Object.keys(env || {})
         }
       }), {
@@ -44,20 +44,20 @@ export async function onRequest(context) {
       });
     }
 
-    // MÉTODO GET - BUSCAR DADOS DA TABELA DE EMISSORAS
+    // MÃ‰TODO GET - BUSCAR DADOS DA TABELA DE EMISSORAS
     if (request.method === 'GET') {
       let id = url.searchParams.get('id');
       const debugMode = url.searchParams.get('debug') === 'true';
       
-      console.log('⚠️ DEBUG GET REQUEST - TABELA DE EMISSORAS');
+      console.log('âš ï¸ DEBUG GET REQUEST - TABELA DE EMISSORAS');
       console.log('URL completa:', request.url);
       console.log('Query params:', [...url.searchParams.entries()]);
-      console.log('ID extraído:', id);
+      console.log('ID extraÃ­do:', id);
       console.log('Debug mode:', debugMode);
       
       if (!id || id.trim() === '') {
         return new Response(JSON.stringify({ 
-          error: 'ID da tabela é obrigatório',
+          error: 'ID da tabela Ã© obrigatÃ³rio',
           debug: {
             receivedUrl: request.url,
             rawId: id
@@ -68,10 +68,10 @@ export async function onRequest(context) {
         });
       }
 
-      // Notion API espera ID sem hífens
+      // Notion API espera ID sem hÃ­fens
       id = id.replace(/-/g, '');
-      console.log('🔍 ID formatado para Notion:', id);
-      console.log('🔍 Buscando tabela de emissoras:', id);
+      console.log('ðŸ” ID formatado para Notion:', id);
+      console.log('ðŸ” Buscando tabela de emissoras:', id);
 
       // Buscar linhas da database no Notion usando query
       const response = await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
@@ -84,8 +84,8 @@ export async function onRequest(context) {
         body: JSON.stringify({})
       });
 
-      console.log('📡 Resposta Notion - Status:', response.status);
-      console.log('📡 Resposta Notion - OK:', response.ok);
+      console.log('ðŸ“¡ Resposta Notion - Status:', response.status);
+      console.log('ðŸ“¡ Resposta Notion - OK:', response.ok);
 
       if (!response.ok) {
         let errorDetails = response.statusText;
@@ -93,14 +93,14 @@ export async function onRequest(context) {
         
         try {
           errorBody = await response.json();
-          console.log('📡 Erro Notion JSON:', errorBody);
+          console.log('ðŸ“¡ Erro Notion JSON:', errorBody);
           errorDetails = JSON.stringify(errorBody, null, 2);
         } catch (e) {
           try {
             errorDetails = await response.text();
-            console.log('📡 Erro Notion texto:', errorDetails);
+            console.log('ðŸ“¡ Erro Notion texto:', errorDetails);
           } catch (e2) {
-            console.log('Não foi possível ler corpo do erro');
+            console.log('NÃ£o foi possÃ­vel ler corpo do erro');
           }
         }
         
@@ -118,9 +118,9 @@ export async function onRequest(context) {
       }
 
       const notionData = await response.json();
-      console.log('✅ Tabela recebida com sucesso!');
-      console.log('📝 Total de registros:', notionData.results?.length || 0);
-      console.log('📝 Primeiro registro ID:', notionData.results?.[0]?.id || 'nenhum');
+      console.log('âœ… Tabela recebida com sucesso!');
+      console.log('ðŸ“ Total de registros:', notionData.results?.length || 0);
+      console.log('ðŸ“ Primeiro registro ID:', notionData.results?.[0]?.id || 'nenhum');
       
       // Log detalhado dos campos do primeiro registro
       const firstRecord = notionData.results?.[0];
@@ -128,9 +128,9 @@ export async function onRequest(context) {
       
       if (firstRecord?.properties) {
         console.log('');
-        console.log('═══════════════════════════════════════════════════════════');
-        console.log('🔍 TODOS OS CAMPOS ENCONTRADOS NO NOTION (PRIMEIRO REGISTRO):');
-        console.log('═══════════════════════════════════════════════════════════');
+        console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+        console.log('ðŸ” TODOS OS CAMPOS ENCONTRADOS NO NOTION (PRIMEIRO REGISTRO):');
+        console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
         const fieldNames = Object.keys(firstRecord.properties).sort();
         allFields = fieldNames.map(fieldName => ({
           name: fieldName,
@@ -141,7 +141,7 @@ export async function onRequest(context) {
           const prop = firstRecord.properties[fieldName];
           console.log(`  "${fieldName}" (tipo: ${prop.type})`);
         });
-        console.log('═══════════════════════════════════════════════════════════');
+        console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
         console.log('');
         
         // Se for debug mode, retorna apenas a lista de campos
@@ -157,27 +157,27 @@ export async function onRequest(context) {
           });
         }
         
-        // Log específico para campos que contêm "impacto"
-        console.log('🔍 PROCURANDO CAMPOS COM "IMPACTO":');
+        // Log especÃ­fico para campos que contÃªm "impacto"
+        console.log('ðŸ” PROCURANDO CAMPOS COM "IMPACTO":');
         const impactFields = fieldNames.filter(f => f.toLowerCase().includes('impacto'));
         if (impactFields.length > 0) {
           impactFields.forEach(field => {
             const prop = firstRecord.properties[field];
-            console.log(`  ✅ ENCONTRADO: "${field}" (tipo: ${prop.type})`);
-            console.log(`     Conteúdo bruto:`, JSON.stringify(prop));
+            console.log(`  âœ… ENCONTRADO: "${field}" (tipo: ${prop.type})`);
+            console.log(`     ConteÃºdo bruto:`, JSON.stringify(prop));
           });
         } else {
-          console.log('  ❌ NENHUM CAMPO COM "IMPACTO" ENCONTRADO');
-          console.log('  💡 DICA: Os campos encontrados são:');
+          console.log('  âŒ NENHUM CAMPO COM "IMPACTO" ENCONTRADO');
+          console.log('  ðŸ’¡ DICA: Os campos encontrados sÃ£o:');
           fieldNames.forEach(fieldName => {
             console.log(`     - "${fieldName}"`);
           });
         }
         console.log('');
         
-        console.log('═══════════════════════════════════════════════════════════');
-        console.log('🔍 VALORES DOS CAMPOS (PRIMEIRO REGISTRO):');
-        console.log('═══════════════════════════════════════════════════════════');
+        console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+        console.log('ðŸ” VALORES DOS CAMPOS (PRIMEIRO REGISTRO):');
+        console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
         fieldNames.forEach(fieldName => {
           const prop = firstRecord.properties[fieldName];
           let value = '(vazio)';
@@ -186,12 +186,12 @@ export async function onRequest(context) {
           if (prop.type === 'rich_text' && prop.rich_text?.length) value = prop.rich_text[0].text.content;
           console.log(`  "${fieldName}": ${value}`);
         });
-        console.log('═══════════════════════════════════════════════════════════');
+        console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
         console.log('');
       }
       
       if (!notionData.results || notionData.results.length === 0) {
-        console.log('⚠️ AVISO: Database retornou vazio!');
+        console.log('âš ï¸ AVISO: Database retornou vazio!');
         return new Response(JSON.stringify({ 
           error: 'Database vazia',
           debug: {
@@ -205,25 +205,25 @@ export async function onRequest(context) {
         });
       }
 
-      // Função melhorada para extrair valores com fallbacks e logging
+      // FunÃ§Ã£o melhorada para extrair valores com fallbacks e logging
       const extractValue = (properties, defaultValue = 0, propName = '', ...possibleKeys) => {
-        // Tenta cada chave possível em sequência
+        // Tenta cada chave possÃ­vel em sequÃªncia
         for (const key of possibleKeys) {
           const prop = properties[key];
           if (prop) {
             if (propName === 'impactos') {
-              console.log(`\n🎯 EXTRAÇÃO DE IMPACTOS:`);
+              console.log(`\nðŸŽ¯ EXTRAÃ‡ÃƒO DE IMPACTOS:`);
               console.log(`  Campo encontrado como: "${key}"`);
               console.log(`  Tipo: ${prop.type}`);
-              console.log(`  Conteúdo bruto:`, JSON.stringify(prop));
+              console.log(`  ConteÃºdo bruto:`, JSON.stringify(prop));
             }
             
-            console.log(`✅ Campo "${propName}" encontrado como: "${key}"`);
+            console.log(`âœ… Campo "${propName}" encontrado como: "${key}"`);
             
             switch (prop.type) {
               case 'number':
                 const numValue = prop.number !== null && prop.number !== undefined ? prop.number : defaultValue;
-                if (propName === 'impactos') console.log(`  ✅ Valor extraído (number): ${numValue}`);
+                if (propName === 'impactos') console.log(`  âœ… Valor extraÃ­do (number): ${numValue}`);
                 console.log(`   Valor: ${numValue}`);
                 return numValue;
               case 'title':
@@ -241,7 +241,7 @@ export async function onRequest(context) {
               case 'multi_select':
                 return prop.multi_select?.map(item => item.name).join(',') || defaultValue;
               default:
-                console.log(`⚠️ Tipo desconhecido: ${prop.type}`);
+                console.log(`âš ï¸ Tipo desconhecido: ${prop.type}`);
                 return defaultValue;
             }
           }
@@ -249,11 +249,11 @@ export async function onRequest(context) {
         
         // Se nenhuma chave foi encontrada
         if (propName === 'impactos') {
-          console.log(`\n❌ ERRO: Campo "impactos" NÃO encontrado!`);
+          console.log(`\nâŒ ERRO: Campo "impactos" NÃƒO encontrado!`);
           console.log(`  Chaves procuradas:`, possibleKeys);
-          console.log(`  Valor padrão retornado: ${defaultValue}`);
+          console.log(`  Valor padrÃ£o retornado: ${defaultValue}`);
         }
-        console.log(`❌ Campo "${propName}" NÃO encontrado. Chaves procuradas:`, possibleKeys);
+        console.log(`âŒ Campo "${propName}" NÃƒO encontrado. Chaves procuradas:`, possibleKeys);
         return defaultValue;
       };
 
@@ -264,19 +264,19 @@ export async function onRequest(context) {
         // Log detalhado apenas do primeiro registro
         if (rowIndex === 0) {
           console.log('');
-          console.log('═══════════════════════════════════════════════════════════');
-          console.log('🔍 TODOS OS CAMPOS DISPONÍVEIS NO NOTION:');
-          console.log('═══════════════════════════════════════════════════════════');
+          console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+          console.log('ðŸ” TODOS OS CAMPOS DISPONÃVEIS NO NOTION:');
+          console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
           
           const allFields = Object.keys(properties).sort();
           allFields.forEach(field => {
-            console.log(`  ✅ "${field}"`);
+            console.log(`  âœ… "${field}"`);
           });
           
           console.log('');
-          console.log('═══════════════════════════════════════════════════════════');
-          console.log('🔍 DEBUG: CAMPOS ENCONTRADOS vs PROCURADOS');
-          console.log('═══════════════════════════════════════════════════════════');
+          console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+          console.log('ðŸ” DEBUG: CAMPOS ENCONTRADOS vs PROCURADOS');
+          console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
           
           const fieldsToProcure = [
             'Spots 30"', 'Valor spot 30" (Tabela)', 'Valor spot 30"(Negociado)',
@@ -295,17 +295,17 @@ export async function onRequest(context) {
           const actualFields = Object.keys(properties);
           console.log('CAMPOS QUE EXISTEM NO NOTION:');
           actualFields.sort().forEach(field => {
-            console.log(`  ✅ "${field}"`);
+            console.log(`  âœ… "${field}"`);
           });
           
           console.log('');
           console.log('CAMPOS QUE ESTAMOS PROCURANDO:');
           fieldsToProcure.forEach(field => {
             const found = properties[field];
-            const status = found ? '✅' : '❌';
+            const status = found ? 'âœ…' : 'âŒ';
             console.log(`  ${status} "${field}"`);
           });
-          console.log('═══════════════════════════════════════════════════════════');
+          console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
           console.log('');
         }
         
@@ -314,70 +314,70 @@ export async function onRequest(context) {
           proposta: extractValue(properties, '', 'Proposta', 'Proposta', 'Nome Proposta', 'Nome da Proposta'),
           empresa: extractValue(properties, '', 'Empresa', 'Empresa', 'Cliente', 'Nome Empresa'),
           emissora: extractValue(properties, '', 'Emissora', 'Emissora'),
-          praca: extractValue(properties, '', 'Praça', 'Praça', 'Praca'),
+          praca: extractValue(properties, '', 'PraÃ§a', 'PraÃ§a', 'Praca'),
           dial: extractValue(properties, '', 'Dial', 'Dial'),
           linkLogo: extractValue(properties, '', 'linkLogo', 'linkLogo', 'Link Logo', 'Link da Logo', 'Logo URL', 'URL Logo'),
           uf: extractValue(properties, '', 'UF', 'UF'),
           impactos: (() => {
-            // Função especial para extrair impactos que aceita QUALQUER tipo de dados
+            // FunÃ§Ã£o especial para extrair impactos que aceita QUALQUER tipo de dados
             const possibleKeys = ['Impactos', 'impactos', 'Quantidade de Impactos', 'IMPACTOS', 'Impacto', 'impacto', 'IMPACTO', 'Qtd Impactos', 'Quantidade Impactos', 'Total Impactos'];
             
             for (const key of possibleKeys) {
               const prop = properties[key];
               if (prop) {
-                console.log(`🎯 EXTRAÇÃO DE IMPACTOS - Campo encontrado: "${key}" (tipo: ${prop.type})`);
+                console.log(`ðŸŽ¯ EXTRAÃ‡ÃƒO DE IMPACTOS - Campo encontrado: "${key}" (tipo: ${prop.type})`);
                 
                 // Tenta extrair de qualquer tipo de campo
                 if (prop.type === 'number' && prop.number !== null && prop.number !== undefined) {
-                  console.log(`   ✅ Valor (number): ${prop.number}`);
+                  console.log(`   âœ… Valor (number): ${prop.number}`);
                   return prop.number;
                 } else if (prop.type === 'title' && prop.title?.length) {
                   const val = prop.title[0].text.content;
-                  console.log(`   ✅ Valor (title): ${val}`);
+                  console.log(`   âœ… Valor (title): ${val}`);
                   return val;
                 } else if (prop.type === 'rich_text' && prop.rich_text?.length) {
                   const val = prop.rich_text[0].text.content;
-                  console.log(`   ✅ Valor (rich_text): ${val}`);
+                  console.log(`   âœ… Valor (rich_text): ${val}`);
                   return val;
                 } else if (prop.type === 'formula' && prop.formula?.number !== null) {
-                  console.log(`   ✅ Valor (formula number): ${prop.formula.number}`);
+                  console.log(`   âœ… Valor (formula number): ${prop.formula.number}`);
                   return prop.formula.number;
                 } else if (prop.type === 'formula' && prop.formula?.string) {
-                  console.log(`   ✅ Valor (formula string): ${prop.formula.string}`);
+                  console.log(`   âœ… Valor (formula string): ${prop.formula.string}`);
                   return prop.formula.string;
                 } else if (prop.type === 'checkbox') {
-                  console.log(`   ✅ Valor (checkbox): ${prop.checkbox}`);
+                  console.log(`   âœ… Valor (checkbox): ${prop.checkbox}`);
                   return prop.checkbox;
                 } else if (prop.type === 'date' && prop.date?.start) {
-                  console.log(`   ✅ Valor (date): ${prop.date.start}`);
+                  console.log(`   âœ… Valor (date): ${prop.date.start}`);
                   return prop.date.start;
                 } else if (prop.type === 'select' && prop.select?.name) {
-                  console.log(`   ✅ Valor (select): ${prop.select.name}`);
+                  console.log(`   âœ… Valor (select): ${prop.select.name}`);
                   return prop.select.name;
                 } else if (prop.type === 'multi_select' && prop.multi_select?.length) {
                   const val = prop.multi_select.map(item => item.name).join(',');
-                  console.log(`   ✅ Valor (multi_select): ${val}`);
+                  console.log(`   âœ… Valor (multi_select): ${val}`);
                   return val;
                 } else {
-                  console.log(`   ⚠️ Campo encontrado mas vazio ou tipo não suportado. Conteúdo:`, prop);
+                  console.log(`   âš ï¸ Campo encontrado mas vazio ou tipo nÃ£o suportado. ConteÃºdo:`, prop);
                   return 0;
                 }
               }
             }
             
-            console.log(`❌ Nenhum campo de impactos encontrado. Procurados:`, possibleKeys);
+            console.log(`âŒ Nenhum campo de impactos encontrado. Procurados:`, possibleKeys);
             return 0;
           })(),
           
-          // Spots 30ʺ
-          spots30: extractValue(properties, 0, 'Spots 30ʺ', 'Spots 30ʺ'),
-          valorTabela30: extractValue(properties, 0, 'Valor spot 30ʺ (Tabela)', 'Valor spot 30ʺ (Tabela)'),
-          valorNegociado30: extractValue(properties, 0, 'Valor spot 30ʺ (Negociado)', 'Valor spot 30ʺ (Negociado)'),
+          // Spots 30Êº
+          spots30: extractValue(properties, 0, 'Spots 30Êº', 'Spots 30Êº'),
+          valorTabela30: extractValue(properties, 0, 'Valor spot 30Êº (Tabela)', 'Valor spot 30Êº (Tabela)'),
+          valorNegociado30: extractValue(properties, 0, 'Valor spot 30Êº (Negociado)', 'Valor spot 30Êº (Negociado)'),
           
-          // Spots 60ʺ
-          spots60: extractValue(properties, 0, 'Spots 60ʺ', 'Spots 60ʺ'),
-          valorTabela60: extractValue(properties, 0, 'Valor spot 60ʺ (Tabela)', 'Valor spot 60ʺ (Tabela)'),
-          valorNegociado60: extractValue(properties, 0, 'Valor spot 60ʺ (Negociado)', 'Valor spot 60ʺ (Negociado)'),
+          // Spots 60Êº
+          spots60: extractValue(properties, 0, 'Spots 60Êº', 'Spots 60Êº'),
+          valorTabela60: extractValue(properties, 0, 'Valor spot 60Êº (Tabela)', 'Valor spot 60Êº (Tabela)'),
+          valorNegociado60: extractValue(properties, 0, 'Valor spot 60Êº (Negociado)', 'Valor spot 60Êº (Negociado)'),
           
           // Blitz
           spotsBlitz: extractValue(properties, 0, 'Blitz', 'Blitz', 'blitz'),
@@ -385,44 +385,44 @@ export async function onRequest(context) {
           valorNegociadoBlitz: extractValue(properties, 0, 'Valor Blitz (Negociado)', 'Valor Blitz (Negociado)', 'valorNegociadoBlitz'),
           
           // Spots 15"
-          spots15: extractValue(properties, 0, 'Spots 15', 'Spots 15"', 'Spots 15ʺ', 'Spots 15', 'spots15'),
-          valorTabela15: extractValue(properties, 0, 'Valor spot 15 (Tabela)', 'Valor spot 15" (Tabela)', 'Valor spot 15ʺ (Tabela)', 'Valor spot 15 (Tabela)', 'valorTabela15'),
-          valorNegociado15: extractValue(properties, 0, 'Valor spot 15 (Negociado)', 'Valor spot 15"(Negociado)', 'Valor spot 15ʺ(Negociado)', 'Valor spot 15 (Negociado)', 'valorNegociado15'),
+          spots15: extractValue(properties, 0, 'Spots 15', 'Spots 15"', 'Spots 15Êº', 'Spots 15', 'spots15'),
+          valorTabela15: extractValue(properties, 0, 'Valor spot 15 (Tabela)', 'Valor spot 15" (Tabela)', 'Valor spot 15Êº (Tabela)', 'Valor spot 15 (Tabela)', 'valorTabela15'),
+          valorNegociado15: extractValue(properties, 0, 'Valor spot 15 (Negociado)', 'Valor spot 15"(Negociado)', 'Valor spot 15Êº(Negociado)', 'Valor spot 15 (Negociado)', 'valorNegociado15'),
           
-          // Spots 5ʺ
-          spots5: extractValue(properties, 0, 'Spots 5ʺ', 'Spots 5ʺ'),
-          valorTabela5: extractValue(properties, 0, 'Valor spot 5ʺ (Tabela)', 'Valor spot 5ʺ (Tabela)'),
-          valorNegociado5: extractValue(properties, 0, 'Valor spot 5ʺ (Negociado)', 'Valor spot 5ʺ (Negociado)'),
+          // Spots 5Êº
+          spots5: extractValue(properties, 0, 'Spots 5Êº', 'Spots 5Êº'),
+          valorTabela5: extractValue(properties, 0, 'Valor spot 5Êº (Tabela)', 'Valor spot 5Êº (Tabela)'),
+          valorNegociado5: extractValue(properties, 0, 'Valor spot 5Êº (Negociado)', 'Valor spot 5Êº (Negociado)'),
           
-          // Test. 30ʺ
-          spotsTest30: extractValue(properties, 0, 'Test. 30ʺ', 'Test. 30ʺ'),
-          valorTabelaTest30: extractValue(properties, 0, 'Valor test. 30ʺ (Tabela)', 'Valor test. 30ʺ (Tabela)'),
-          valorNegociadoTest30: extractValue(properties, 0, 'Valor test. 30ʺ (Negociado)', 'Valor test. 30ʺ (Negociado)'),
+          // Test. 30Êº
+          spotsTest30: extractValue(properties, 0, 'Test. 30Êº', 'Test. 30Êº'),
+          valorTabelaTest30: extractValue(properties, 0, 'Valor test. 30Êº (Tabela)', 'Valor test. 30Êº (Tabela)'),
+          valorNegociadoTest30: extractValue(properties, 0, 'Valor test. 30Êº (Negociado)', 'Valor test. 30Êº (Negociado)'),
           
-          // Test. 60ʺ
-          spotsTest60: extractValue(properties, 0, 'Test. 60ʺ', 'Test. 60ʺ'),
-          valorTabelaTest60: extractValue(properties, 0, 'Valor test. 60ʺ (Tabela)', 'Valor test. 60ʺ (Tabela)'),
-          valorNegociadoTest60: extractValue(properties, 0, 'Valor test. 60ʺ (Negociado)', 'Valor test. 60ʺ (Negociado)'),
+          // Test. 60Êº
+          spotsTest60: extractValue(properties, 0, 'Test. 60Êº', 'Test. 60Êº'),
+          valorTabelaTest60: extractValue(properties, 0, 'Valor test. 60Êº (Tabela)', 'Valor test. 60Êº (Tabela)'),
+          valorNegociadoTest60: extractValue(properties, 0, 'Valor test. 60Êº (Negociado)', 'Valor test. 60Êº (Negociado)'),
           
           // Flash 30"
-          spotsFlash30: extractValue(properties, 0, 'Flash 30', 'Flash 30"', 'Flash 30ʺ', 'Flash 30', 'spotsFlash30'),
-          valorTabelaFlash30: extractValue(properties, 0, 'Valor Flash 30 (Tabela)', 'Valor Flash 30" (Tabela)', 'Valor Flash 30ʺ (Tabela)', 'Valor Flash 30 (Tabela)', 'valorTabelaFlash30'),
-          valorNegociadoFlash30: extractValue(properties, 0, 'Valor Flash 30 (Negociado)', 'Valor Flash 30"(Negociado)', 'Valor Flash 30ʺ(Negociado)', 'Valor Flash 30 (Negociado)', 'valorNegociadoFlash30'),
+          spotsFlash30: extractValue(properties, 0, 'Flash 30', 'Flash 30"', 'Flash 30Êº', 'Flash 30', 'spotsFlash30'),
+          valorTabelaFlash30: extractValue(properties, 0, 'Valor Flash 30 (Tabela)', 'Valor Flash 30" (Tabela)', 'Valor Flash 30Êº (Tabela)', 'Valor Flash 30 (Tabela)', 'valorTabelaFlash30'),
+          valorNegociadoFlash30: extractValue(properties, 0, 'Valor Flash 30 (Negociado)', 'Valor Flash 30"(Negociado)', 'Valor Flash 30Êº(Negociado)', 'Valor Flash 30 (Negociado)', 'valorNegociadoFlash30'),
           
           // Flash 60"
-          spotsFlash60: extractValue(properties, 0, 'Flash 60', 'Flash 60"', 'Flash 60ʺ', 'Flash 60', 'spotsFlash60'),
-          valorTabelaFlash60: extractValue(properties, 0, 'Valor Flash 60 (Tabela)', 'Valor Flash 60" (Tabela)', 'Valor Flash 60ʺ (Tabela)', 'Valor Flash 60 (Tabela)', 'valorTabelaFlash60'),
-          valorNegociadoFlash60: extractValue(properties, 0, 'Valor Flash 60 (Negociado)', 'Valor Flash 60"(Negociado)', 'Valor Flash 60ʺ(Negociado)', 'Valor Flash 60 (Negociado)', 'valorNegociadoFlash60'),
+          spotsFlash60: extractValue(properties, 0, 'Flash 60', 'Flash 60"', 'Flash 60Êº', 'Flash 60', 'spotsFlash60'),
+          valorTabelaFlash60: extractValue(properties, 0, 'Valor Flash 60 (Tabela)', 'Valor Flash 60" (Tabela)', 'Valor Flash 60Êº (Tabela)', 'Valor Flash 60 (Tabela)', 'valorTabelaFlash60'),
+          valorNegociadoFlash60: extractValue(properties, 0, 'Valor Flash 60 (Negociado)', 'Valor Flash 60"(Negociado)', 'Valor Flash 60Êº(Negociado)', 'Valor Flash 60 (Negociado)', 'valorNegociadoFlash60'),
           
           // Menshan 30"
-          spotsMensham30: extractValue(properties, 0, 'Menshan 30', 'Menshan 30"', 'Menshan 30ʺ', 'Menshan 30', 'spotsMensham30'),
-          valorTabelaMensham30: extractValue(properties, 0, 'Valor Mershan 30 (Tabela)', 'Valor Mershan 30" (Tabela)', 'Valor Mershan 30ʺ (Tabela)', 'Valor Mershan 30 (Tabela)', 'valorTabelaMensham30'),
-          valorNegociadoMensham30: extractValue(properties, 0, 'Valor Mershan 30 (Tabela)', 'Valor Mershan 30" (Tabela)', 'Valor Mershan 30ʺ (Tabela)', 'Valor Mershan 30 (Tabela)', 'valorNegociadoMensham30'),
+          spotsMensham30: extractValue(properties, 0, 'Menshan 30', 'Menshan 30"', 'Menshan 30Êº', 'Menshan 30', 'spotsMensham30'),
+          valorTabelaMensham30: extractValue(properties, 0, 'Valor Mershan 30 (Tabela)', 'Valor Mershan 30" (Tabela)', 'Valor Mershan 30Êº (Tabela)', 'Valor Mershan 30 (Tabela)', 'valorTabelaMensham30'),
+          valorNegociadoMensham30: extractValue(properties, 0, 'Valor Mershan 30 (Tabela)', 'Valor Mershan 30" (Tabela)', 'Valor Mershan 30Êº (Tabela)', 'Valor Mershan 30 (Tabela)', 'valorNegociadoMensham30'),
           
           // Menshan 60"
-          spotsMensham60: extractValue(properties, 0, 'Menshan 60', 'Menshan 60"', 'Menshan 60ʺ', 'Menshan 60', 'spotsMensham60'),
-          valorTabelaMensham60: extractValue(properties, 0, 'Valor Mershan 60 (Tabela)', 'Valor Mershan 60" (Tabela)', 'Valor Mershan 60ʺ (Tabela)', 'Valor Mershan 60 (Tabela)', 'valorTabelaMensham60'),
-          valorNegociadoMensham60: extractValue(properties, 0, 'Valor Mershan 60 (Tabela)', 'Valor Mershan 60" (Tabela)', 'Valor Mershan 60ʺ (Tabela)', 'Valor Mershan 60 (Tabela)', 'valorNegociadoMensham60'),
+          spotsMensham60: extractValue(properties, 0, 'Menshan 60', 'Menshan 60"', 'Menshan 60Êº', 'Menshan 60', 'spotsMensham60'),
+          valorTabelaMensham60: extractValue(properties, 0, 'Valor Mershan 60 (Tabela)', 'Valor Mershan 60" (Tabela)', 'Valor Mershan 60Êº (Tabela)', 'Valor Mershan 60 (Tabela)', 'valorTabelaMensham60'),
+          valorNegociadoMensham60: extractValue(properties, 0, 'Valor Mershan 60 (Tabela)', 'Valor Mershan 60" (Tabela)', 'Valor Mershan 60Êº (Tabela)', 'Valor Mershan 60 (Tabela)', 'valorNegociadoMensham60'),
           
           // Coluna "Excluir" para filtro no site
           excluir: (() => {
@@ -435,20 +435,20 @@ export async function onRequest(context) {
         };
       });
 
-      console.log('✅ Emissoras mapeadas:', emissoras);
+      console.log('âœ… Emissoras mapeadas:', emissoras);
       
-      // Carregar estado de exclusão do Notion
+      // Carregar estado de exclusÃ£o do Notion
       const ocultasEmissoras = emissoras
         .filter(e => e.excluir === true)
         .map(e => e.id);
       console.log('');
-      console.log('═══════════════════════════════════════════════════════════');
-      console.log('✅ EMISSORAS MAPEADAS - PRIMEIRA EMISSORA:');
-      console.log('═══════════════════════════════════════════════════════════');
+      console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
+      console.log('âœ… EMISSORAS MAPEADAS - PRIMEIRA EMISSORA:');
+      console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
       if (emissoras.length > 0) {
         console.log(JSON.stringify(emissoras[0], null, 2));
       }
-      console.log('═══════════════════════════════════════════════════════════');
+      console.log('â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•');
       console.log('');
 
       return new Response(JSON.stringify({
@@ -460,7 +460,7 @@ export async function onRequest(context) {
       });
     }
 
-    // MÉTODO PATCH - ATUALIZAR MÚLTIPLAS EMISSORAS
+    // MÃ‰TODO PATCH - ATUALIZAR MÃšLTIPLAS EMISSORAS
     if (request.method === 'PATCH') {
       const tableId = url.searchParams.get('id');
       
@@ -473,7 +473,7 @@ export async function onRequest(context) {
       
       if (!tableId) {
         return new Response(JSON.stringify({ 
-          error: 'ID da tabela obrigatório' 
+          error: 'ID da tabela obrigatÃ³rio' 
         }), {
           status: 400,
           headers
@@ -485,18 +485,18 @@ export async function onRequest(context) {
         requestBody = await request.json();
       } catch (e) {
         return new Response(JSON.stringify({ 
-          error: 'Body inválido' 
+          error: 'Body invÃ¡lido' 
         }), {
           status: 400,
           headers
         });
       }
 
-      log('🔄 Atualizando múltiplas emissoras');
-      log('📝 Dados recebidos: ' + JSON.stringify(requestBody));
+      log('ðŸ”„ Atualizando mÃºltiplas emissoras');
+      log('ðŸ“ Dados recebidos: ' + JSON.stringify(requestBody));
 
       const { emissoras, changes, ocultasEmissoras } = requestBody;
-      log('📝 ocultasEmissoras recebido: ' + JSON.stringify(ocultasEmissoras));
+      log('ðŸ“ ocultasEmissoras recebido: ' + JSON.stringify(ocultasEmissoras));
       
       if (!emissoras || !Array.isArray(emissoras)) {
         return new Response(JSON.stringify({ 
@@ -509,14 +509,15 @@ export async function onRequest(context) {
 
       // Sincronizar o status "Excluir" com Notion
       if (ocultasEmissoras && Array.isArray(ocultasEmissoras)) {
-        log(`🔄 Sincronizando status "Excluir" para ${ocultasEmissoras.length} emissoras`);
+        log(`ðŸ”„ Sincronizando status "Excluir" para ${ocultasEmissoras.length} emissoras`);
         
         for (const emissora of emissoras) {
           const isExcluida = ocultasEmissoras.includes(emissora.id);
           const wasPreviouslyExcluida = emissora.excluir || false;
           
-          if (isExcluida !== wasPreviouslyExcluida) {
-            log(`  🔄 Atualizando ${emissora.emissora}: Excluir = ${isExcluida}`);
+          // SEMPRE atualizar - Notion é a fonte da verdade
+if (true) {
+            log(`  ðŸ”„ Atualizando ${emissora.emissora}: Excluir = ${isExcluida}`);
             
             const excludeResponse = await fetch(`https://api.notion.com/v1/pages/${emissora.id}`, {
               method: 'PATCH',
@@ -535,13 +536,13 @@ export async function onRequest(context) {
             });
             
             if (excludeResponse.ok) {
-              log(`    ✅ Excluir atualizado para ${isExcluida}`);
+              log(`    âœ… Excluir atualizado para ${isExcluida}`);
             } else {
               const error = await excludeResponse.json();
-              log(`    ❌ Erro ao atualizar Excluir: ${JSON.stringify(error)}`);
-              console.error(`    ❌ Erro completo:`, error);
+              log(`    âŒ Erro ao atualizar Excluir: ${JSON.stringify(error)}`);
+              console.error(`    âŒ Erro completo:`, error);
               
-              // ⚠️ IMPORTANTE: Rastrear falha de atualização de exclusão
+              // âš ï¸ IMPORTANTE: Rastrear falha de atualizaÃ§Ã£o de exclusÃ£o
               updatePromises.push({
                 field: 'Excluir',
                 notionField: 'Excluir',
@@ -557,7 +558,7 @@ export async function onRequest(context) {
         }
       }
 
-      // Processar cada alteração
+      // Processar cada alteraÃ§Ã£o
       const updatePromises = [];
       
       for (const changeKey in changes) {
@@ -568,42 +569,42 @@ export async function onRequest(context) {
 
         // Mapear campo para nome do Notion
         const fieldMap = {
-          'spots30': 'Spots 30ʺ',
-          'valorTabela30': 'Valor spot 30ʺ (Tabela)',
-          'valorNegociado30': 'Valor spot 30ʺ (Negociado)',
-          'spots60': 'Spots 60ʺ',
-          'valorTabela60': 'Valor spot 60ʺ (Tabela)',
-          'valorNegociado60': 'Valor spot 60ʺ (Negociado)',
+          'spots30': 'Spots 30Êº',
+          'valorTabela30': 'Valor spot 30Êº (Tabela)',
+          'valorNegociado30': 'Valor spot 30Êº (Negociado)',
+          'spots60': 'Spots 60Êº',
+          'valorTabela60': 'Valor spot 60Êº (Tabela)',
+          'valorNegociado60': 'Valor spot 60Êº (Negociado)',
           'spotsBlitz': 'Blitz',
           'valorTabelaBlitz': 'Valor Blitz (Tabela)',
           'valorNegociadoBlitz': 'Valor Blitz (Negociado)',
-          'spots15': 'Spots 15ʺ',
-          'valorTabela15': 'Valor spot 15ʺ (Tabela)',
-          'valorNegociado15': 'Valor spot 15ʺ (Negociado)',
-          'spots5': 'Spots 5ʺ',
-          'valorTabela5': 'Valor spot 5ʺ (Tabela)',
-          'valorNegociado5': 'Valor spot 5ʺ (Negociado)',
-          'spotsTest60': 'Test. 60ʺ',
-          'valorTabelaTest60': 'Valor test. 60ʺ (Tabela)',
-          'valorNegociadoTest60': 'Valor test. 60ʺ (Negociado)'
+          'spots15': 'Spots 15Êº',
+          'valorTabela15': 'Valor spot 15Êº (Tabela)',
+          'valorNegociado15': 'Valor spot 15Êº (Negociado)',
+          'spots5': 'Spots 5Êº',
+          'valorTabela5': 'Valor spot 5Êº (Tabela)',
+          'valorNegociado5': 'Valor spot 5Êº (Negociado)',
+          'spotsTest60': 'Test. 60Êº',
+          'valorTabelaTest60': 'Valor test. 60Êº (Tabela)',
+          'valorNegociadoTest60': 'Valor test. 60Êº (Negociado)'
         };
 
         const notionField = fieldMap[change.field];
         if (!notionField) {
-          console.error(`❌ Campo não mapeado: ${change.field}`);
+          console.error(`âŒ Campo nÃ£o mapeado: ${change.field}`);
           continue;
         }
 
-        console.log(`📤 Atualizando ${emissora.emissora} - Campo: "${notionField}" = ${change.new}`);
+        console.log(`ðŸ“¤ Atualizando ${emissora.emissora} - Campo: "${notionField}" = ${change.new}`);
 
         const updateProperties = {};
         updateProperties[notionField] = { number: parseFloat(change.new) || 0 };
 
         const bodyToSend = JSON.stringify({ properties: updateProperties });
-        console.log(`🔍 FIELD NAME (chave):`, notionField);
-        console.log(`🔍 FIELD NAME (type):`, typeof notionField);
-        console.log(`🔍 BODY sendo enviado para Notion:`, bodyToSend);
-        console.log(`🔍 updateProperties objeto:`, updateProperties);
+        console.log(`ðŸ” FIELD NAME (chave):`, notionField);
+        console.log(`ðŸ” FIELD NAME (type):`, typeof notionField);
+        console.log(`ðŸ” BODY sendo enviado para Notion:`, bodyToSend);
+        console.log(`ðŸ” updateProperties objeto:`, updateProperties);
 
         const updateResponse = await fetch(`https://api.notion.com/v1/pages/${emissora.id}`, {
           method: 'PATCH',
@@ -618,7 +619,7 @@ export async function onRequest(context) {
         const updateData = await updateResponse.json();
 
         if (!updateResponse.ok) {
-          console.error(`❌ Erro ao atualizar ${emissora.emissora} (${notionField}):`, updateResponse.status, updateData);
+          console.error(`âŒ Erro ao atualizar ${emissora.emissora} (${notionField}):`, updateResponse.status, updateData);
           updatePromises.push({
             field: change.field,
             notionField: notionField,
@@ -631,7 +632,7 @@ export async function onRequest(context) {
             notionResponse: updateData
           });
         } else {
-          console.log(`✅ ${emissora.emissora} - ${notionField} atualizado com sucesso`);
+          console.log(`âœ… ${emissora.emissora} - ${notionField} atualizado com sucesso`);
           updatePromises.push({
             field: change.field,
             notionField: notionField,
@@ -642,7 +643,7 @@ export async function onRequest(context) {
         }
       }
 
-      // Enviar email com as alterações
+      // Enviar email com as alteraÃ§Ãµes
       try {
         await sendNotificationEmail(env, {
           tableId: id,
@@ -651,21 +652,21 @@ export async function onRequest(context) {
           requestIP: request.headers.get('cf-connecting-ip') || 'desconhecido'
         });
       } catch (emailError) {
-        console.error('⚠️ Erro ao enviar email:', emailError.message);
-        log('⚠️ Erro ao enviar email: ' + emailError.message);
-        // Não interrompe o fluxo se falhar o email
+        console.error('âš ï¸ Erro ao enviar email:', emailError.message);
+        log('âš ï¸ Erro ao enviar email: ' + emailError.message);
+        // NÃ£o interrompe o fluxo se falhar o email
       }
 
-      console.log('📤 Retornando resposta com debugLogs:', debugLogs.length, 'mensagens');
+      console.log('ðŸ“¤ Retornando resposta com debugLogs:', debugLogs.length, 'mensagens');
       
       const failedUpdates = updatePromises.filter(p => !p.success).length;
       const hasFailed = failedUpdates > 0;
       
-      // ⚠️ IMPORTANTE: Se houver qualquer falha, retornar sucesso falso
-      // Isso garante que o frontend saiba que algo não funcionou
+      // âš ï¸ IMPORTANTE: Se houver qualquer falha, retornar sucesso falso
+      // Isso garante que o frontend saiba que algo nÃ£o funcionou
       const responseData = { 
-        success: !hasFailed,  // ✅ Retorna false se houver falhas
-        message: hasFailed ? 'Algumas alterações falharam' : 'Alterações processadas com sucesso',
+        success: !hasFailed,  // âœ… Retorna false se houver falhas
+        message: hasFailed ? 'Algumas alteraÃ§Ãµes falharam' : 'AlteraÃ§Ãµes processadas com sucesso',
         totalChanges: Object.keys(changes).length,
         successfulUpdates: updatePromises.filter(p => p.success).length,
         failedUpdates: failedUpdates,
@@ -673,24 +674,24 @@ export async function onRequest(context) {
         debugLogs: debugLogs
       };
       
-      console.log('📤 Response data:', responseData);
+      console.log('ðŸ“¤ Response data:', responseData);
       
       return new Response(JSON.stringify(responseData), {
-        status: hasFailed ? 400 : 200,  // ✅ Retorna 400 se houver falhas
+        status: hasFailed ? 400 : 200,  // âœ… Retorna 400 se houver falhas
         headers
       });
     }
 
-    // Método não suportado
+    // MÃ©todo nÃ£o suportado
     return new Response(JSON.stringify({  
-      error: 'Método não permitido' 
+      error: 'MÃ©todo nÃ£o permitido' 
     }), {
       status: 405,
       headers
     });
 
   } catch (error) {
-    console.error('💥 Erro:', error);
+    console.error('ðŸ’¥ Erro:', error);
     
     return new Response(JSON.stringify({ 
       error: 'Erro interno',
@@ -703,7 +704,7 @@ export async function onRequest(context) {
 }
 
 // =====================================================
-// FUNÇÃO DE ENVIO DE EMAIL
+// FUNÃ‡ÃƒO DE ENVIO DE EMAIL
 // =====================================================
 
 async function sendNotificationEmail(env, data) {
@@ -711,11 +712,11 @@ async function sendNotificationEmail(env, data) {
   const resendApiKey = env.RESEND_API_KEY;
   
   if (!resendApiKey) {
-    console.warn('⚠️ RESEND_API_KEY não configurada. Email não será enviado.');
+    console.warn('âš ï¸ RESEND_API_KEY nÃ£o configurada. Email nÃ£o serÃ¡ enviado.');
     return;
   }
 
-  // Agrupar alterações por emissora
+  // Agrupar alteraÃ§Ãµes por emissora
   const changesByEmissora = {};
   changes.forEach(change => {
     if (change.success) {
@@ -736,7 +737,7 @@ async function sendNotificationEmail(env, data) {
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Alteração de Proposta</title>
+      <title>AlteraÃ§Ã£o de Proposta</title>
       <style>
         body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
@@ -756,28 +757,28 @@ async function sendNotificationEmail(env, data) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>📋 Alteração de Proposta Radiofônica</h1>
-          <p style="margin: 10px 0 0 0; opacity: 0.9;">E-MÍDIAS | Sistema de Gestão de Propostas</p>
+          <h1>ðŸ“‹ AlteraÃ§Ã£o de Proposta RadiofÃ´nica</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">E-MÃDIAS | Sistema de GestÃ£o de Propostas</p>
         </div>
         
         <div class="content">
-          <p>Olá,</p>
-          <p>Uma proposta foi alterada no sistema E-MÍDIAS. Confira os detalhes abaixo:</p>
+          <p>OlÃ¡,</p>
+          <p>Uma proposta foi alterada no sistema E-MÃDIAS. Confira os detalhes abaixo:</p>
           
           <div class="info-box">
-            <strong>📅 Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}<br>
-            <strong>🌐 IP do Responsável:</strong> ${requestIP}
+            <strong>ðŸ“… Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}<br>
+            <strong>ðŸŒ IP do ResponsÃ¡vel:</strong> ${requestIP}
           </div>
   `;
 
-  // Adicionar alterações por emissora
+  // Adicionar alteraÃ§Ãµes por emissora
   for (const emissoraIndex in changesByEmissora) {
     const emissora = emissoras[emissoraIndex];
     const emissoras_changes = changesByEmissora[emissoraIndex];
     
     emailHTML += `
       <div class="change-group">
-        <h3>📻 ${emissora.emissora}</h3>
+        <h3>ðŸ“» ${emissora.emissora}</h3>
     `;
     
     emissoras_changes.forEach(change => {
@@ -785,7 +786,7 @@ async function sendNotificationEmail(env, data) {
         <div class="change-item">
           <strong>${change.notionField}:</strong> 
           <span class="old-value">${change.oldValue || change.old}</span> 
-          → 
+          â†’ 
           <span class="new-value">${change.newValue || change.new}</span>
         </div>
       `;
@@ -797,17 +798,17 @@ async function sendNotificationEmail(env, data) {
   // Link da proposta
   emailHTML += `
           <div class="info-box">
-            <strong>🔗 Link da Proposta:</strong><br>
-            <a href="https://seu-dominio.pages.dev/?id=${tableId}" class="link">Abrir Proposta no E-MÍDIAS</a>
+            <strong>ðŸ”— Link da Proposta:</strong><br>
+            <a href="https://seu-dominio.pages.dev/?id=${tableId}" class="link">Abrir Proposta no E-MÃDIAS</a>
           </div>
           
           <p style="color: #999; font-size: 12px; margin-top: 20px;">
-            Este é um email automático. Não responda este message.
+            Este Ã© um email automÃ¡tico. NÃ£o responda este message.
           </p>
         </div>
         
         <div class="footer">
-          <p>© 2025 HUB RÁDIOS - E-MÍDIAS. Todos os direitos reservados.</p>
+          <p>Â© 2025 HUB RÃDIOS - E-MÃDIAS. Todos os direitos reservados.</p>
         </div>
       </div>
     </body>
@@ -825,20 +826,20 @@ async function sendNotificationEmail(env, data) {
       body: JSON.stringify({
         from: 'noreply@hubradios.com',
         to: 'tatico5@hubradios.com',
-        subject: `[E-MÍDIAS] Alteração de Proposta - ${new Date().toLocaleDateString('pt-BR')}`,
+        subject: `[E-MÃDIAS] AlteraÃ§Ã£o de Proposta - ${new Date().toLocaleDateString('pt-BR')}`,
         html: emailHTML
       })
     });
 
     if (response.ok) {
       const result = await response.json();
-      console.log('✅ Email enviado com sucesso:', result.id);
+      console.log('âœ… Email enviado com sucesso:', result.id);
     } else {
       const error = await response.json();
-      console.error('❌ Erro ao enviar email via Resend:', error);
+      console.error('âŒ Erro ao enviar email via Resend:', error);
     }
   } catch (error) {
-    console.error('❌ Erro na requisição Resend:', error);
+    console.error('âŒ Erro na requisiÃ§Ã£o Resend:', error);
   }
 }
 
@@ -847,9 +848,12 @@ function findEmissoraIndexById(id, emissoras) {
 }
 
 // =====================================================
-// NOTA: Todas as funções de "Lista de alternantes" 
+// NOTA: Todas as funÃ§Ãµes de "Lista de alternantes" 
 // foram removidas em favor de um filtro cliente simples
 // (getAlternantesEmissoraIds, getOrCreateAlternantesDatabase,
 //  createAlternantesDatabase, moveToAlternantes, removeFromAlternantes)
 // =====================================================
+
+
+
 
