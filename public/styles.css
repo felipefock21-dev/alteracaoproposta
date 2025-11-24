@@ -73,48 +73,7 @@ body {
     align-items: center;
 }
 
-/* Responsivo com zoom-out mantendo proporções */
-@media (max-width: 1920px) {
-    body {
-        transform: scale(1);
-        transform-origin: top center;
-    }
-}
 
-@media (max-width: 1600px) {
-    body {
-        transform: scale(0.95);
-        transform-origin: top center;
-    }
-}
-
-@media (max-width: 1440px) {
-    body {
-        transform: scale(0.90);
-        transform-origin: top center;
-    }
-}
-
-@media (max-width: 1280px) {
-    body {
-        transform: scale(0.85);
-        transform-origin: top center;
-    }
-}
-
-@media (max-width: 1024px) {
-    body {
-        transform: scale(0.70);
-        transform-origin: top center;
-    }
-}
-
-@media (max-width: 768px) {
-    body {
-        transform: scale(0.50);
-        transform-origin: top center;
-    }
-}
 
 /* =====================================================
    TOP HEADER COM LOGO
