@@ -35,6 +35,33 @@ let charts = {
     investment: null
 };
 
+// Função para extrair o link da logo (pode vir como string, array ou objeto)
+function getLogoUrl(linkLogoField) {
+    if (!linkLogoField) return null;
+    
+    // Se for string, retorna direto
+    if (typeof linkLogoField === 'string' && linkLogoField.trim()) {
+        return linkLogoField.trim();
+    }
+    
+    // Se for array, pega o primeiro elemento
+    if (Array.isArray(linkLogoField) && linkLogoField.length > 0) {
+        const firstItem = linkLogoField[0];
+        if (typeof firstItem === 'string') {
+            return firstItem.trim();
+        } else if (typeof firstItem === 'object' && firstItem.url) {
+            return firstItem.url.trim();
+        }
+    }
+    
+    // Se for objeto com propriedade url
+    if (typeof linkLogoField === 'object' && linkLogoField.url) {
+        return linkLogoField.url.trim();
+    }
+    
+    return null;
+}
+
 // Função de debug visual - removida
 // Todos os debugs agora vão apenas para console
 
@@ -396,6 +423,10 @@ function renderSpotsTable() {
         
         // Colunas fixas
         const isOculta = proposalData.ocultasEmissoras.has(emissora.id);
+        const logoUrl = getLogoUrl(emissora.linkLogo);
+        
+        console.log(`  Logo URL para ${emissora.emissora}: ${logoUrl}`);
+        
         row.innerHTML = `
             <td class="checkbox-cell">
                 <input 
@@ -410,7 +441,7 @@ function renderSpotsTable() {
             <td>${emissora.uf || '-'}</td>
             <td>${emissora.praca || '-'}</td>
             <td class="emissora-cell">
-                ${emissora.linkLogo ? `<img src="${emissora.linkLogo}" alt="${emissora.emissora}" class="emissora-logo">` : ''}
+                ${logoUrl ? `<img src="${logoUrl}" alt="${emissora.emissora}" class="emissora-logo" onerror="console.error('Erro ao carregar logo de ${emissora.emissora}')">` : ''}
                 <span class="emissora-name"><strong>${emissora.emissora || '-'}</strong></span>
             </td>
         `;
