@@ -405,7 +405,10 @@ function renderSpotsTable() {
             </td>
             <td>${emissora.uf || '-'}</td>
             <td>${emissora.praca || '-'}</td>
-            <td><strong>${emissora.emissora || '-'}</strong></td>
+            <td class="emissora-cell">
+                ${emissora.logo ? `<img src="${emissora.logo}" alt="${emissora.emissora}" class="emissora-logo">` : ''}
+                <span class="emissora-name"><strong>${emissora.emissora || '-'}</strong></span>
+            </td>
         `;
         
         // Colunas dinâmicas por produto
