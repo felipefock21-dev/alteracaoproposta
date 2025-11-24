@@ -577,7 +577,28 @@ function updateStats() {
     // Atualizar lista de produtos ativos
     updateActiveProducts();
     
+    // Atualizar tabela comparativa "Sua Proposta"
+    updateComparisonTable(totalInvestimentoNegociado, totalInvestimentoTabela);
+    
     console.log('✅ Estatísticas atualizadas!\n');
+}
+
+function updateComparisonTable(negociado, tabela) {
+    // Obtém os elementos da tabela
+    const compNegociado = document.getElementById('compNegociado');
+    const compNegociadoAtual = document.getElementById('compNegociadoAtual');
+    const compTabela = document.getElementById('compTabela');
+    const compTabelaAtual = document.getElementById('compTabelaAtual');
+    
+    // Valor anterior (sempre 0 ou pode vir de proposalData se existir dados anteriores)
+    const negociadoAnterior = proposalData.negociadoAnterior || 0;
+    const tabelaAnterior = proposalData.tabelaAnterior || 0;
+    
+    // Atualiza os valores
+    if (compNegociado) compNegociado.textContent = formatCurrency(negociadoAnterior);
+    if (compNegociadoAtual) compNegociadoAtual.textContent = formatCurrency(negociado);
+    if (compTabela) compTabela.textContent = formatCurrency(tabelaAnterior);
+    if (compTabelaAtual) compTabelaAtual.textContent = formatCurrency(tabela);
 }
 
 function renderCharts() {
