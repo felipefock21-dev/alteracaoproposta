@@ -776,7 +776,7 @@ async function sendNotificationEmail(env, data) {
   emailHTML += `
           <div class="info-box">
             <strong> Link da Proposta:</strong><br>
-            <a href="https://seu-dominio.pages.dev/?id=${tableId}" class="link">Abrir Proposta no E-MDIAS</a>
+            <a href="https://alteracaoproposta.pages.dev/?id=${tableId}" class="link">Abrir Proposta no E-MDIAS</a>
           </div>
           
           <p style="color: #999; font-size: 12px; margin-top: 20px;">
