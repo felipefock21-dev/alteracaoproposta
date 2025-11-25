@@ -227,61 +227,43 @@ export async function onRequest(context) {
         });
       }
 
-      // Funo melhorada para extrair valores com fallbacks, fuzzy matching e logging
+      // Função otimizada para extrair valores (menos verbosa)
       const extractValue = (properties, defaultValue = 0, propName = '', ...possibleKeys) => {
-        // Tenta cada chave possvel em sequncia
+        // Tenta cada chave possível em sequência
         for (const key of possibleKeys) {
           const prop = properties[key];
           if (prop) {
-            if (propName === 'impactos') {
-              console.log(`\n EXTRAO DE IMPACTOS:`);
-              console.log(`  Campo encontrado como: "${key}"`);
-              console.log(`  Tipo: ${prop.type}`);
-              console.log(`  Contedo bruto:`, JSON.stringify(prop));
-            }
-            
-            console.log(` Campo "${propName}" encontrado como: "${key}"`);
-            
             switch (prop.type) {
               case 'number':
-                const numValue = prop.number !== null && prop.number !== undefined ? prop.number : defaultValue;
-                if (propName === 'impactos') console.log(`   Valor extrado (number): ${numValue}`);
-                console.log(`   Valor: ${numValue}`);
-                return numValue;
+                return prop.number !== null && prop.number !== undefined ? prop.number : defaultValue;
               case 'title':
-                const titleValue = prop.title?.[0]?.text?.content || defaultValue;
-                console.log(`   Valor: ${titleValue}`);
-                return titleValue;
+                return prop.title?.[0]?.text?.content || defaultValue;
               case 'rich_text':
-                const textValue = prop.rich_text?.[0]?.text?.content || defaultValue;
-                console.log(`   Valor: ${textValue}`);
-                return textValue;
+                return prop.rich_text?.[0]?.text?.content || defaultValue;
               case 'date':
                 return prop.date?.start || defaultValue;
               case 'select':
                 return prop.select?.name || defaultValue;
               case 'multi_select':
                 return prop.multi_select?.map(item => item.name).join(',') || defaultValue;
+              case 'formula':
+                return prop.formula?.number !== null ? prop.formula.number : (prop.formula?.string || defaultValue);
               default:
-                console.log(` Tipo desconhecido: ${prop.type}`);
                 return defaultValue;
             }
           }
         }
         
-        // FALLBACK 1: Tenta busca parcial case-insensitive
+        // FALLBACK: busca parcial case-insensitive (otimizado)
         const allKeys = Object.keys(properties);
         for (const key of allKeys) {
+          const keyLower = key.toLowerCase().replace(/[^\w]/g, '');
           for (const searchKey of possibleKeys) {
             if (!searchKey) continue;
-            
-            const keyLower = key.toLowerCase().replace(/[^\w]/g, '');
             const searchLower = searchKey.toLowerCase().replace(/[^\w]/g, '');
             
-            // Se 80% das letras correspondem, consideramos um match
             if (keyLower.includes(searchLower) || searchLower.includes(keyLower)) {
               const prop = properties[key];
-              console.log(` FALLBACK (fuzzy match): Campo "${propName}" encontrado como: "${key}"`);
               
               switch (prop.type) {
                 case 'number':
@@ -296,6 +278,8 @@ export async function onRequest(context) {
                   return prop.select?.name || defaultValue;
                 case 'multi_select':
                   return prop.multi_select?.map(item => item.name).join(',') || defaultValue;
+                case 'formula':
+                  return prop.formula?.number !== null ? prop.formula.number : (prop.formula?.string || defaultValue);
                 default:
                   return defaultValue;
               }
@@ -303,67 +287,20 @@ export async function onRequest(context) {
           }
         }
         
-        // Se nenhuma chave foi encontrada
-        if (propName === 'impactos') {
-          console.log(`\n ERRO: Campo "impactos" NO encontrado!`);
-          console.log(`  Chaves procuradas:`, possibleKeys);
-          console.log(`  Valor padro retornado: ${defaultValue}`);
-        }
-        console.log(` Campo "${propName}" NO encontrado. Chaves procuradas:`, possibleKeys);
-        console.log(`  Chaves disponveis:`, Object.keys(properties).slice(0, 10).join(', ') + (Object.keys(properties).length > 10 ? '...' : ''));
         return defaultValue;
       };
 
-      // Mapear registros da tabela
+      // Mapear registros da tabela (otimizado - debug apenas se necessário)
       const emissoras = notionData.results.map((row, rowIndex) => {
         const properties = row.properties || {};
         
-        // Log detalhado apenas do primeiro registro
-        if (rowIndex === 0) {
-          console.log('');
-          console.log('');
-          console.log(' TODOS OS CAMPOS DISPONVEIS NO NOTION:');
-          console.log('');
-          
+        // Log detalhado apenas se houver parâmetro debug=true na URL
+        const debugMode = url.searchParams.get('debug') === 'true';
+        if (rowIndex === 0 && debugMode) {
+          console.log('═══ DEBUG: CAMPOS DISPONÍVEIS NO NOTION ═══');
           const allFields = Object.keys(properties).sort();
-          allFields.forEach(field => {
-            console.log(`   "${field}"`);
-          });
-          
-          console.log('');
-          console.log('');
-          console.log(' DEBUG: CAMPOS ENCONTRADOS vs PROCURADOS');
-          console.log('');
-          
-          const fieldsToProcure = [
-            'Spots 30"', 'Valor spot 30" (Tabela)', 'Valor spot 30"(Negociado)',
-            'Spots 60"', 'Valor spot 60" (Tabela)', 'Valor spot 60"(Negociado)',
-            'Blitz', 'Valor Blitz (Tabela)', 'Valor Blitz (Negociado)',
-            'Spots 15"', 'Valor spot 15" (Tabela)', 'Valor spot 15"(Negociado)',
-            'Spots 5"', 'Valor spot 5" (Tabela)', 'Valor spot 5"(Negociado)',
-            'Test 60"', 'Valor Test 60" (Tabela)', 'Valor Test 60" (Negociado)',
-            'Flash 30"', 'Valor Flash 30" (Tabela)', 'Valor Flash 30"(Negociado)',
-            'Flash 60"', 'Valor Flash 60" (Tabela)', 'Valor Flash 60"(Negociado)',
-            'Menshan 30"', 'Valor Mershan 30" (Tabela)', 'Valor Mershan 30" (Tabela)',
-            'Menshan 60"', 'Valor Mershan 60" (Tabela)', 'Valor Mershan 60" (Tabela)',
-            'Impactos', 'impactos', 'Quantidade de Impactos', 'IMPACTOS', 'Impacto', 'impacto', 'IMPACTO'
-          ];
-          
-          const actualFields = Object.keys(properties);
-          console.log('CAMPOS QUE EXISTEM NO NOTION:');
-          actualFields.sort().forEach(field => {
-            console.log(`   "${field}"`);
-          });
-          
-          console.log('');
-          console.log('CAMPOS QUE ESTAMOS PROCURANDO:');
-          fieldsToProcure.forEach(field => {
-            const found = properties[field];
-            const status = found ? '' : '';
-            console.log(`  ${status} "${field}"`);
-          });
-          console.log('');
-          console.log('');
+          allFields.forEach(field => console.log(`   "${field}"`));
+          console.log('═══════════════════════════════════════════');
         }
         
         return {
@@ -376,53 +313,20 @@ export async function onRequest(context) {
           linkLogo: extractValue(properties, '', 'linkLogo', 'linkLogo', 'Link Logo', 'Link da Logo', 'Logo URL', 'URL Logo'),
           uf: extractValue(properties, '', 'UF', 'UF'),
           impactos: (() => {
-            // Funo especial para extrair impactos que aceita QUALQUER tipo de dados
-            const possibleKeys = ['Impactos', 'impactos', 'Quantidade de Impactos', 'IMPACTOS', 'Impacto', 'impacto', 'IMPACTO', 'Qtd Impactos', 'Quantidade Impactos', 'Total Impactos'];
+            // Extração otimizada de impactos
+            const possibleKeys = ['Impactos', 'impactos', 'Quantidade de Impactos', 'IMPACTOS', 'Impacto', 'impacto', 'IMPACTO', 'Qtd Impactos'];
             
             for (const key of possibleKeys) {
               const prop = properties[key];
-              if (prop) {
-                console.log(` EXTRAO DE IMPACTOS - Campo encontrado: "${key}" (tipo: ${prop.type})`);
-                
-                // Tenta extrair de qualquer tipo de campo
-                if (prop.type === 'number' && prop.number !== null && prop.number !== undefined) {
-                  console.log(`    Valor (number): ${prop.number}`);
-                  return prop.number;
-                } else if (prop.type === 'title' && prop.title?.length) {
-                  const val = prop.title[0].text.content;
-                  console.log(`    Valor (title): ${val}`);
-                  return val;
-                } else if (prop.type === 'rich_text' && prop.rich_text?.length) {
-                  const val = prop.rich_text[0].text.content;
-                  console.log(`    Valor (rich_text): ${val}`);
-                  return val;
-                } else if (prop.type === 'formula' && prop.formula?.number !== null) {
-                  console.log(`    Valor (formula number): ${prop.formula.number}`);
-                  return prop.formula.number;
-                } else if (prop.type === 'formula' && prop.formula?.string) {
-                  console.log(`    Valor (formula string): ${prop.formula.string}`);
-                  return prop.formula.string;
-                } else if (prop.type === 'checkbox') {
-                  console.log(`    Valor (checkbox): ${prop.checkbox}`);
-                  return prop.checkbox;
-                } else if (prop.type === 'date' && prop.date?.start) {
-                  console.log(`    Valor (date): ${prop.date.start}`);
-                  return prop.date.start;
-                } else if (prop.type === 'select' && prop.select?.name) {
-                  console.log(`    Valor (select): ${prop.select.name}`);
-                  return prop.select.name;
-                } else if (prop.type === 'multi_select' && prop.multi_select?.length) {
-                  const val = prop.multi_select.map(item => item.name).join(',');
-                  console.log(`    Valor (multi_select): ${val}`);
-                  return val;
-                } else {
-                  console.log(`    Campo encontrado mas vazio ou tipo no suportado. Contedo:`, prop);
-                  return 0;
-                }
-              }
+              if (!prop) continue;
+              
+              // Tenta extrair de qualquer tipo de campo
+              if (prop.type === 'number') return prop.number || 0;
+              if (prop.type === 'title') return prop.title?.[0]?.text?.content || 0;
+              if (prop.type === 'rich_text') return prop.rich_text?.[0]?.text?.content || 0;
+              if (prop.type === 'formula') return prop.formula?.number || prop.formula?.string || 0;
             }
             
-            console.log(` Nenhum campo de impactos encontrado. Procurados:`, possibleKeys);
             return 0;
           })(),
           
@@ -565,6 +469,9 @@ export async function onRequest(context) {
         });
       }
 
+      // Array para guardar resultados das atualizações
+      const updatePromises = [];
+
       // Sincronizar o status "Excluir" com Notion
       if (ocultasEmissoras && Array.isArray(ocultasEmissoras)) {
         log(` Sincronizando status "Excluir" para ${ocultasEmissoras.length} emissoras`);
@@ -573,8 +480,8 @@ export async function onRequest(context) {
           const isExcluida = ocultasEmissoras.includes(emissora.id);
           const wasPreviouslyExcluida = emissora.excluir || false;
           
-          // SEMPRE atualizar - Notion  a fonte da verdade
-if (true) {
+          // Só atualizar se houve mudança no status
+          if (isExcluida !== wasPreviouslyExcluida) {
             log(`   Atualizando ${emissora.emissora}: Excluir = ${isExcluida}`);
             
             const excludeResponse = await fetch(`https://api.notion.com/v1/pages/${emissora.id}`, {
@@ -616,9 +523,7 @@ if (true) {
         }
       }
 
-      // Processar cada alterao
-      const updatePromises = [];
-      
+      // Processar cada alteração
       for (const changeKey in changes) {
         const change = changes[changeKey];
         const emissora = emissoras[change.emissoraIndex];
@@ -701,18 +606,18 @@ if (true) {
         }
       }
 
-      // Enviar email com as alteraes
+      // Enviar email com as alterações
       try {
         await sendNotificationEmail(env, {
-          tableId: id,
+          tableId: tableId,
           changes: updatePromises,
           emissoras: emissoras,
           requestIP: request.headers.get('cf-connecting-ip') || 'desconhecido'
         });
       } catch (emailError) {
-        console.error(' Erro ao enviar email:', emailError.message);
-        log(' Erro ao enviar email: ' + emailError.message);
-        // No interrompe o fluxo se falhar o email
+        console.error('⚠️ Erro ao enviar email:', emailError.message);
+        log('⚠️ Erro ao enviar email: ' + emailError.message);
+        // Não interrompe o fluxo se falhar o email
       }
 
       console.log(' Retornando resposta com debugLogs:', debugLogs.length, 'mensagens');
