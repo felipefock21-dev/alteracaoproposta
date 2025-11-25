@@ -685,8 +685,8 @@ tbody tr:last-child td {
 
 /* PRODUCT VALUE CELLS - Coloridas */
 .product-value-negociado {
-    background: linear-gradient(135deg, #fef3f2 0%, #fee4e2 100%);
-    color: #d97706;
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
+    color: #7c3aed;
     font-weight: 600;
     text-align: right;
     min-width: 100px;
@@ -694,16 +694,16 @@ tbody tr:last-child td {
 
 /* INVESTMENT CELLS - Coloridas com contraste */
 .investment-tabela {
-    background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
-    color: #6366f1;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+    color: #b60000;
     font-weight: 700;
     text-align: right;
     min-width: 140px;
 }
 
 .investment-negociado {
-    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
-    color: #7c3aed;
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
+    color: #009e12;
     font-weight: 700;
     text-align: right;
     min-width: 140px;
