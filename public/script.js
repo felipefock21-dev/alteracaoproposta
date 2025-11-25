@@ -1279,11 +1279,11 @@ function showSuccessModal() {
     const successModal = document.getElementById('successModal');
     successModal.style.display = 'flex';
     
-    // Auto-fechar após 5 segundos (opcional)
+    // Recarregar página após 3 segundos
     setTimeout(() => {
-        // Comentado para o usuário controlar quando fechar
-        // closeSuccessModal();
-    }, 5000);
+        console.log('🔄 Recarregando página...');
+        window.location.reload();
+    }, 3000);
 }
 
 function closeSuccessModal() {
