@@ -279,6 +279,15 @@ async function loadProposalFromNotion(tableId) {
         let ocultasEmissoras = data.ocultasEmissoras || [];
         let proposalName = data.proposalName || 'Proposta';
         
+        console.log('\n═══ DADOS RECEBIDOS DO API /notion ═══');
+        console.log(`📦 data.proposalName: "${data.proposalName}"`);
+        console.log(`📦 proposalName extraído: "${proposalName}"`);
+        console.log(`📦 Tipo: ${typeof proposalName}`);
+        console.log(`📦 Comprimento: ${proposalName.length}`);
+        console.log(`📦 data.emissoras: ${data.emissoras?.length || 0} emissoras`);
+        console.log(`📦 data.ocultasEmissoras: ${data.ocultasEmissoras?.length || 0} ocultas`);
+        console.log('════════════════════════════════════════\n');
+        
         // Log de debug das logos
         if (data.debug) {
           console.log(`📊 Debug info:`, data.debug);
@@ -349,11 +358,27 @@ function getApiUrl() {
 // =====================================================
 
 function updateProposalTitle() {
+    console.log('\n╔════════════════════════════════════════════════════════════════╗');
+    console.log('║ 🎯 ATUALIZANDO TÍTULO DA PROPOSTA');
+    console.log('╚════════════════════════════════════════════════════════════════╝');
+    
+    console.log(`📋 proposalData.proposalName: "${proposalData.proposalName}"`);
+    console.log(`📋 Tipo: ${typeof proposalData.proposalName}`);
+    console.log(`📋 Comprimento: ${proposalData.proposalName?.length || 'undefined'}`);
+    
     const titleElement = document.getElementById('proposalTitle');
+    console.log(`🔍 Elemento #proposalTitle encontrado: ${!!titleElement}`);
+    
     if (titleElement && proposalData.proposalName) {
+        console.log(`✅ Atualizando título para: "${proposalData.proposalName}"`);
         titleElement.textContent = proposalData.proposalName;
         document.title = `${proposalData.proposalName} - E-MÍDIAS`;
-        console.log(`📋 Título atualizado: ${proposalData.proposalName}`);
+        console.log(`✅ Novo título do documento: "${document.title}"`);
+        console.log(`✅ Novo textContent do elemento: "${titleElement.textContent}"`);
+    } else {
+        console.error('❌ FALHA: titleElement ou proposalName indefinidos');
+        console.log(`   - titleElement: ${titleElement}`);
+        console.log(`   - proposalData.proposalName: ${proposalData.proposalName}`);
     }
 }
 

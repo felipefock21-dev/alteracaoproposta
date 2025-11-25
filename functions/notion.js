@@ -412,10 +412,20 @@ export async function onRequest(context) {
       console.log('');
       console.log('');
 
+      // Buscar nome da proposta
+      let proposalName = 'Proposta';
+      try {
+        proposalName = await getProposalName(notionToken, id);
+        console.log(`✅ Nome da proposta obtido: "${proposalName}"`);
+      } catch (error) {
+        console.error('⚠️ Falha ao obter nome da proposta, usando padrão:', error.message);
+        proposalName = 'Proposta';
+      }
+      
       return new Response(JSON.stringify({
         emissoras: emissoras,
         ocultasEmissoras: ocultasEmissoras,
-        proposalName: await getProposalName(notionToken, id)
+        proposalName: proposalName
       }), {
         status: 200,
         headers
@@ -704,6 +714,9 @@ export async function onRequest(context) {
 
 async function getProposalName(notionToken, databaseId) {
   try {
+    console.log('🔍 Iniciando busca do nome da proposta...');
+    console.log(`📍 Database ID: ${databaseId}`);
+    
     // Buscar a página da database para pegar o título
     const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}`, {
       method: 'GET',
@@ -713,23 +726,43 @@ async function getProposalName(notionToken, databaseId) {
       }
     });
 
+    console.log(`📡 Resposta Notion - Status: ${response.status}`);
+    console.log(`✅ Response OK: ${response.ok}`);
+
     if (!response.ok) {
-      throw new Error('Não conseguiu buscar database properties');
+      const errorData = await response.json().catch(() => ({}));
+      console.error('❌ Erro na resposta:', errorData);
+      throw new Error(`Não conseguiu buscar database properties (${response.status})`);
     }
 
     const data = await response.json();
+    console.log('📦 Dados recebidos do Notion:');
+    console.log(`   - data.title type: ${typeof data.title}`);
+    console.log(`   - data.title: ${JSON.stringify(data.title)}`);
+    console.log(`   - data.title.length: ${data.title?.length || 'undefined'}`);
+    console.log(`   - data.title[0]: ${JSON.stringify(data.title?.[0])}`);
     
     // O título da database está em data.title
     if (data.title && data.title.length > 0) {
       const titleBlock = data.title[0];
+      console.log(`📋 Title block encontrado:`);
+      console.log(`   - type: ${titleBlock.type}`);
+      console.log(`   - content: ${titleBlock.text?.content || 'sem content'}`);
+      console.log(`   - full object: ${JSON.stringify(titleBlock)}`);
+      
       if (titleBlock.type === 'text') {
-        return titleBlock.text.content;
+        const proposalName = titleBlock.text.content;
+        console.log(`✅ NOME DA PROPOSTA EXTRAÍDO: "${proposalName}"`);
+        return proposalName;
       }
     }
     
+    console.log('⚠️ Nenhum título encontrado, usando padrão "Proposta"');
     return 'Proposta';
   } catch (error) {
-    console.error('❌ Erro ao buscar nome da proposta:', error.message);
+    console.error('❌ ERRO CRÍTICO ao buscar nome da proposta:');
+    console.error(`   Mensagem: ${error.message}`);
+    console.error(`   Stack: ${error.stack}`);
     throw error;
   }
 }
