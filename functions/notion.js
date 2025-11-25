@@ -736,29 +736,60 @@ async function getProposalName(notionToken, databaseId) {
     }
 
     const data = await response.json();
-    console.log('📦 Dados recebidos do Notion:');
-    console.log(`   - data.title type: ${typeof data.title}`);
+    console.log('📦 Dados completos recebidos do Notion:');
     console.log(`   - data.title: ${JSON.stringify(data.title)}`);
-    console.log(`   - data.title.length: ${data.title?.length || 'undefined'}`);
-    console.log(`   - data.title[0]: ${JSON.stringify(data.title?.[0])}`);
+    console.log(`   - data.parent: ${JSON.stringify(data.parent)}`);
     
-    // O título da database está em data.title
-    if (data.title && data.title.length > 0) {
+    // Tentar extrair o título da database
+    let proposalName = null;
+    
+    // Primeira opção: data.title (array de rich text blocks)
+    if (data.title && Array.isArray(data.title) && data.title.length > 0) {
+      console.log('📋 Tentando extrair de data.title (array)...');
       const titleBlock = data.title[0];
-      console.log(`📋 Title block encontrado:`);
-      console.log(`   - type: ${titleBlock.type}`);
-      console.log(`   - content: ${titleBlock.text?.content || 'sem content'}`);
-      console.log(`   - full object: ${JSON.stringify(titleBlock)}`);
+      console.log(`   - Tipo: ${titleBlock.type}`);
+      console.log(`   - Conteúdo: ${JSON.stringify(titleBlock)}`);
       
-      if (titleBlock.type === 'text') {
-        const proposalName = titleBlock.text.content;
-        console.log(`✅ NOME DA PROPOSTA EXTRAÍDO: "${proposalName}"`);
-        return proposalName;
+      if (titleBlock.type === 'text' && titleBlock.text?.content) {
+        proposalName = titleBlock.text.content;
+        console.log(`✅ Nome extraído de data.title: "${proposalName}"`);
       }
     }
     
-    console.log('⚠️ Nenhum título encontrado, usando padrão "Proposta"');
-    return 'Proposta';
+    // Se não encontrou, tentar extrair do parent (página pai)
+    if (!proposalName && data.parent?.page_id) {
+      console.log('📋 Tentando extrair da página pai via API...');
+      const parentResponse = await fetch(`https://api.notion.com/v1/pages/${data.parent.page_id}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${notionToken.trim()}`,
+          'Notion-Version': '2022-06-28'
+        }
+      });
+      
+      if (parentResponse.ok) {
+        const parentData = await parentResponse.json();
+        console.log(`📦 Dados da página pai:`, JSON.stringify(parentData.properties?.title || {}));
+        
+        if (parentData.properties?.title) {
+          const titleProp = parentData.properties.title;
+          if (titleProp.title && titleProp.title.length > 0) {
+            proposalName = titleProp.title[0].text.content;
+            console.log(`✅ Nome extraído da página pai: "${proposalName}"`);
+          }
+        }
+      }
+    }
+    
+    // Se ainda não encontrou, usar padrão
+    if (!proposalName) {
+      console.log('⚠️ Nenhum título encontrado, usando padrão "Proposta"');
+      proposalName = 'Proposta';
+    }
+    
+    console.log(`✅ NOME FINAL DA PROPOSTA: "${proposalName}"`);
+    return proposalName;
+    
   } catch (error) {
     console.error('❌ ERRO CRÍTICO ao buscar nome da proposta:');
     console.error(`   Mensagem: ${error.message}`);
