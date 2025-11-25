@@ -625,8 +625,18 @@ export async function onRequest(context) {
       try {
         console.log('📧 [PATCH] Chamando sendNotificationEmail...');
         console.log('📧 [PATCH] updatePromises:', updatePromises.length, 'alterações');
+        
+        // Buscar nome da proposta
+        let proposalName = 'Proposta';
+        try {
+          proposalName = await getProposalName(notionToken, tableId);
+        } catch (e) {
+          console.warn('⚠️ Não conseguiu buscar nome da proposta:', e.message);
+        }
+        
         emailLogs = await sendNotificationEmail(env, {
           tableId: tableId,
+          proposalName: proposalName,
           changes: updatePromises,
           emissoras: emissoras,
           requestIP: request.headers.get('cf-connecting-ip') || 'desconhecido'
@@ -687,15 +697,53 @@ export async function onRequest(context) {
 }
 
 // =====================================================
-// FUNO DE ENVIO DE EMAIL
+// =====================================================
+// FUNÇÃO DE EXTRAÇÃO DO NOME DA PROPOSTA
+// =====================================================
+
+async function getProposalName(notionToken, databaseId) {
+  try {
+    // Buscar a página da database para pegar o título
+    const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${notionToken.trim()}`,
+        'Notion-Version': '2022-06-28'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Não conseguiu buscar database properties');
+    }
+
+    const data = await response.json();
+    
+    // O título da database está em data.title
+    if (data.title && data.title.length > 0) {
+      const titleBlock = data.title[0];
+      if (titleBlock.type === 'text') {
+        return titleBlock.text.content;
+      }
+    }
+    
+    return 'Proposta';
+  } catch (error) {
+    console.error('❌ Erro ao buscar nome da proposta:', error.message);
+    throw error;
+  }
+}
+
+// =====================================================
+// FUNÇÃO DE ENVIO DE EMAIL
 // =====================================================
 
 async function sendNotificationEmail(env, data) {
-  const { tableId, changes, emissoras, requestIP } = data;
+  const { tableId, proposalName, changes, emissoras, requestIP } = data;
   const resendApiKey = env.RESEND_API_KEY;
   const emailLogs = [];
   
   emailLogs.push('📧 [EMAIL] Iniciando envio de email...');
+  emailLogs.push('📧 [EMAIL] Proposta: ' + proposalName);
   emailLogs.push('📧 [EMAIL] RESEND_API_KEY existe? ' + (!!resendApiKey));
   emailLogs.push('📧 [EMAIL] Alterações recebidas: ' + changes.length);
   emailLogs.push('📧 [EMAIL] Emissoras: ' + emissoras.length);
@@ -752,17 +800,18 @@ async function sendNotificationEmail(env, data) {
     <body>
       <div class="container">
         <div class="header">
-          <h1> Alterao de Proposta Radiofnica</h1>
-          <p style="margin: 10px 0 0 0; opacity: 0.9;">E-MDIAS | Sistema de Gesto de Propostas</p>
+          <h1> Alteração de Proposta</h1>
+          <p style="margin: 10px 0 0 0; opacity: 0.9;">Proposta: <strong>${proposalName}</strong></p>
+          <p style="margin: 8px 0 0 0; opacity: 0.8; font-size: 13px;">E-MDIAS | Sistema de Gestão de Propostas</p>
         </div>
         
         <div class="content">
-          <p>Ol,</p>
-          <p>Uma proposta foi alterada no sistema E-MDIAS. Confira os detalhes abaixo:</p>
+          <p>Olá,</p>
+          <p>A proposta <strong>"${proposalName}"</strong> foi alterada no sistema E-MDIAS. Confira os detalhes abaixo:</p>
           
           <div class="info-box">
-            <strong> Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}<br>
-            <strong> IP do Responsvel:</strong> ${requestIP}
+            <strong>📅 Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}<br>
+            <strong>🌐 IP do Responsável:</strong> ${requestIP}
           </div>
   `;
 
