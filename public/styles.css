@@ -358,6 +358,33 @@ body {
     background-color: #f9f9f9;
 }
 
+/* Estilos específicos para tabela de histórico */
+#historyTable th {
+    text-align: left !important;
+    background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%) !important;
+    color: #6366f1 !important;
+    padding: 14px 16px !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.6px !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid #8b5cf6 !important;
+}
+
+#historyTable tbody tr {
+    border-bottom: 1px solid #e5e7eb !important;
+    transition: background-color 0.2s ease;
+}
+
+#historyTable tbody tr:hover {
+    background-color: #f9fafb !important;
+}
+
+#historyTable td {
+    padding: 12px 16px !important;
+    text-align: left !important;
+}
+
 .comparison-table td {
     padding: 20px;
     font-size: 1rem;

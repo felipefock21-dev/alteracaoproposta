@@ -35,6 +35,78 @@ let charts = {
     investment: null
 };
 
+// =====================================================
+// GERENCIAMENTO DE HISTÓRICO DE ALTERAÇÕES
+// =====================================================
+
+const HISTORY_STORAGE_KEY = 'proposal_history';
+
+function loadHistoryFromStorage() {
+    const stored = localStorage.getItem(HISTORY_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+}
+
+function saveHistoryToStorage(history) {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+}
+
+function addToHistory(emissoraNome, campo, valorAnterior, novoValor) {
+    const history = loadHistoryFromStorage();
+    const now = new Date();
+    const dataHora = now.toLocaleString('pt-BR');
+    
+    const entry = {
+        dataHora,
+        timestamp: now.getTime(),
+        emissora: emissoraNome,
+        campo,
+        valorAnterior,
+        novoValor
+    };
+    
+    history.push(entry);
+    saveHistoryToStorage(history);
+    renderHistoryTable();
+}
+
+function renderHistoryTable() {
+    const history = loadHistoryFromStorage();
+    const tbody = document.getElementById('historyTableBody');
+    
+    if (!tbody) return;
+    
+    if (history.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="5" style="text-align: center; color: #999; padding: 20px;">
+                    Nenhuma alteração registrada ainda
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    // Ordenar histórico por timestamp decrescente (mais recente primeiro)
+    const sorted = [...history].sort((a, b) => b.timestamp - a.timestamp);
+    
+    tbody.innerHTML = sorted.map((entry, index) => `
+        <tr>
+            <td style="font-size: 0.9rem; color: #666;">${entry.dataHora}</td>
+            <td style="font-weight: 600; color: #06055b;">${entry.emissora}</td>
+            <td style="color: #333;">${entry.campo}</td>
+            <td style="color: #ef4444; font-weight: 500;">${entry.valorAnterior}</td>
+            <td style="color: #10b981; font-weight: 600;">${entry.novoValor}</td>
+        </tr>
+    `).join('');
+}
+
+function clearHistory() {
+    if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+        localStorage.removeItem(HISTORY_STORAGE_KEY);
+        renderHistoryTable();
+    }
+}
+
 // Função para extrair o link da logo (pode vir como string, array ou objeto)
 function getLogoUrl(linkLogoField) {
     if (!linkLogoField) return null;
@@ -89,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         await loadProposalFromNotion(proposalData.tableId);
         renderInterface();
+        renderHistoryTable();  // Carregar histórico ao inicializar
         console.log('✅ Página carregada com sucesso!');
     } catch (error) {
         console.error('❌ Erro ao carregar:', error);
@@ -1256,6 +1329,12 @@ async function confirmAndSave() {
         } else {
             console.warn('⚠️ debugLogs vazio ou não é array:', result.debugLogs);
         }
+        
+        // Adicionar alterações ao histórico
+        Object.values(proposalData.changes).forEach(change => {
+            const emissoraNome = proposalData.emissoras[change.emissoraIndex]?.emissora || 'Desconhecida';
+            addToHistory(emissoraNome, change.field, change.old, change.new);
+        });
         
         proposalData.changes = {};
         

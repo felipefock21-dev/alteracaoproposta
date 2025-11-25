@@ -105,26 +105,25 @@
 
             <!-- TABELA COMPARATIVA "SUA PROPOSTA" -->
             <div class="comparison-section">
-                <div class="comparison-header">SUA PROPOSTA</div>
+                <div class="comparison-header">
+                    <i class="fas fa-history"></i> Histórico de Alterações
+                </div>
                 <div class="comparison-table-wrapper">
-                    <table class="comparison-table">
+                    <table class="comparison-table" id="historyTable">
                         <thead>
                             <tr>
-                                <th></th>
-                                <th>Anterior</th>
-                                <th>Atual</th>
+                                <th>Data/Hora</th>
+                                <th>Emissora</th>
+                                <th>Campo</th>
+                                <th>Valor Anterior</th>
+                                <th>Novo Valor</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="historyTableBody">
                             <tr>
-                                <td class="label-cell">Valor Negociado</td>
-                                <td class="value-cell anterior" id="compNegociado">R$ 0</td>
-                                <td class="value-cell atual" id="compNegociadoAtual">R$ 0</td>
-                            </tr>
-                            <tr>
-                                <td class="label-cell">Valor Tabela</td>
-                                <td class="value-cell anterior" id="compTabela">R$ 0</td>
-                                <td class="value-cell atual" id="compTabelaAtual">R$ 0</td>
+                                <td colspan="5" style="text-align: center; color: #999; padding: 20px;">
+                                    Nenhuma alteração registrada ainda
+                                </td>
                             </tr>
                         </tbody>
                     </table>
