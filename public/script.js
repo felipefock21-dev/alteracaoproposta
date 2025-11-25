@@ -5,6 +5,7 @@
 
 let proposalData = {
     tableId: null,
+    proposalName: 'Proposta',  // Nome da proposta carregada do Notion
     emissoras: [],  // Array de emissoras
     changes: {},
     ocultasEmissoras: new Set(),  // Rastreia emissoras ocultas (por ID)
@@ -160,6 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         await loadProposalFromNotion(proposalData.tableId);
+        updateProposalTitle();  // Atualizar título com nome da proposta
         renderInterface();
         renderHistoryTable();  // Carregar histórico ao inicializar
         console.log('✅ Página carregada com sucesso!');
@@ -275,6 +277,7 @@ async function loadProposalFromNotion(tableId) {
         // Se tem estrutura com debug, extrair emissoras
         let emissoras = Array.isArray(data) ? data : (data.emissoras || []);
         let ocultasEmissoras = data.ocultasEmissoras || [];
+        let proposalName = data.proposalName || 'Proposta';
         
         // Log de debug das logos
         if (data.debug) {
@@ -292,6 +295,7 @@ async function loadProposalFromNotion(tableId) {
         console.log(`📊 É array? ${Array.isArray(emissoras)}`);
         console.log(`📊 Tamanho: ${Array.isArray(emissoras) ? emissoras.length : 'N/A'}`);
         console.log(`👤 Emissoras ocultas: ${ocultasEmissoras.length}`);
+        console.log(`📋 Nome da Proposta: ${proposalName}`);
         
         if (Array.isArray(emissoras) && emissoras.length > 0) {
             console.log(`✅ Processando ${emissoras.length} emissoras`);
@@ -299,6 +303,7 @@ async function loadProposalFromNotion(tableId) {
             
             // Usar os dados diretamente do Notion, sem transformação
             proposalData.emissoras = emissoras;
+            proposalData.proposalName = proposalName;
             
             // Carregar emissoras ocultas no Set
             proposalData.ocultasEmissoras = new Set(ocultasEmissoras);
@@ -343,9 +348,18 @@ function getApiUrl() {
 // RENDERIZAÇÃO
 // =====================================================
 
+function updateProposalTitle() {
+    const titleElement = document.getElementById('proposalTitle');
+    if (titleElement && proposalData.proposalName) {
+        titleElement.textContent = proposalData.proposalName;
+        document.title = `${proposalData.proposalName} - E-MÍDIAS`;
+        console.log(`📋 Título atualizado: ${proposalData.proposalName}`);
+    }
+}
+
 function renderInterface() {
     console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: renderInterface()');
+    console.log('║ 🎨 INICIANDO: renderInterface()');
     console.log('╚════════════════════════════════════════════════════════════════╝');
     console.log('proposalData.emissoras.length:', proposalData.emissoras.length);
     
@@ -353,7 +367,7 @@ function renderInterface() {
     console.log('📊 Emissoras disponíveis:', proposalData.emissoras.length);
     
     // Buscar o nome da proposta
-    let proposalName = 'Proposta de Mídia';
+    let proposalName = proposalData.proposalName || 'Proposta de Mídia';
     
     if (proposalData.emissoras && proposalData.emissoras.length > 0) {
         const firstEmissora = proposalData.emissoras[0];

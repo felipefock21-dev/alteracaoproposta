@@ -414,7 +414,8 @@ export async function onRequest(context) {
 
       return new Response(JSON.stringify({
         emissoras: emissoras,
-        ocultasEmissoras: ocultasEmissoras
+        ocultasEmissoras: ocultasEmissoras,
+        proposalName: await getProposalName(notionToken, id)
       }), {
         status: 200,
         headers
