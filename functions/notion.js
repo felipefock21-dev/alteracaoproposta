@@ -50,6 +50,7 @@ export async function onRequest(context) {
         const debugMode = url.searchParams.get('debug') === 'true';
         const listFieldsOnly = url.searchParams.get('listFields') === 'true';
         const debugFields = url.searchParams.get('debugFields') === 'true';
+        const showAllFields = url.searchParams.get('showAllFields') === 'true';
         
         console.log(' DEBUG GET REQUEST - TABELA DE EMISSORAS');
         console.log('URL completa:', request.url);
@@ -131,6 +132,37 @@ export async function onRequest(context) {
           return new Response(JSON.stringify({
             error: 'Nenhum registro encontrado'
           }), { status: 400, headers });
+        }
+        
+        // Se showAllFields, retornar JSON com todos os campos da primeira emissora
+        if (showAllFields && notionData.results.length > 0) {
+          const firstRecord = notionData.results[0];
+          const allProps = Object.keys(firstRecord.properties).sort();
+          const importantProps = allProps.filter(k => {
+            const lower = k.toLowerCase();
+            return lower.includes('valor') || lower.includes('negociado') || lower.includes('tabela') || lower.includes('cota') || lower.includes('spot');
+          });
+          
+          return new Response(JSON.stringify({
+            success: true,
+            showAllFields: true,
+            emissora: firstRecord.properties['Emissora']?.rich_text?.[0]?.text?.content || 'Desconhecida',
+            totalFields: allProps.length,
+            importantFieldsCount: importantProps.length,
+            importantFields: importantProps.map(name => {
+              const prop = firstRecord.properties[name];
+              let value = '?';
+              if (prop.type === 'number') value = prop.number;
+              else if (prop.type === 'formula') value = prop.formula?.number || prop.formula?.string;
+              else if (prop.type === 'rich_text') value = prop.rich_text?.[0]?.text?.content;
+              return {
+                name: name,
+                type: prop.type,
+                value: value
+              };
+            }),
+            allFields: allProps
+          }, null, 2), { status: 200, headers });
         }
         
         // Se debugFields, retornar com valores completos
