@@ -302,7 +302,7 @@ export async function onRequest(context) {
               
               // Log para Patrocínio
               if (propName && propName.includes('Cota')) {
-                console.log(`✅ ENCONTRADO (match fuzzy básico): "${key}" ≈ "${searchKey}" para ${propName}`);
+                console.log(`✅ ENCONTRADO (FALLBACK 1): Notion="${key}" (${prop.type}) para ${propName}`);
               }
               
               switch (prop.type) {
@@ -334,15 +334,20 @@ export async function onRequest(context) {
             const keyLower = key.toLowerCase();
             if (keyLower.includes('valor') && keyLower.includes('cota')) {
               const prop = properties[key];
-              console.warn(`⚠️  FALLBACK 2: Campo potencial encontrado: "${key}" (${prop.type}) para ${propName}`);
               
-              // Verificar se também contém a palavra "negociado"
+              // ⚠️ IMPORTANTE: Verificar se o campo é realmente o correto
+              // Se está procurando "Negociado", o campo DEVE conter "negociado"
+              // Se está procurando "Tabela", o campo DEVE conter "tabela"
               if (propName.includes('Negociado') && !keyLower.includes('negociado')) {
-                console.warn(`      ⚠️  MAS: "${key}" NÃO contém 'negociado', pode não ser o campo correto`);
+                console.warn(`⚠️  FALLBACK 2: Campo "${key}" encontrado mas NÃO contém 'negociado' - PULANDO`);
+                continue; // PULE e procure o próximo
               }
               if (propName.includes('Tabela') && !keyLower.includes('tabela')) {
-                console.warn(`      ⚠️  MAS: "${key}" NÃO contém 'tabela', pode não ser o campo correto`);
+                console.warn(`⚠️  FALLBACK 2: Campo "${key}" encontrado mas NÃO contém 'tabela' - PULANDO`);
+                continue; // PULE e procure o próximo
               }
+              
+              console.warn(`✅ FALLBACK 2: Campo correto encontrado: "${key}" (${prop.type}) para ${propName}`);
               
               switch (prop.type) {
                 case 'number':
@@ -362,6 +367,12 @@ export async function onRequest(context) {
             const keyLower = key.toLowerCase();
             // Procura por campos que contêm "negociado" (qualquer variação)
             if (keyLower.includes('negociado')) {
+              // Verificar se também tem "cota" ou "valor"
+              if (!keyLower.includes('cota') && !keyLower.includes('valor')) {
+                console.warn(`⚠️  FALLBACK 3: Campo "${key}" tem 'negociado' mas não tem 'cota' ou 'valor' - PULANDO`);
+                continue;
+              }
+              
               const prop = properties[key];
               console.log(`✅ FALLBACK 3: Campo 'Negociado' encontrado: "${key}" (${prop.type})`);
               
