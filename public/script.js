@@ -673,7 +673,7 @@ function renderSpotsTable() {
                 </td>
             `;
             
-            // Inserções
+            // Inserções (SOMENTE LEITURA - não podem ser editadas)
             const insercoes = ['ins5', 'ins15', 'ins30', 'ins60'];
             insercoes.forEach(insKey => {
                 const ins = emissora[insKey] || 0;
@@ -682,11 +682,9 @@ function renderSpotsTable() {
                         <input 
                             type="number" 
                             value="${ins}" 
-                            onchange="updateEmissora(${emissoraIndex}, '${insKey}', this.value)"
+                            readonly
                             class="input-spots"
-                            min="0"
-                            step="1"
-                            style="width: 60px; padding: 4px; text-align: center;"
+                            style="width: 60px; padding: 4px; text-align: center; background-color: #f0f0f0; cursor: not-allowed;"
                         >
                     </td>
                 `;
