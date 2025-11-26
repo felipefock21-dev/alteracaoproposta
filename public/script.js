@@ -645,6 +645,13 @@ function renderSpotsTable() {
             const valorTabelaCota = emissora.valorTabelaCota || 0;
             const valorNegociadoCota = emissora.valorNegociadoCota || 0;
             
+            console.log(`📋 PATROCÍNIO - Emissora ${emissoraIndex} (${emissora.emissora}):`);
+            console.log(`   - cotasMeses: ${cotasMeses}`);
+            console.log(`   - valorTabelaCota: ${valorTabelaCota}`);
+            console.log(`   - valorNegociadoCota: ${valorNegociadoCota}`);
+            console.log(`   - ins5: ${emissora.ins5}, ins15: ${emissora.ins15}, ins30: ${emissora.ins30}, ins60: ${emissora.ins60}`);
+            console.log(`   - Dados brutos da emissora:`, emissora);
+            
             // Investimento Patrocínio
             const invTabePatrocinio = cotasMeses * valorTabelaCota;
             const invNegPatrocinio = cotasMeses * valorNegociadoCota;
