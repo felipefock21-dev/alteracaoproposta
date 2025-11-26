@@ -336,6 +336,35 @@ export async function onRequest(context) {
               const prop = properties[key];
               console.warn(`⚠️  FALLBACK 2: Campo potencial encontrado: "${key}" (${prop.type}) para ${propName}`);
               
+              // Verificar se também contém a palavra "negociado"
+              if (propName.includes('Negociado') && !keyLower.includes('negociado')) {
+                console.warn(`      ⚠️  MAS: "${key}" NÃO contém 'negociado', pode não ser o campo correto`);
+              }
+              if (propName.includes('Tabela') && !keyLower.includes('tabela')) {
+                console.warn(`      ⚠️  MAS: "${key}" NÃO contém 'tabela', pode não ser o campo correto`);
+              }
+              
+              switch (prop.type) {
+                case 'number':
+                  return prop.number !== null && prop.number !== undefined ? prop.number : defaultValue;
+                case 'formula':
+                  return prop.formula?.number !== null ? prop.formula.number : (prop.formula?.string || defaultValue);
+                default:
+                  return defaultValue;
+              }
+            }
+          }
+        }
+        
+        // FALLBACK 3: busca específica por "Negociado"
+        if (propName && propName.includes('Negociado')) {
+          for (const key of allKeys) {
+            const keyLower = key.toLowerCase();
+            // Procura por campos que contêm "negociado" (qualquer variação)
+            if (keyLower.includes('negociado')) {
+              const prop = properties[key];
+              console.log(`✅ FALLBACK 3: Campo 'Negociado' encontrado: "${key}" (${prop.type})`);
+              
               switch (prop.type) {
                 case 'number':
                   return prop.number !== null && prop.number !== undefined ? prop.number : defaultValue;
@@ -370,12 +399,25 @@ export async function onRequest(context) {
           console.log('║ 🔍 PRIMEIRA EMISSORA - TODOS OS CAMPOS');
           console.log('╚════════════════════════════════════════════════════════════════╝');
           const allKeys = Object.keys(properties).sort();
+          
+          // Mostrar campos com 'valor', 'negociado', 'cota', 'tabela'
+          console.log('📌 CAMPOS IMPORTANTES (com valor/negociado/cota/tabela):');
+          const importantFields = allKeys.filter(k => {
+            const lower = k.toLowerCase();
+            return lower.includes('valor') || lower.includes('negociado') || lower.includes('cota') || lower.includes('tabela');
+          });
+          importantFields.forEach(key => {
+            const prop = properties[key];
+            let valor = '?';
+            if (prop.type === 'number') valor = prop.number;
+            else if (prop.type === 'formula') valor = prop.formula?.number || prop.formula?.string;
+            console.log(`   "${key}" (${prop.type}) = ${valor}`);
+          });
+          
+          console.log('\n📋 TODOS OS CAMPOS:');
           allKeys.forEach(key => {
             const prop = properties[key];
-            console.log(`📋 "${key}" (${prop.type})`);
-            if (key.toLowerCase().includes('valor') || key.toLowerCase().includes('cota') || key.toLowerCase().includes('tabela')) {
-              console.log(`   → POTENCIAL MATCH! Valor: ${JSON.stringify(prop)}`);
-            }
+            console.log(`   "${key}" (${prop.type})`);
           });
           console.log('');
         }
