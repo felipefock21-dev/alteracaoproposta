@@ -294,6 +294,22 @@ export async function onRequest(context) {
       const emissoras = notionData.results.map((row, rowIndex) => {
         const properties = row.properties || {};
         
+        // LOG detalhado apenas da primeira emissora para debug de Patrocínio
+        if (rowIndex === 0) {
+          console.log('\n╔════════════════════════════════════════════════════════════════╗');
+          console.log('║ 🔍 PRIMEIRA EMISSORA - TODOS OS CAMPOS');
+          console.log('╚════════════════════════════════════════════════════════════════╝');
+          const allKeys = Object.keys(properties).sort();
+          allKeys.forEach(key => {
+            const prop = properties[key];
+            console.log(`📋 "${key}" (${prop.type})`);
+            if (key.toLowerCase().includes('valor') || key.toLowerCase().includes('cota') || key.toLowerCase().includes('tabela')) {
+              console.log(`   → POTENCIAL MATCH! Valor: ${JSON.stringify(prop)}`);
+            }
+          });
+          console.log('');
+        }
+        
         // Log detalhado apenas se houver parâmetro debug=true na URL
         const debugMode = url.searchParams.get('debug') === 'true';
         if (rowIndex === 0 && debugMode) {
