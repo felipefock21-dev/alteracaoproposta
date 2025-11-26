@@ -714,11 +714,14 @@ export async function onRequest(context) {
 
 async function getProposalName(notionToken, databaseId) {
   try {
-    console.log('🔍 Iniciando busca do nome da proposta...');
+    console.log('\n╔════════════════════════════════════════════════════════════════╗');
+    console.log('║ 🔍 BUSCANDO NOME DA PROPOSTA');
+    console.log('╚════════════════════════════════════════════════════════════════╝');
     console.log(`📍 Database ID: ${databaseId}`);
     
-    // Buscar a página da database para pegar o título
-    const response = await fetch(`https://api.notion.com/v1/databases/${databaseId}`, {
+    // Passo 1: Buscar metadados da database
+    console.log('\n📍 PASSO 1: Buscando database...');
+    const dbResponse = await fetch(`https://api.notion.com/v1/databases/${databaseId}`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${notionToken.trim()}`,
@@ -726,74 +729,121 @@ async function getProposalName(notionToken, databaseId) {
       }
     });
 
-    console.log(`📡 Resposta Notion - Status: ${response.status}`);
-    console.log(`✅ Response OK: ${response.ok}`);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      console.error('❌ Erro na resposta:', errorData);
-      throw new Error(`Não conseguiu buscar database properties (${response.status})`);
+    if (!dbResponse.ok) {
+      const errorData = await dbResponse.json().catch(() => ({}));
+      console.error('❌ Erro ao buscar database:', errorData);
+      throw new Error(`Erro ao buscar database (${dbResponse.status})`);
     }
 
-    const data = await response.json();
-    console.log('📦 Dados completos recebidos do Notion:');
-    console.log(`   - data.title: ${JSON.stringify(data.title)}`);
-    console.log(`   - data.parent: ${JSON.stringify(data.parent)}`);
+    const dbData = await dbResponse.json();
+    console.log('✅ Database encontrada!');
+    console.log(`   - Database ID: ${dbData.id}`);
+    console.log(`   - Database Title: ${JSON.stringify(dbData.title)}`);
+    console.log(`   - Parent Type: ${dbData.parent?.type || 'nenhum'}`);
+    console.log(`   - Parent Page ID: ${dbData.parent?.page_id || 'nenhum'}`);
+    console.log(`   - Parent Database ID: ${dbData.parent?.database_id || 'nenhum'}`);
     
-    // Tentar extrair o título da database
+    // Passo 2: Se há parent_id, buscar a página pai
+    let parentPageId = dbData.parent?.page_id;
+    
+    if (!parentPageId) {
+      console.log('⚠️ Nenhum parent.page_id encontrado na database');
+      console.log('   Tentando usar database_id do parent...');
+      parentPageId = dbData.parent?.database_id;
+    }
+    
+    if (!parentPageId) {
+      console.log('❌ Nenhum parent encontrado. Usando nome da database.');
+      if (dbData.title && dbData.title.length > 0) {
+        const proposalName = dbData.title[0].text.content;
+        console.log(`✅ Nome da database: "${proposalName}"`);
+        return proposalName;
+      }
+      return 'Proposta';
+    }
+    
+    // Passo 3: Buscar a página pai
+    console.log(`\n📍 PASSO 2: Buscando página pai (ID: ${parentPageId})...`);
+    const parentResponse = await fetch(`https://api.notion.com/v1/pages/${parentPageId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${notionToken.trim()}`,
+        'Notion-Version': '2022-06-28'
+      }
+    });
+
+    if (!parentResponse.ok) {
+      const errorData = await parentResponse.json().catch(() => ({}));
+      console.error('❌ Erro ao buscar página pai:', errorData);
+      throw new Error(`Erro ao buscar página pai (${parentResponse.status})`);
+    }
+
+    const parentData = await parentResponse.json();
+    console.log('✅ Página pai encontrada!');
+    console.log(`   - Page ID: ${parentData.id}`);
+    console.log(`   - Properties: ${JSON.stringify(Object.keys(parentData.properties || {}))}`);
+    
+    // Passo 4: Extrair o título da página pai
     let proposalName = null;
     
-    // Primeira opção: data.title (array de rich text blocks)
-    if (data.title && Array.isArray(data.title) && data.title.length > 0) {
-      console.log('📋 Tentando extrair de data.title (array)...');
-      const titleBlock = data.title[0];
-      console.log(`   - Tipo: ${titleBlock.type}`);
-      console.log(`   - Conteúdo: ${JSON.stringify(titleBlock)}`);
+    // Procurar pela propriedade "title" (mais comum)
+    if (parentData.properties?.title) {
+      const titleProp = parentData.properties.title;
+      console.log(`\n📋 Propriedade 'title' encontrada:`);
+      console.log(`   - Tipo: ${titleProp.type}`);
+      console.log(`   - Conteúdo: ${JSON.stringify(titleProp.title)}`);
       
-      if (titleBlock.type === 'text' && titleBlock.text?.content) {
-        proposalName = titleBlock.text.content;
-        console.log(`✅ Nome extraído de data.title: "${proposalName}"`);
+      if (titleProp.title && titleProp.title.length > 0) {
+        proposalName = titleProp.title[0].text.content;
+        console.log(`✅ NOME EXTRAÍDO: "${proposalName}"`);
+        return proposalName;
       }
     }
     
-    // Se não encontrou, tentar extrair do parent (página pai)
-    if (!proposalName && data.parent?.page_id) {
-      console.log('📋 Tentando extrair da página pai via API...');
-      const parentResponse = await fetch(`https://api.notion.com/v1/pages/${data.parent.page_id}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${notionToken.trim()}`,
-          'Notion-Version': '2022-06-28'
-        }
-      });
+    // Se não tem "title", procurar por "Name" (alternativa comum)
+    if (!proposalName && parentData.properties?.Name) {
+      const nameProp = parentData.properties.Name;
+      console.log(`\n📋 Propriedade 'Name' encontrada:`);
+      console.log(`   - Tipo: ${nameProp.type}`);
+      console.log(`   - Conteúdo: ${JSON.stringify(nameProp.title)}`);
       
-      if (parentResponse.ok) {
-        const parentData = await parentResponse.json();
-        console.log(`📦 Dados da página pai:`, JSON.stringify(parentData.properties?.title || {}));
-        
-        if (parentData.properties?.title) {
-          const titleProp = parentData.properties.title;
-          if (titleProp.title && titleProp.title.length > 0) {
-            proposalName = titleProp.title[0].text.content;
-            console.log(`✅ Nome extraído da página pai: "${proposalName}"`);
-          }
-        }
+      if (nameProp.title && nameProp.title.length > 0) {
+        proposalName = nameProp.title[0].text.content;
+        console.log(`✅ NOME EXTRAÍDO: "${proposalName}"`);
+        return proposalName;
       }
     }
     
-    // Se ainda não encontrou, usar padrão
+    // Se ainda não achou, listar todas as propriedades para debug
     if (!proposalName) {
-      console.log('⚠️ Nenhum título encontrado, usando padrão "Proposta"');
+      console.log('\n⚠️ Nenhuma propriedade "title" ou "Name" encontrada');
+      console.log('📋 Propriedades disponíveis na página pai:');
+      for (const [key, prop] of Object.entries(parentData.properties || {})) {
+        console.log(`   - ${key}: ${prop.type}`);
+        if (prop.type === 'title' && prop.title?.length > 0) {
+          proposalName = prop.title[0].text.content;
+          console.log(`     ✅ ENCONTRADO TÍTULO: "${proposalName}"`);
+          break;
+        }
+      }
+    }
+    
+    if (!proposalName) {
+      console.log('⚠️ Não conseguiu extrair nome da página pai, usando padrão');
       proposalName = 'Proposta';
     }
     
-    console.log(`✅ NOME FINAL DA PROPOSTA: "${proposalName}"`);
+    console.log(`\n✅ NOME FINAL DA PROPOSTA: "${proposalName}"`);
+    console.log('╚════════════════════════════════════════════════════════════════╝\n');
     return proposalName;
     
   } catch (error) {
-    console.error('❌ ERRO CRÍTICO ao buscar nome da proposta:');
+    console.error('\n╔════════════════════════════════════════════════════════════════╗');
+    console.error('║ ❌ ERRO CRÍTICO ao buscar nome da proposta');
+    console.error('╚════════════════════════════════════════════════════════════════╝');
     console.error(`   Mensagem: ${error.message}`);
     console.error(`   Stack: ${error.stack}`);
+    console.error('');
     throw error;
   }
 }
