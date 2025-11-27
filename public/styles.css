@@ -631,30 +631,39 @@ table td:nth-child(1) {
     left: 0;
     z-index: 13;
     background: var(--white);
+    width: 50px;
+    min-width: 50px;
+    max-width: 50px;
 }
 
 table th:nth-child(2),
 table td:nth-child(2) {
     position: sticky;
-    left: 54px;
+    left: 50px;
     z-index: 13;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    width: 100px;
+    min-width: 100px;
 }
 
 table th:nth-child(3),
 table td:nth-child(3) {
     position: sticky;
-    left: 120px;
+    left: 150px;
     z-index: 13;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    width: 120px;
+    min-width: 120px;
 }
 
 table th:nth-child(4),
 table td:nth-child(4) {
     position: sticky;
-    left: 190px;
+    left: 270px;
     z-index: 13;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    width: 200px;
+    min-width: 200px;
 }
 
 thead {

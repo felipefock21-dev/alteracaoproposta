@@ -520,10 +520,10 @@ function renderSpotsTable() {
         
         // Cabeçalhos fixos
         headerRow.innerHTML = `
-            <th style="width: 40px; min-width: 40px;">✓</th>
-            <th style="min-width: 80px;">Região</th>
-            <th style="min-width: 100px;">Praça</th>
-            <th style="min-width: 140px;">Emissora</th>
+            <th>✓</th>
+            <th>Região</th>
+            <th>Praça</th>
+            <th>Emissora</th>
         `;
         
         // Cabeçalhos dinâmicos por produto de MÍDIA AVULSA
@@ -531,7 +531,7 @@ function renderSpotsTable() {
             const produto = PRODUTOS.find(p => p.key === produtoKey && p.type === 'midia');
             if (produto) {
                 headerRow.innerHTML += `
-                    <th colspan="2" style="text-align: center; border-bottom: 2px solid var(--primary); min-width: 180px;">
+                    <th colspan="2" style="text-align: center; border-bottom: 2px solid var(--primary);">
                         ${produto.label}
                     </th>
                 `;
@@ -541,7 +541,7 @@ function renderSpotsTable() {
         // Cabeçalhos para PATROCÍNIO se existir
         if (temPatrocinioAtivo) {
             headerRow.innerHTML += `
-                <th style="min-width: 120px;">Cotas / Meses</th>
+                <th>Cotas / Meses</th>
             `;
             
             // Inserções
@@ -550,22 +550,22 @@ function renderSpotsTable() {
                 const ins = PRODUTOS.find(p => p.key === insKey);
                 if (ins) {
                     headerRow.innerHTML += `
-                        <th style="min-width: 100px;">${ins.label}</th>
+                        <th>${ins.label}</th>
                     `;
                 }
             });
             
             headerRow.innerHTML += `
-                <th style="min-width: 120px;">Valor Tabela por Cota</th>
-                <th style="min-width: 120px;">Valor Negociado por Cota</th>
+                <th>Valor Tabela por Cota</th>
+                <th>Valor Negociado por Cota</th>
             `;
         }
         
         // Colunas finais de investimento e impactos
         headerRow.innerHTML += `
-            <th style="min-width: 140px;">Inv. Tabela</th>
-            <th style="min-width: 140px;">Inv. Negociado</th>
-            <th style="min-width: 120px;">Impactos</th>
+            <th>Inv. Tabela</th>
+            <th>Inv. Negociado</th>
+            <th>Impactos</th>
         `;
         
         thead.appendChild(headerRow);
@@ -626,14 +626,8 @@ function renderSpotsTable() {
                 const valorTabela = emissora[produto.tabelaKey] || 0;
                 const valorNegociado = emissora[produto.negKey] || 0;
                 
-                const invTabela = spots * valorTabela;
-                const invNegociado = spots * valorNegociado;
-                
-                investimentoTabelaEmissora += invTabela;
-                investimentoNegociadoEmissora += invNegociado;
-                
                 row.innerHTML += `
-                    <td style="text-align: center; min-width: 90px;">
+                    <td style="text-align: center;">
                         <input 
                             type="number" 
                             value="${spots}" 
@@ -670,7 +664,7 @@ function renderSpotsTable() {
             investimentoNegociadoEmissora += invNegPatrocinio;
             
             row.innerHTML += `
-                <td style="text-align: center; min-width: 90px;">
+                <td style="text-align: center;">
                     <input 
                         type="number" 
                         value="${cotasMeses}" 
@@ -688,7 +682,7 @@ function renderSpotsTable() {
             insercoes.forEach(insKey => {
                 const ins = emissora[insKey] || 0;
                 row.innerHTML += `
-                    <td style="text-align: center; min-width: 80px;">
+                    <td style="text-align: center;">
                         <input 
                             type="number" 
                             value="${ins}" 
