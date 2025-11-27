@@ -572,7 +572,10 @@ export async function onRequest(context) {
               return excludeField.checkbox === true;
             }
             return false;
-          })()
+          })(),
+          
+          // PMM (Pessoas Muito Mais / Público-alvo) - Para cálculo de impactos
+          PMM: extractValue(properties, 0, 'PMM', 'PMM', 'Pmm', 'PMM Valor', 'PMM (Público)')
         };
       });
 
