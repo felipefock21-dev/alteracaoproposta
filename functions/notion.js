@@ -1080,17 +1080,19 @@ async function getProposalName(notionToken, databaseId) {
 // =====================================================
 
 async function sendNotificationEmail(env, data) {
-  const { tableId, proposalName, changes, emissoras, requestIP } = data;
+  const { tableId, proposalName, changes, emissoras, requestIP, editorEmail } = data;
   const resendApiKey = env.RESEND_API_KEY;
   const emailLogs = [];
   
   emailLogs.push('📧 [EMAIL] Iniciando envio de email...');
   emailLogs.push('📧 [EMAIL] Proposta: ' + proposalName);
+  emailLogs.push('📧 [EMAIL] Editor: ' + (editorEmail || 'desconhecido'));
   emailLogs.push('📧 [EMAIL] RESEND_API_KEY existe? ' + (!!resendApiKey));
   emailLogs.push('📧 [EMAIL] Alterações recebidas: ' + changes.length);
   emailLogs.push('📧 [EMAIL] Emissoras: ' + emissoras.length);
   
   console.log('📧 [EMAIL] Iniciando envio de email...');
+  console.log('📧 [EMAIL] Editor:', editorEmail || 'desconhecido');
   console.log('📧 [EMAIL] RESEND_API_KEY existe?', !!resendApiKey);
   console.log('📧 [EMAIL] Alterações recebidas:', changes.length);
   console.log('📧 [EMAIL] Emissoras:', emissoras.length);
@@ -1152,6 +1154,7 @@ async function sendNotificationEmail(env, data) {
           <p>A proposta <strong>"${proposalName}"</strong> foi alterada no sistema E-MDIAS. Confira os detalhes abaixo:</p>
           
           <div class="info-box">
+            <strong>📧 Alterado por:</strong> ${editorEmail || 'Desconhecido'}<br>
             <strong>📅 Data/Hora:</strong> ${new Date().toLocaleString('pt-BR')}<br>
             <strong>🌐 IP do Responsável:</strong> ${requestIP}
           </div>
