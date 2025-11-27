@@ -1186,10 +1186,11 @@ async function saveChanges() {
         return;
     }
     
-    console.log('💾 Preparando alterações para visualização...');
+    console.log('💾 Abrindo modal para capturar email...');
     
-    // Montar o resumo das alterações agrupadas por emissora
-    showConfirmModal();
+    // Mostrar modal de email
+    const emailModal = document.getElementById('emailModal');
+    emailModal.style.display = 'flex';
 }
 
 function showConfirmModal() {
@@ -1336,6 +1337,36 @@ function showConfirmModal() {
     console.log('✅ Modal aberto com sucesso!');
 }
 
+function closeEmailModal() {
+    console.log('❌ Fechando modal de email');
+    document.getElementById('emailModal').style.display = 'none';
+    document.getElementById('editorEmail').value = '';
+}
+
+function proceedWithEmail() {
+    const emailInput = document.getElementById('editorEmail');
+    const email = emailInput.value.trim();
+    
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+        alert('Por favor, insira um email válido!');
+        emailInput.focus();
+        return;
+    }
+    
+    console.log('✅ Email validado:', email);
+    
+    // Armazenar email no proposalData para usar depois
+    proposalData.editorEmail = email;
+    
+    // Fechar modal de email
+    closeEmailModal();
+    
+    // Abrir modal de confirmação
+    showConfirmModal();
+}
+
 function closeConfirmModal() {
     console.log('❌ Fechando modal (editando novamente)');
     document.getElementById('confirmModal').style.display = 'none';
@@ -1463,10 +1494,12 @@ async function confirmAndSave() {
             tableId: proposalData.tableId,
             emissoras: proposalData.emissoras,
             changes: proposalData.changes,
-            ocultasEmissoras: Array.from(proposalData.ocultasEmissoras)  // Converter Set para Array
+            ocultasEmissoras: Array.from(proposalData.ocultasEmissoras),  // Converter Set para Array
+            editorEmail: proposalData.editorEmail || 'desconhecido@email.com'  // Incluir email do editor
         };
         
         console.log('📤 Enviando dados:', dataToSave);
+        console.log('👤 Email do editor:', dataToSave.editorEmail);
         console.log('👤 Emissoras ocultas:', dataToSave.ocultasEmissoras);
         
         const response = await fetch(`${apiUrl}?id=${proposalData.tableId}`, {
