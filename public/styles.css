@@ -619,6 +619,12 @@ table td:nth-child(1) {
     z-index: 12;
 }
 
+table th:nth-child(1) {
+    background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
+    z-index: 21;
+    top: 0;
+}
+
 table th:nth-child(2),
 table td:nth-child(2) {
     position: sticky;
@@ -626,6 +632,11 @@ table td:nth-child(2) {
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-right: 1px solid var(--gray);
     z-index: 12;
+}
+
+table th:nth-child(2) {
+    z-index: 21;
+    top: 0;
 }
 
 table th:nth-child(3),
@@ -637,6 +648,11 @@ table td:nth-child(3) {
     z-index: 12;
 }
 
+table th:nth-child(3) {
+    z-index: 21;
+    top: 0;
+}
+
 table th:nth-child(4),
 table td:nth-child(4) {
     position: sticky;
@@ -644,6 +660,11 @@ table td:nth-child(4) {
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-right: 1px solid var(--gray);
     z-index: 12;
+}
+
+table th:nth-child(4) {
+    z-index: 21;
+    top: 0;
 }
 
 thead {
@@ -666,7 +687,6 @@ th {
     background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
     position: sticky;
     top: 0;
-    left: 0;
     z-index: 20;
 }
 
