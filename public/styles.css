@@ -195,29 +195,6 @@ body {
     color: #c4b5fd;
     font-family: 'Space Grotesk', sans-serif;
     letter-spacing: -0.5px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.btn-export-excel {
-    background: none;
-    border: none;
-    color: #c4b5fd;
-    font-size: 1.4rem;
-    cursor: pointer;
-    padding: 8px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.btn-export-excel:hover {
-    background: rgba(196, 181, 253, 0.2);
-    color: #ffffff;
-    transform: scale(1.1);
 }
 
 .header-actions {
