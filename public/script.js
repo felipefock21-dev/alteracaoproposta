@@ -1571,3 +1571,193 @@ window.addEventListener('resize', () => {
         if (chart) chart.resize();
     });
 });
+
+// =====================================================
+// EXPORTAÇÃO PARA EXCEL
+// =====================================================
+
+function exportToExcel() {
+    console.log('📊 Iniciando exportação para Excel...');
+    
+    // Criar workbook XLSX
+    const workbook = XLSX.utils.book_new();
+    
+    // Preparar dados da tabela
+    const tableData = [];
+    
+    // Cabeçalho
+    const headers = [
+        '✓',
+        'Região',
+        'Praça',
+        'Emissora'
+    ];
+    
+    // Adicionar cabeçalhos dos produtos dinâmicos
+    const produtosAtivos = new Set();
+    proposalData.emissoras.forEach(emissora => {
+        PRODUTOS.forEach(produto => {
+            const spots = emissora[produto.key] || 0;
+            if (spots > 0) {
+                produtosAtivos.add(produto.key);
+            }
+        });
+    });
+    
+    produtosAtivos.forEach(produtoKey => {
+        const produto = PRODUTOS.find(p => p.key === produtoKey && p.type === 'midia');
+        if (produto) {
+            headers.push(`${produto.label} (Spots)`, `${produto.label} (Valor)`);
+        }
+    });
+    
+    // Verificar se tem patrocínio
+    const temPatrocinioAtivo = proposalData.emissoras.some(e => e.cotasMeses > 0);
+    if (temPatrocinioAtivo) {
+        headers.push('Cotas/Meses');
+        headers.push('Ins 5"', 'Ins 15"', 'Ins 30"', 'Ins 60"');
+        headers.push('Valor Tabela por Cota', 'Valor Negociado por Cota');
+    }
+    
+    // Adicionar colunas finais
+    headers.push('Inv. Tabela', 'Inv. Negociado', 'Impactos');
+    
+    tableData.push(headers);
+    
+    // Preencher dados das emissoras
+    proposalData.emissoras.forEach((emissora) => {
+        const row = [
+            proposalData.ocultasEmissoras.has(emissora.id) ? '' : '✓',
+            emissora.uf || '-',
+            emissora.praca || '-',
+            emissora.emissora || '-'
+        ];
+        
+        // Produtos dinâmicos
+        let investimentoTabelaEmissora = 0;
+        let investimentoNegociadoEmissora = 0;
+        
+        produtosAtivos.forEach(produtoKey => {
+            const produto = PRODUTOS.find(p => p.key === produtoKey && p.type === 'midia');
+            if (produto) {
+                const spots = emissora[produto.key] || 0;
+                const valorTabela = emissora[produto.tabelaKey] || 0;
+                const valorNegociado = emissora[produto.negKey] || 0;
+                
+                const invTabela = spots * valorTabela;
+                const invNegociado = spots * valorNegociado;
+                
+                investimentoTabelaEmissora += invTabela;
+                investimentoNegociadoEmissora += invNegociado;
+                
+                row.push(spots);
+                row.push(valorNegociado);
+            }
+        });
+        
+        // Patrocínio
+        if (temPatrocinioAtivo) {
+            const cotasMeses = emissora.cotasMeses || 0;
+            const valorTabelaCota = emissora.valorTabelaCota || 0;
+            const valorNegociadoCota = emissora.valorNegociadoCota || 0;
+            
+            const invTabePatrocinio = cotasMeses * valorTabelaCota;
+            const invNegPatrocinio = cotasMeses * valorNegociadoCota;
+            
+            investimentoTabelaEmissora += invTabePatrocinio;
+            investimentoNegociadoEmissora += invNegPatrocinio;
+            
+            row.push(cotasMeses);
+            row.push(emissora.ins5 || 0);
+            row.push(emissora.ins15 || 0);
+            row.push(emissora.ins30 || 0);
+            row.push(emissora.ins60 || 0);
+            row.push(valorTabelaCota);
+            row.push(valorNegociadoCota);
+        }
+        
+        // Investimentos e impactos
+        row.push(investimentoTabelaEmissora);
+        row.push(investimentoNegociadoEmissora);
+        row.push(emissora.impactos || 0);
+        
+        tableData.push(row);
+    });
+    
+    // Adicionar linha de totais
+    const totalsRow = ['TOTAL'];
+    
+    let totalSpots = 0;
+    let totalInvTabela = 0;
+    let totalInvNegociado = 0;
+    let totalImpactos = 0;
+    
+    proposalData.emissoras.forEach(emissora => {
+        if (!proposalData.ocultasEmissoras.has(emissora.id)) {
+            // Total de spots
+            PRODUTOS.forEach(produto => {
+                if (produto.type === 'midia') {
+                    totalSpots += emissora[produto.key] || 0;
+                } else if (produto.type === 'patrocinio') {
+                    totalSpots += emissora[produto.quantidadeKey] || 0;
+                }
+            });
+            
+            // Totais de investimento
+            let invTabela = 0;
+            let invNegociado = 0;
+            
+            PRODUTOS.forEach(produto => {
+                if (produto.type === 'midia') {
+                    const spots = emissora[produto.key] || 0;
+                    invTabela += spots * (emissora[produto.tabelaKey] || 0);
+                    invNegociado += spots * (emissora[produto.negKey] || 0);
+                }
+            });
+            
+            if (emissora.cotasMeses > 0) {
+                invTabela += (emissora.cotasMeses || 0) * (emissora.valorTabelaCota || 0);
+                invNegociado += (emissora.cotasMeses || 0) * (emissora.valorNegociadoCota || 0);
+            }
+            
+            totalInvTabela += invTabela;
+            totalInvNegociado += invNegociado;
+            totalImpactos += emissora.impactos || 0;
+        }
+    });
+    
+    // Preencher totals row com espaços vazios até as colunas de totais
+    while (totalsRow.length < headers.length - 3) {
+        totalsRow.push('');
+    }
+    
+    totalsRow.push(totalInvTabela);
+    totalsRow.push(totalInvNegociado);
+    totalsRow.push(totalImpactos);
+    
+    tableData.push(totalsRow);
+    
+    // Converter para worksheet
+    const worksheet = XLSX.utils.aoa_to_sheet(tableData);
+    
+    // Ajustar largura das colunas
+    worksheet['!cols'] = [
+        { wch: 5 },      // ✓
+        { wch: 12 },     // Região
+        { wch: 15 },     // Praça
+        { wch: 20 },     // Emissora
+    ];
+    
+    // Adicionar worksheet ao workbook
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Proposta');
+    
+    // Gerar nome do arquivo
+    const fileName = `${proposalData.proposalName || 'Proposta'}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`;
+    
+    // Salvar arquivo
+    XLSX.writeFile(workbook, fileName);
+    
+    console.log('✅ Arquivo Excel exportado:', fileName);
+}
+
+
