@@ -793,8 +793,11 @@ function updateStats() {
                         totalSpots += spots;
                     }
                 } else if (produto.type === 'patrocinio') {
-                    // PATROCÍNIO: já foi calculado na renderização da tabela
-                    // Não precisa fazer nada aqui, pois é somado em investimentoTabelaEmissora e investimentoNegociadoEmissora
+                    // PATROCÍNIO: contar inserções para total de spots
+                    const inseracoes = emissora[produto.quantidadeKey] || 0;
+                    if (inseracoes > 0) {
+                        totalSpots += inseracoes;
+                    }
                 }
             });
             
