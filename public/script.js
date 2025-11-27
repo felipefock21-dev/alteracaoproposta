@@ -88,7 +88,7 @@ function addToHistory(emissoraNome, campo, valorAnterior, novoValor) {
     
     history.push(entry);
     saveHistoryToStorage(history);
-    renderHistoryTable();
+    // renderHistoryTable(); // Desativado - histórico removido do site
 }
 
 function renderHistoryTable() {
@@ -124,8 +124,9 @@ function renderHistoryTable() {
 
 function clearHistory() {
     if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
-        localStorage.removeItem(HISTORY_STORAGE_KEY);
-        renderHistoryTable();
+        const key = getHistoryStorageKey();
+        localStorage.removeItem(key);
+        // renderHistoryTable(); // Desativado - histórico removido do site
     }
 }
 
@@ -184,7 +185,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await loadProposalFromNotion(proposalData.tableId);
         updateProposalTitle();  // Atualizar título com nome da proposta
         renderInterface();
-        renderHistoryTable();  // Carregar histórico ao inicializar
+        // renderHistoryTable();  // Desativado - histórico removido do site
         console.log('✅ Página carregada com sucesso!');
     } catch (error) {
         console.error('❌ Erro ao carregar:', error);
@@ -861,8 +862,8 @@ function updateStats() {
     // Atualizar lista de produtos ativos
     updateActiveProducts();
     
-    // Atualizar tabela comparativa "Sua Proposta"
-    updateComparisonTable(totalInvestimentoNegociado, totalInvestimentoTabela);
+    // Atualizar tabela comparativa "Sua Proposta" - Desativado
+    // updateComparisonTable(totalInvestimentoNegociado, totalInvestimentoTabela);
     
     console.log('✅ Estatísticas atualizadas!\n');
 }
@@ -891,12 +892,12 @@ function renderCharts() {
     try {
         // Destroi os gráficos antigos se existirem
         if (charts.investment) {
-            charts.investment.destroy();
-            charts.investment = null;
+            // charts.investment.destroy(); // Desativado - gráfico removido do site
+            // charts.investment = null;
         }
         
-        renderInvestmentChart();
-        console.log('✅ Gráficos renderizados com sucesso!');
+        // renderInvestmentChart(); // Desativado - gráfico removido do site
+        console.log('✅ Estatísticas renderizadas com sucesso!');
     } catch (error) {
         console.error('⚠️ Erro ao renderizar gráficos (não crítico):', error);
     }
