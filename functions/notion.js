@@ -1210,15 +1210,10 @@ async function sendNotificationEmail(env, data) {
     emailHTML += '</div>';
   }
 
-  // Link da proposta
+  // Fechar conteúdo
   emailHTML += `
-          <div class="info-box">
-            <strong> Link da Proposta:</strong><br>
-            <a href="https://alteracaoproposta.pages.dev/?id=${tableId}" class="link">Abrir Proposta no E-MDIAS</a>
-          </div>
-          
           <p style="color: #999; font-size: 12px; margin-top: 20px;">
-            Este  um email automtico. No responda este message.
+            Este é um email automático. Não responda este message.
           </p>
         </div>
         
