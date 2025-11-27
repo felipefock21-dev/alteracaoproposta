@@ -1270,6 +1270,13 @@ async function sendNotificationEmail(env, data) {
       emailLogs.push(errorMsg);
       console.error(errorMsg);
       
+      // Mensagem específica para erro 403 (domínio não verificado)
+      if (response.status === 403) {
+        const domainMsg = '⚠️ [EMAIL] Erro 403: O domínio hubradios.com não está verificado no Resend. Acesse https://resend.com/domains para verificar o domínio.';
+        emailLogs.push(domainMsg);
+        console.warn(domainMsg);
+      }
+      
       try {
         const errorJson = JSON.parse(errorText);
         emailLogs.push('📧 [EMAIL] Erro detalhado: ' + JSON.stringify(errorJson));
