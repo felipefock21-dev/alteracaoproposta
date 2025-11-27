@@ -524,7 +524,6 @@ function renderSpotsTable() {
             <th style="min-width: 80px;">Região</th>
             <th style="min-width: 100px;">Praça</th>
             <th style="min-width: 140px;">Emissora</th>
-            <th style="min-width: 120px;">Impactos</th>
         `;
         
         // Cabeçalhos dinâmicos por produto de MÍDIA AVULSA
@@ -562,10 +561,11 @@ function renderSpotsTable() {
             `;
         }
         
-        // Colunas finais de investimento
+        // Colunas finais de investimento e impactos
         headerRow.innerHTML += `
             <th style="min-width: 140px;">Inv. Tabela</th>
             <th style="min-width: 140px;">Inv. Negociado</th>
+            <th style="min-width: 120px;">Impactos</th>
         `;
         
         thead.appendChild(headerRow);
@@ -615,9 +615,6 @@ function renderSpotsTable() {
             <td class="emissora-cell">
                 ${logoUrl ? `<img src="${logoUrl}" alt="${emissora.emissora}" class="emissora-logo" onerror="console.error('Erro ao carregar logo de ${emissora.emissora}')">` : ''}
                 <span class="emissora-name"><strong>${emissora.emissora || '-'}</strong></span>
-            </td>
-            <td style="text-align: center; font-weight: 600; color: #06055b;">
-                ${(emissora.impactos || 0).toLocaleString('pt-BR')}
             </td>
         `;
         
@@ -713,6 +710,9 @@ function renderSpotsTable() {
         row.innerHTML += `
             <td class="investment-tabela">R$ ${investimentoTabelaEmissora.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="investment-negociado">R$ ${investimentoNegociadoEmissora.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+            <td style="text-align: center; font-weight: 600; color: #06055b; min-width: 120px;">
+                ${(emissora.impactos || 0).toLocaleString('pt-BR')}
+            </td>
         `;
         
         tbody.appendChild(row);
