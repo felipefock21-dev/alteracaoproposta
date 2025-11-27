@@ -13,6 +13,7 @@ let proposalData = {
     changedEmissoras: new Set(),  // Rastreia quais emissoras tiveram mudanças no status "Excluir"
     temMidia: false,  // Se tem produtos de Mídia Avulsa
     temPatrocinio: false,  // Se tem produtos de Patrocínio
+    editorEmail: null,  // Email do editor que está fazendo as alterações
     availableProducts: {  // Produtos disponíveis carregados do Notion
         midia: [],
         patrocinio: []

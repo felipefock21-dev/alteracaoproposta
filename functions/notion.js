@@ -863,8 +863,8 @@ export async function onRequest(context) {
       try {
         console.log('📧 [PATCH] Chamando sendNotificationEmail...');
         console.log('📧 [PATCH] updatePromises:', updatePromises.length, 'alterações');
-        console.log('📧 [PATCH] data.editorEmail:', data.editorEmail);
-        console.log('📧 [PATCH] editorEmail final:', data.editorEmail || 'desconhecido@email.com');
+        console.log('📧 [PATCH] requestBody.editorEmail:', requestBody.editorEmail);
+        console.log('📧 [PATCH] editorEmail final:', requestBody.editorEmail || 'desconhecido@email.com');
         
         // Buscar nome da proposta
         let proposalName = 'Proposta';
@@ -880,7 +880,7 @@ export async function onRequest(context) {
           changes: updatePromises,
           emissoras: emissoras,
           requestIP: request.headers.get('cf-connecting-ip') || 'desconhecido',
-          editorEmail: data.editorEmail || 'desconhecido@email.com'
+          editorEmail: requestBody.editorEmail || 'desconhecido@email.com'
         };
         
         console.log('📧 [PATCH] Payload enviado para sendNotificationEmail:', JSON.stringify(emailPayload));
@@ -1090,9 +1090,19 @@ async function getProposalName(notionToken, databaseId) {
 // =====================================================
 
 async function sendNotificationEmail(env, data) {
+  const emailLogs = [];
+  
+  // Validação defensiva
+  if (!data || typeof data !== 'object') {
+    emailLogs.push('❌ [EMAIL] ERRO: data inválida ou undefined!');
+    emailLogs.push('❌ [EMAIL] data type: ' + typeof data);
+    emailLogs.push('❌ [EMAIL] data value: ' + JSON.stringify(data));
+    console.error('❌ [EMAIL] ERRO: data inválida ou undefined!', data);
+    return emailLogs;
+  }
+  
   const { tableId, proposalName, changes, emissoras, requestIP, editorEmail } = data;
   const resendApiKey = env.RESEND_API_KEY;
-  const emailLogs = [];
   
   emailLogs.push('📧 [EMAIL] ===== INICIANDO ENVIO DE EMAIL =====');
   emailLogs.push('📧 [EMAIL] Proposta: ' + proposalName);
