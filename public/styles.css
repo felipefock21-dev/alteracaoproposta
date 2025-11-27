@@ -616,12 +616,12 @@ table td:nth-child(1) {
     position: sticky;
     left: 0;
     background: var(--white);
-    z-index: 12;
+    z-index: 13;
 }
 
 table th:nth-child(1) {
     background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
-    z-index: 21;
+    z-index: 22;
     top: 0;
 }
 
@@ -631,11 +631,11 @@ table td:nth-child(2) {
     left: 54px;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-right: 1px solid var(--gray);
-    z-index: 12;
+    z-index: 13;
 }
 
 table th:nth-child(2) {
-    z-index: 21;
+    z-index: 22;
     top: 0;
 }
 
@@ -645,11 +645,11 @@ table td:nth-child(3) {
     left: 118px;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-right: 1px solid var(--gray);
-    z-index: 12;
+    z-index: 13;
 }
 
 table th:nth-child(3) {
-    z-index: 21;
+    z-index: 22;
     top: 0;
 }
 
@@ -659,11 +659,11 @@ table td:nth-child(4) {
     left: 172px;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-right: 1px solid var(--gray);
-    z-index: 12;
+    z-index: 13;
 }
 
 table th:nth-child(4) {
-    z-index: 21;
+    z-index: 22;
     top: 0;
 }
 
@@ -687,7 +687,7 @@ th {
     background: linear-gradient(135deg, #f3f0ff 0%, #ede9fe 100%);
     position: sticky;
     top: 0;
-    z-index: 20;
+    z-index: 21;
 }
 
 td {
