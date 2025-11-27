@@ -612,29 +612,38 @@ table {
 
 /* Colunas fixas na tabela */
 table th:nth-child(1),
-table th:nth-child(2),
-table th:nth-child(3),
-table th:nth-child(4),
-table td:nth-child(1),
-table td:nth-child(2),
-table td:nth-child(3),
-table td:nth-child(4) {
+table td:nth-child(1) {
     position: sticky;
     left: 0;
     background: var(--white);
+    z-index: 12;
 }
 
 table th:nth-child(2),
-table th:nth-child(3),
-table th:nth-child(4) {
+table td:nth-child(2) {
+    position: sticky;
+    left: 54px;
     background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-right: 1px solid var(--gray);
+    z-index: 12;
 }
 
-table td:nth-child(2),
-table td:nth-child(3),
-table td:nth-child(4) {
+table th:nth-child(3),
+table td:nth-child(3) {
+    position: sticky;
+    left: 118px;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
     border-right: 1px solid var(--gray);
+    z-index: 12;
+}
+
+table th:nth-child(4),
+table td:nth-child(4) {
+    position: sticky;
+    left: 172px;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-right: 1px solid var(--gray);
+    z-index: 12;
 }
 
 thead {
