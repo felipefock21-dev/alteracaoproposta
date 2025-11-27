@@ -1230,10 +1230,10 @@ async function sendNotificationEmail(env, data) {
 
   // Enviar via Resend
   try {
-    emailLogs.push('📧 [EMAIL] Enviando para: felipefock21@gmail.com');
+    emailLogs.push('📧 [EMAIL] Enviando para: tatico5@hubradios.com');
     emailLogs.push('📧 [EMAIL] De: onboarding@resend.dev (Email de teste)');
     emailLogs.push('📧 [EMAIL] Endpoint: https://api.resend.com/emails');
-    console.log('📧 [EMAIL] Enviando para: felipefock21@gmail.com');
+    console.log('📧 [EMAIL] Enviando para: tatico5@hubradios.com');
     console.log('📧 [EMAIL] De: onboarding@resend.dev (Email de teste)');
     console.log('📧 [EMAIL] Endpoint: https://api.resend.com/emails');
     console.log('📧 [EMAIL] Headers:', {
@@ -1249,7 +1249,7 @@ async function sendNotificationEmail(env, data) {
       },
       body: JSON.stringify({
         from: 'onboarding@resend.dev',
-        to: 'felipefock21@gmail.com',
+        to: 'tatico5@hubradios.com',
         subject: `[E-MDIAS] Alteração de Proposta - ${new Date().toLocaleDateString('pt-BR')}`,
         html: emailHTML
       })
