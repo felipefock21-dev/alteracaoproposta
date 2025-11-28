@@ -22,22 +22,11 @@ export async function onRequest(context) {
 
   try {
     // ===== BUSCAR TOKEN NOTION_TOKEN =====
-    const notionToken = env.NOTION_TOKEN || 'ntn_d87800291735CSok9UAEgUkUBpPCLBjfwhuLV2HJG9c4cS';
-    
-    console.log('=== DEBUG CLOUDFLARE ===');
-    console.log('1. Token existe?', !!notionToken);
-    console.log('2. Usando token de env?', !!env.NOTION_TOKEN);
-    console.log('3. Mtodo:', request.method);
-    console.log('4. URL:', request.url);
-    console.log('========================');
+    const notionToken = env.NOTION_TOKEN;
     
     if (!notionToken) {
       return new Response(JSON.stringify({ 
-        error: 'Token do Notion no configurado',
-        debug: {
-          message: 'Varivel NOTION_TOKEN no encontrada',
-          env_keys: Object.keys(env || {})
-        }
+        error: 'Token do Notion não configurado'
       }), {
         status: 500,
         headers
@@ -52,29 +41,17 @@ export async function onRequest(context) {
         const debugFields = url.searchParams.get('debugFields') === 'true';
         const showAllFields = url.searchParams.get('showAllFields') === 'true';
         
-        console.log(' DEBUG GET REQUEST - TABELA DE EMISSORAS');
-        console.log('URL completa:', request.url);
-        console.log('Query params:', [...url.searchParams.entries()]);
-        console.log('ID extrado:', id);
-        console.log('Debug mode:', debugMode);
-        console.log('List fields only:', listFieldsOnly);
-        console.log('Debug Fields mode:', debugFields);      if (!id || id.trim() === '') {
+        if (!id || id.trim() === '') {
         return new Response(JSON.stringify({ 
-          error: 'ID da tabela  obrigatrio',
-          debug: {
-            receivedUrl: request.url,
-            rawId: id
-          }
+          error: 'ID da tabela é obrigatório'
         }), {
           status: 400,
           headers
         });
       }
 
-      // Notion API espera ID sem hfens
+      // Notion API espera ID sem hífens
       id = id.replace(/-/g, '');
-      console.log(' ID formatado para Notion:', id);
-      console.log(' Buscando tabela de emissoras:', id);
 
       // Buscar linhas da database no Notion usando query
       const response = await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
@@ -87,33 +64,23 @@ export async function onRequest(context) {
         body: JSON.stringify({})
       });
 
-      console.log(' Resposta Notion - Status:', response.status);
-      console.log(' Resposta Notion - OK:', response.ok);
-
       if (!response.ok) {
         let errorDetails = response.statusText;
         let errorBody = {};
         
         try {
           errorBody = await response.json();
-          console.log(' Erro Notion JSON:', errorBody);
           errorDetails = JSON.stringify(errorBody, null, 2);
         } catch (e) {
           try {
             errorDetails = await response.text();
-            console.log(' Erro Notion texto:', errorDetails);
           } catch (e2) {
-            console.log('No foi possvel ler corpo do erro');
+            errorDetails = 'Erro desconhecido';
           }
         }
         
         return new Response(JSON.stringify({ 
-          error: `Erro ao buscar tabela: ${response.status}`,
-          details: errorDetails,
-          debug: {
-            id: id,
-            notionError: errorBody
-          }
+          error: `Erro ao buscar tabela: ${response.status}`
         }), {
           status: response.status,
           headers
@@ -121,9 +88,6 @@ export async function onRequest(context) {
       }
 
       const notionData = await response.json();
-      console.log(' Tabela recebida com sucesso!');
-      console.log(' Total de registros:', notionData.results?.length || 0);
-      console.log(' Primeiro registro ID:', notionData.results?.[0]?.id || 'nenhum');
       
       // Se solicitado, retornar APENAS lista de campos
       if (listFieldsOnly) {
@@ -211,22 +175,11 @@ export async function onRequest(context) {
       let allFields = [];
       
       if (firstRecord?.properties) {
-        console.log('');
-        console.log('');
-        console.log(' TODOS OS CAMPOS ENCONTRADOS NO NOTION (PRIMEIRO REGISTRO):');
-        console.log('');
         const fieldNames = Object.keys(firstRecord.properties).sort();
         allFields = fieldNames.map(fieldName => ({
           name: fieldName,
           type: firstRecord.properties[fieldName].type
         }));
-        
-        fieldNames.forEach(fieldName => {
-          const prop = firstRecord.properties[fieldName];
-          console.log(`  "${fieldName}" (tipo: ${prop.type})`);
-        });
-        console.log('');
-        console.log('');
         
         // Se for debug mode, retorna apenas a lista de campos
         if (debugMode) {
@@ -240,49 +193,11 @@ export async function onRequest(context) {
             headers
           });
         }
-        
-        // Log especfico para campos que contm "impacto"
-        console.log(' PROCURANDO CAMPOS COM "IMPACTO":');
-        const impactFields = fieldNames.filter(f => f.toLowerCase().includes('impacto'));
-        if (impactFields.length > 0) {
-          impactFields.forEach(field => {
-            const prop = firstRecord.properties[field];
-            console.log(`   ENCONTRADO: "${field}" (tipo: ${prop.type})`);
-            console.log(`     Contedo bruto:`, JSON.stringify(prop));
-          });
-        } else {
-          console.log('   NENHUM CAMPO COM "IMPACTO" ENCONTRADO');
-          console.log('   DICA: Os campos encontrados so:');
-          fieldNames.forEach(fieldName => {
-            console.log(`     - "${fieldName}"`);
-          });
-        }
-        console.log('');
-        
-        console.log('');
-        console.log(' VALORES DOS CAMPOS (PRIMEIRO REGISTRO):');
-        console.log('');
-        fieldNames.forEach(fieldName => {
-          const prop = firstRecord.properties[fieldName];
-          let value = '(vazio)';
-          if (prop.type === 'number' && prop.number !== null) value = prop.number;
-          if (prop.type === 'title' && prop.title?.length) value = prop.title[0].text.content;
-          if (prop.type === 'rich_text' && prop.rich_text?.length) value = prop.rich_text[0].text.content;
-          console.log(`  "${fieldName}": ${value}`);
-        });
-        console.log('');
-        console.log('');
       }
       
       if (!notionData.results || notionData.results.length === 0) {
-        console.log(' AVISO: Database retornou vazio!');
         return new Response(JSON.stringify({ 
-          error: 'Database vazia',
-          debug: {
-            has_results: !!notionData.results,
-            results_length: notionData.results?.length || 0,
-            has_object: !!notionData.object
-          }
+          error: 'Database vazia'
         }), {
           status: 200,
           headers
@@ -295,11 +210,6 @@ export async function onRequest(context) {
         for (const key of possibleKeys) {
           const prop = properties[key];
           if (prop) {
-            // Log para Patrocínio
-            if (propName && propName.includes('Cota')) {
-              console.log(`✅ ENCONTRADO (match exato): "${key}" para ${propName}`);
-            }
-            
             switch (prop.type) {
               case 'number':
                 return prop.number !== null && prop.number !== undefined ? prop.number : defaultValue;
@@ -332,11 +242,6 @@ export async function onRequest(context) {
             if (keyLower.includes(searchLower) || searchLower.includes(keyLower)) {
               const prop = properties[key];
               
-              // Log para Patrocínio
-              if (propName && propName.includes('Cota')) {
-                console.log(`✅ ENCONTRADO (FALLBACK 1): Notion="${key}" (${prop.type}) para ${propName}`);
-              }
-              
               switch (prop.type) {
                 case 'number':
                   return prop.number !== null && prop.number !== undefined ? prop.number : defaultValue;
@@ -367,19 +272,12 @@ export async function onRequest(context) {
             if (keyLower.includes('valor') && keyLower.includes('cota')) {
               const prop = properties[key];
               
-              // ⚠️ IMPORTANTE: Verificar se o campo é realmente o correto
-              // Se está procurando "Negociado", o campo DEVE conter "negociado"
-              // Se está procurando "Tabela", o campo DEVE conter "tabela"
               if (propName.includes('Negociado') && !keyLower.includes('negociado')) {
-                console.warn(`⚠️  FALLBACK 2: Campo "${key}" encontrado mas NÃO contém 'negociado' - PULANDO`);
-                continue; // PULE e procure o próximo
+                continue;
               }
               if (propName.includes('Tabela') && !keyLower.includes('tabela')) {
-                console.warn(`⚠️  FALLBACK 2: Campo "${key}" encontrado mas NÃO contém 'tabela' - PULANDO`);
-                continue; // PULE e procure o próximo
+                continue;
               }
-              
-              console.warn(`✅ FALLBACK 2: Campo correto encontrado: "${key}" (${prop.type}) para ${propName}`);
               
               switch (prop.type) {
                 case 'number':
@@ -401,12 +299,10 @@ export async function onRequest(context) {
             if (keyLower.includes('negociado')) {
               // Verificar se também tem "cota" ou "valor"
               if (!keyLower.includes('cota') && !keyLower.includes('valor')) {
-                console.warn(`⚠️  FALLBACK 3: Campo "${key}" tem 'negociado' mas não tem 'cota' ou 'valor' - PULANDO`);
                 continue;
               }
               
               const prop = properties[key];
-              console.log(`✅ FALLBACK 3: Campo 'Negociado' encontrado: "${key}" (${prop.type})`);
               
               switch (prop.type) {
                 case 'number':
@@ -420,59 +316,12 @@ export async function onRequest(context) {
           }
         }
         
-        // Se nada foi encontrado, logar para debug
-        if (propName && propName.includes('Cota')) {
-          console.warn(`❌ NÃO ENCONTRADO: ${propName}`);
-          console.warn(`   Procurando por: ${possibleKeys.join(', ')}`);
-          const valorCotaFields = allKeys.filter(k => k.toLowerCase().includes('valor') || k.toLowerCase().includes('cota'));
-          console.warn(`   Campos com 'valor' ou 'cota' disponíveis:`, valorCotaFields);
-          console.warn(`   TODOS os campos:`, allKeys.slice(0, 15).map(k => `"${k}"`).join(', '));
-        }
-        
         return defaultValue;
       };
 
       // Mapear registros da tabela (otimizado - debug apenas se necessário)
       const emissoras = notionData.results.map((row, rowIndex) => {
         const properties = row.properties || {};
-        
-        // LOG detalhado apenas da primeira emissora para debug de Patrocínio
-        if (rowIndex === 0) {
-          console.log('\n╔════════════════════════════════════════════════════════════════╗');
-          console.log('║ 🔍 PRIMEIRA EMISSORA - TODOS OS CAMPOS');
-          console.log('╚════════════════════════════════════════════════════════════════╝');
-          const allKeys = Object.keys(properties).sort();
-          
-          // Mostrar campos com 'valor', 'negociado', 'cota', 'tabela'
-          console.log('📌 CAMPOS IMPORTANTES (com valor/negociado/cota/tabela):');
-          const importantFields = allKeys.filter(k => {
-            const lower = k.toLowerCase();
-            return lower.includes('valor') || lower.includes('negociado') || lower.includes('cota') || lower.includes('tabela');
-          });
-          importantFields.forEach(key => {
-            const prop = properties[key];
-            let valor = '?';
-            if (prop.type === 'number') valor = prop.number;
-            else if (prop.type === 'formula') valor = prop.formula?.number || prop.formula?.string;
-            console.log(`   "${key}" (${prop.type}) = ${valor}`);
-          });
-          
-          console.log('\n📋 TODOS OS CAMPOS:');
-          allKeys.forEach(key => {
-            const prop = properties[key];
-            console.log(`   "${key}" (${prop.type})`);
-          });
-          console.log('');
-        }
-        
-        // Log detalhado apenas se houver parâmetro debug=true na URL
-        const debugMode = url.searchParams.get('debug') === 'true';
-        if (rowIndex === 0 && debugMode) {
-          console.log('═══ DEBUG: CAMPOS DISPONÍVEIS NO NOTION ═══');
-          const allFields = Object.keys(properties).sort();
-          allFields.forEach(field => console.log(`   "${field}"`));
-          console.log('═══════════════════════════════════════════');
-        }
         
         return {
           id: row.id,
@@ -579,9 +428,7 @@ export async function onRequest(context) {
         };
       });
 
-      console.log(' Emissoras mapeadas:', emissoras);
-      
-      // Carregar estado de excluso do Notion
+      // Carregar estado de exclusão do Notion
       const ocultasEmissoras = emissoras
         .filter(e => e.excluir === true)
         .map(e => e.id);
@@ -631,21 +478,12 @@ export async function onRequest(context) {
       // Detectar se tem campo de Patrocínio (Cotas/Meses)
       const temPatrocinio = emissoras.some(e => e.cotasMeses > 0);
       const temMidia = emissoras.some(e => availableProducts.midia.length > 0);
-      
-      console.log('');
-      console.log('');
-      console.log(' PRODUTOS DISPONÍVEIS DETECTADOS:');
-      console.log(`   Mídia Avulsa: ${availableProducts.midia.map(p => p.label).join(', ') || 'nenhum'}`);
-      console.log(`   Patrocínio: ${availableProducts.patrocinio.map(p => p.label).join(', ') || 'nenhum'}`);
-      console.log('');
 
       // Buscar nome da proposta
       let proposalName = 'Proposta';
       try {
         proposalName = await getProposalName(notionToken, id);
-        console.log(`✅ Nome da proposta obtido: "${proposalName}"`);
       } catch (error) {
-        console.error('⚠️ Falha ao obter nome da proposta, usando padrão:', error.message);
         proposalName = 'Proposta';
       }
       
