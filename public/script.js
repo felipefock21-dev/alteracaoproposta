@@ -1712,21 +1712,24 @@ function showError(message) {
 
 function goBack() {
     /**
-     * Redireciona para a proposta no hub emidiastec:
-     * URL Padrão: https://hub.emidiastec.com.br/NOME-PROPOSTA-ID
-     * Exemplo: https://hub.emidiastec.com.br/Corteva-24-11-16-27-Patroc-nio-2b520b549cf581818da3d9e924248ec6
+     * Redireciona para a proposta com fallback:
+     * URL Principal: https://hub.emidiastec.com.br/NOME-PROPOSTA-ID
+     * URL Fallback: https://e-radios.notion.site/NOME-PROPOSTA-ID
      * 
-     * Fallback: https://e-radios.notion.site/
+     * Exemplo: https://hub.emidiastec.com.br/Corteva-24-11-16-27-Patroc-nio-2b520b549cf581818da3d9e924248ec6
      */
     
     const proposalName = proposalData.proposalName ? proposalData.proposalName.trim().replace(/\s+/g, '-') : '';
     const pageId = proposalData.tableId || '';
     
-    // URL única: hub.emidiastec.com.br/NOMEPROPOSTA-IDPAGINA
-    const hubUrl = `https://hub.emidiastec.com.br/${proposalName}-${pageId}`;
+    // Construir URL padrão: NOME-PROPOSTA-ID
+    const urlPath = `${proposalName}-${pageId}`;
     
-    // URL fallback: notion.site
-    const fallbackUrl = 'https://e-radios.notion.site/';
+    // URL principal: hub.emidiastec.com.br
+    const hubUrl = `https://hub.emidiastec.com.br/${urlPath}`;
+    
+    // URL fallback: e-radios.notion.site com mesmo padrão
+    const fallbackUrl = `https://e-radios.notion.site/${urlPath}`;
     
     console.log(`🔗 Redirecionando para: ${hubUrl}`);
     console.log(`⚠️ Fallback disponível: ${fallbackUrl}`);
@@ -1738,12 +1741,12 @@ function goBack() {
         
         // Fallback após 4 segundos se a URL não carregar
         setTimeout(() => {
-            console.warn('⚠️ URL do hub não respondeu, usando fallback');
+            console.warn('⚠️ Hub não respondeu, redirecionando para Notion');
             window.location.href = fallbackUrl;
         }, 4000);
     } else {
         // Se faltam dados, ir direto para o fallback
-        console.warn('⚠️ Dados insuficientes para URL do hub, usando fallback');
+        console.warn('⚠️ Dados insuficientes para construir URL, usando fallback');
         window.location.href = fallbackUrl;
     }
 }
