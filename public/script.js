@@ -166,14 +166,9 @@ function getLogoUrl(linkLogoField) {
 // INICIALIZAÇÃO
 // =====================================================
 
-console.log('═══════════════════════════════════════════════════════════════');
-console.log('🔥 script.js CARREGADO!');
-console.log('═══════════════════════════════════════════════════════════════');
+// Script carregado
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('\n🎯 DOMContentLoaded DISPARADO!');
-    console.log('🚀 Inicializando página de proposta...');
-    
     try {
         const params = new URLSearchParams(window.location.search);
         proposalData.tableId = params.get('id');
@@ -184,12 +179,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         await loadProposalFromNotion(proposalData.tableId);
-        updateProposalTitle();  // Atualizar título com nome da proposta
+        updateProposalTitle();
         renderInterface();
-        // renderHistoryTable();  // Desativado - histórico removido do site
-        console.log('✅ Página carregada com sucesso!');
     } catch (error) {
-        console.error('❌ Erro ao carregar:', error);
+        console.error('Erro ao carregar proposta:', error);
         showError(error.message);
     }
 });
@@ -249,55 +242,23 @@ function loadFromWelcome() {
 // =====================================================
 
 async function loadProposalFromNotion(tableId) {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: loadProposalFromNotion()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('Parâmetro tableId:', tableId);
-    
     const apiUrl = getApiUrl();
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : apiUrl + '/';
     const finalUrl = `${baseUrl}?id=${tableId}`;
     
-    console.log(`📡 URL final: ${finalUrl}`);
-    
     try {
         const response = await fetch(finalUrl);
         
-        console.log(`📊 Status HTTP: ${response.status}`);
-        console.log(`✅ OK: ${response.ok}`);
-        
         if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({}));
-            console.log(`❌ Erro: ${JSON.stringify(errorBody)}`);
             throw new Error(`Erro ao carregar dados: ${response.status}`);
         }
 
         const data = await response.json();
         
-        // Log detalhado no console para diagnóstico
-        console.log('');
-        console.log('╔════════════════════════════════════════════════════════╗');
-        console.log('║  RESPOSTA BRUTA DA API - PRIMEIRO REGISTRO COMPLETO   ║');
-        console.log('╚════════════════════════════════════════════════════════╝');
-        if (Array.isArray(data) && data.length > 0) {
-            console.log(data[0]);
-        } else {
-            console.log(data);
-        }
-        console.log('');
-        
-        console.log(`📦 Dados tipo: ${typeof data}`);
-        console.log(`📦 Dados é array? ${Array.isArray(data)}`);
-        console.log(`📦 Dados tem .error? ${'error' in data}`);
-        
-        // Se recebeu erro, mostrar
         if (data.error) {
-          console.log(`❌ API retornou erro: ${data.error}`);
-          console.log(`📋 Debug info: ${JSON.stringify(data.debug || {})}`);
           throw new Error(`Erro da API: ${data.error}`);
         }
         
-        // Se tem estrutura com debug, extrair emissoras
         let emissoras = Array.isArray(data) ? data : (data.emissoras || []);
         let ocultasEmissoras = data.ocultasEmissoras || [];
         let proposalName = data.proposalName || 'Proposta';
@@ -305,59 +266,20 @@ async function loadProposalFromNotion(tableId) {
         let temMidia = data.temMidia || false;
         let temPatrocinio = data.temPatrocinio || false;
         
-        console.log('\n═══ DADOS RECEBIDOS DO API /notion ═══');
-        console.log(`📦 proposalName: "${proposalName}"`);
-        console.log(`📦 temMidia: ${temMidia}, temPatrocinio: ${temPatrocinio}`);
-        console.log(`📦 Produtos Mídia: ${availableProducts.midia.map(p => p.label).join(', ') || 'nenhum'}`);
-        console.log(`📦 Produtos Patrocínio: ${availableProducts.patrocinio.map(p => p.label).join(', ') || 'nenhum'}`);
-        console.log('════════════════════════════════════════\n');
-        
-        // Log de debug das logos
-        if (data.debug) {
-          console.log(`📊 Debug info:`, data.debug);
-          console.log(`✅ Logos encontradas: ${data.debug.logosFounded}`);
-          console.log(`❌ Logos NÃO encontradas: ${data.debug.logosNotFound}`);
-          if (data.debug.sampleWithLogo) {
-            console.log(`📌 Exemplo com logo:`, data.debug.sampleWithLogo.emissora, '→', data.debug.sampleWithLogo.logo?.substring(0, 50));
-          }
-          if (data.debug.sampleWithoutLogo) {
-            console.log(`⚠️ Exemplo sem logo:`, data.debug.sampleWithoutLogo.emissora);
-          }
-        }
-        
-        console.log(`📊 É array? ${Array.isArray(emissoras)}`);
-        console.log(`📊 Tamanho: ${Array.isArray(emissoras) ? emissoras.length : 'N/A'}`);
-        console.log(`👤 Emissoras ocultas: ${ocultasEmissoras.length}`);
-        console.log(`📋 Nome da Proposta: ${proposalName}`);
-        
         if (Array.isArray(emissoras) && emissoras.length > 0) {
-            console.log(`✅ Processando ${emissoras.length} emissoras`);
-            console.log(`📋 Primeiro emissora: ${emissoras[0].emissora || 'SEM NOME'}`);
-            
-            // Usar os dados diretamente do Notion, sem transformação
             proposalData.emissoras = emissoras;
             proposalData.proposalName = proposalName;
             proposalData.temMidia = temMidia;
             proposalData.temPatrocinio = temPatrocinio;
             proposalData.availableProducts = availableProducts;
-            
-            // Carregar emissoras ocultas no Set
             proposalData.ocultasEmissoras = new Set(ocultasEmissoras);
-            proposalData.initialOcultasEmissoras = new Set(ocultasEmissoras);  // Guardar estado inicial
-            console.log(`👤 ${proposalData.ocultasEmissoras.size} emissoras marcadas como ocultas`);
-            
-            // Recalcular impactos dinamicamente para todas as emissoras
-            console.log('\n📊 Recalculando impactos com base na fórmula do Notion...');
+            proposalData.initialOcultasEmissoras = new Set(ocultasEmissoras);
             recalculateAllImpactos();
-            
-            console.log(`✅ ${proposalData.emissoras.length} emissoras carregadas com sucesso!`);
         } else {
-            console.log('⚠️ Array vazio ou inválido');
             throw new Error('Nenhuma emissora encontrada');
         }
     } catch (error) {
-        console.log(`❌ Erro na função: ${error.message}`);
-        console.error(error);
+        console.error('Erro ao carregar proposta:', error);
         throw error;
     }
 }
@@ -389,113 +311,53 @@ function getApiUrl() {
 // =====================================================
 
 function updateProposalTitle() {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 🎯 ATUALIZANDO TÍTULO DA PROPOSTA');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    
-    console.log(`📋 proposalData.proposalName: "${proposalData.proposalName}"`);
-    console.log(`📋 Tipo: ${typeof proposalData.proposalName}`);
-    console.log(`📋 Comprimento: ${proposalData.proposalName?.length || 'undefined'}`);
-    
     const titleElement = document.getElementById('proposalTitle');
-    console.log(`🔍 Elemento #proposalTitle encontrado: ${!!titleElement}`);
     
     if (titleElement && proposalData.proposalName) {
-        console.log(`✅ Atualizando título para: "${proposalData.proposalName}"`);
         titleElement.textContent = proposalData.proposalName;
         document.title = `${proposalData.proposalName} - E-MÍDIAS`;
-        console.log(`✅ Novo título do documento: "${document.title}"`);
-        console.log(`✅ Novo textContent do elemento: "${titleElement.textContent}"`);
-    } else {
-        console.error('❌ FALHA: titleElement ou proposalName indefinidos');
-        console.log(`   - titleElement: ${titleElement}`);
-        console.log(`   - proposalData.proposalName: ${proposalData.proposalName}`);
     }
 }
 
 function renderInterface() {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 🎨 INICIANDO: renderInterface()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('proposalData.emissoras.length:', proposalData.emissoras.length);
-    
-    console.log('🎨 Renderizando interface...');
-    console.log('📊 Emissoras disponíveis:', proposalData.emissoras.length);
-    
-    // Buscar o nome da proposta
     let proposalName = proposalData.proposalName || 'Proposta de Mídia';
     
     if (proposalData.emissoras && proposalData.emissoras.length > 0) {
         const firstEmissora = proposalData.emissoras[0];
         
-        // Tenta encontrar o nome da proposta nos campos
         if (firstEmissora.proposta && firstEmissora.proposta.trim()) {
             proposalName = firstEmissora.proposta;
-            console.log('✅ Nome da proposta encontrado:', proposalName);
         } else if (firstEmissora.empresa && firstEmissora.empresa.trim()) {
             proposalName = firstEmissora.empresa;
-            console.log('✅ Nome da empresa encontrado:', proposalName);
         } else {
-            // Fallback: usa a primeira emissora
             proposalName = firstEmissora.emissora || 'Proposta de Mídia';
-            console.log('⚠️ Usando emissora como nome:', proposalName);
         }
     }
     
-    console.log('🏢 Nome da proposta:', proposalName);
-    // Título não é mais atualizado dinamicamente
-    
-    // Remover a seção de localização (já não será exibida)
     const locationInfo = document.getElementById('locationInfo');
     if (locationInfo && locationInfo.parentElement) {
         locationInfo.parentElement.style.display = 'none';
     }
     
-    console.log('🎯 Chamando renderSpotsTable...');
     renderSpotsTable();
-    console.log('🎯 Chamando updateStats...');
     updateStats();
-    console.log('🎯 Chamando renderCharts...');
     renderCharts();
-    console.log('🎯 Garantindo que botão de salvar está oculto (sem alterações)...');
     showUnsavedChanges();
-    console.log('✅ renderInterface() finalizado!');
 }
 
 function renderSpotsTable() {
-    console.log('\n🎯🎯🎯 renderSpotsTable() INICIADA 🎯🎯🎯');
-    
     const tbody = document.getElementById('spotsTableBody');
     const table = document.getElementById('spotsTable');
     
-    console.log('✅ Procurando tbody #spotsTableBody...');
-    console.log('✅ tbody encontrado?', !!tbody);
-    console.log('✅ proposalData.emissoras.length:', proposalData.emissoras.length);
-    
     if (!tbody || !table) {
-        console.error('❌ CRÍTICO: Elementos da tabela não encontrados no DOM!');
+        console.error('Elementos da tabela não encontrados');
         return;
     }
     
     if (!proposalData.emissoras || proposalData.emissoras.length === 0) {
-        console.error('❌ CRÍTICO: proposalData.emissoras vazio ou indefinido!');
+        console.error('Nenhuma emissora disponível');
         return;
     }
-    
-    // LOG: Verificar se campo 'impactos' existe nos dados
-    console.log('\n╔═══════════════════════════════════════════════════════════════╗');
-    console.log('║ 🔍 VERIFICANDO CAMPOS NOS DADOS');
-    console.log('╚═══════════════════════════════════════════════════════════════╝');
-    proposalData.emissoras.forEach((emissora, idx) => {
-        const logoUrl = getLogoUrl(emissora.linkLogo);
-        console.log(`  [${idx}] ${emissora.emissora}:`);
-        console.log(`       - impactos: "${emissora.impactos}"`);
-        console.log(`       - linkLogo (raw): ${JSON.stringify(emissora.linkLogo)}`);
-        console.log(`       - linkLogo (tipo): ${typeof emissora.linkLogo}`);
-        console.log(`       - linkLogo (extraído): "${logoUrl}"`);
-        console.log(`       - logo: "${emissora.logo}"`);
-        console.log(`       - Todas as chaves:`, Object.keys(emissora));
-    });
     
     // Encontra quais produtos têm dados (spots > 0) em qualquer emissora
     const produtosAtivos = new Set();
@@ -508,14 +370,7 @@ function renderSpotsTable() {
         });
     });
     
-    // Também verificar produtos de Patrocínio
     const temPatrocinioAtivo = proposalData.emissoras.some(e => e.cotasMeses > 0);
-    
-    console.log('🔍 Produtos com dados encontrados:', Array.from(produtosAtivos).map(pk => {
-        const p = PRODUTOS.find(x => x.key === pk);
-        return p ? p.label : pk;
-    }));
-    console.log('🔍 Tem Patrocínio ativo?', temPatrocinioAtivo);
     
     // RECONSTRÓI os cabeçalhos da tabela
     const thead = table.querySelector('thead');
@@ -715,10 +570,6 @@ function renderSpotsTable() {
         }
         
         // Colunas de investimento
-        console.log(`💰 TOTAIS DA EMISSORA ${emissora.emissora}:`);
-        console.log(`   - Inv. Tabela: R$ ${investimentoTabelaEmissora.toFixed(2)}`);
-        console.log(`   - Inv. Negociado: R$ ${investimentoNegociadoEmissora.toFixed(2)}`);
-        
         row.innerHTML += `
             <td class="investment-tabela">R$ ${investimentoTabelaEmissora.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
             <td class="investment-negociado">R$ ${investimentoNegociadoEmissora.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
@@ -730,9 +581,6 @@ function renderSpotsTable() {
         tbody.appendChild(row);
         totalLinhasAdicionadas++;
     });
-    
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log(`✅ Tabela renderizada com sucesso! ${totalLinhasAdicionadas} emissoras exibidas`);
     console.log('═══════════════════════════════════════════════════════════');
 }
 
