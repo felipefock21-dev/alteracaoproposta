@@ -1087,29 +1087,34 @@ function calculateCPM() {
 
 function calculateImpactosForEmissora(emissora) {
     /**
-     * Calcula impactos dinamicamente usando a fórmula exata do Notion:
-     * MÍDIA AVULSA: (Spots30 * PMM) + (Test60 * PMM * 2) + (Spots60 * PMM * 2) + (Spots15 * PMM / 2) + (Spots5 * PMM / 6)
-     * PATROCÍNIO: (Ins5 * PMM / 6) + (Ins15 * PMM / 2) + (Ins30 * PMM) + (Ins60 * PMM * 2)
+     * Calcula impactos dinamicamente usando as fórmulas exatas do Notion:
+     * 
+     * MÍDIA AVULSA:
+     * (Spots30 * PMM) + (Test60 * PMM * 2) + (Spots60 * PMM * 2) + (Spots15 * PMM / 2) + (Spots5 * PMM / 6)
+     * 
+     * PATROCÍNIO:
+     * ((Ins30 * PMM) + (Ins60 * PMM * 2) + (Ins15 * PMM / 2) + (Ins5 * PMM / 6)) * CotasMeses
      */
     
     if (!emissora) return 0;
     
     const pmm = emissora.PMM || parseFloat(emissora.PMM) || 0;
     
-    // MÍDIA AVULSA
+    // MÍDIA AVULSA - Spots
     const spots30 = parseFloat(emissora.spots30) || 0;
     const test60 = parseFloat(emissora.spotsTest60) || 0;  // Test 60ʺ
     const spots60 = parseFloat(emissora.spots60) || 0;
     const spots15 = parseFloat(emissora.spots15) || 0;
     const spots5 = parseFloat(emissora.spots5) || 0;
     
-    // PATROCÍNIO (Inserções)
+    // PATROCÍNIO - Inserções e Cotas
     const ins5 = parseFloat(emissora.ins5) || 0;
     const ins15 = parseFloat(emissora.ins15) || 0;
     const ins30 = parseFloat(emissora.ins30) || 0;
     const ins60 = parseFloat(emissora.ins60) || 0;
+    const cotasMeses = parseFloat(emissora.cotasMeses) || 0;
     
-    // Aplicar a fórmula exata para MÍDIA AVULSA
+    // Aplicar a fórmula para MÍDIA AVULSA
     const impactosMedia = 
         (spots30 * pmm) +
         (test60 * pmm * 2) +
@@ -1117,12 +1122,10 @@ function calculateImpactosForEmissora(emissora) {
         (spots15 * pmm / 2) +
         (spots5 * pmm / 6);
     
-    // Aplicar a fórmula para PATROCÍNIO (usando mesma lógica de spots)
+    // Aplicar a fórmula para PATROCÍNIO
+    // ((Ins30 * PMM) + (Ins60 * PMM * 2) + (Ins15 * PMM / 2) + (Ins5 * PMM / 6)) * CotasMeses
     const impactosPatrocinio = 
-        (ins5 * pmm / 6) +
-        (ins15 * pmm / 2) +
-        (ins30 * pmm) +
-        (ins60 * pmm * 2);
+        ((ins30 * pmm) + (ins60 * pmm * 2) + (ins15 * pmm / 2) + (ins5 * pmm / 6)) * cotasMeses;
     
     // Soma total de impactos (mídia + patrocínio)
     const impactos = impactosMedia + impactosPatrocinio;
