@@ -21,12 +21,12 @@ export async function onRequest(context) {
   }
 
   try {
-    // ===== BUSCAR TOKEN NOTION_TOKEN =====
+    // ===== BUSCAR TOKEN DE AUTENTICAÇÃO =====
     const notionToken = env.NOTION_TOKEN;
-    
+
     if (!notionToken) {
-      return new Response(JSON.stringify({ 
-        error: 'Token do Notion não configurado'
+      return new Response(JSON.stringify({
+        error: 'Token de autenticação não configurado'
       }), {
         status: 500,
         headers
@@ -50,10 +50,10 @@ export async function onRequest(context) {
         });
       }
 
-      // Notion API espera ID sem hífens
+      // API espera ID sem hífens
       id = id.replace(/-/g, '');
 
-      // Buscar linhas da database no Notion usando query
+      // Buscar linhas da database usando query
       const response = await fetch(`https://api.notion.com/v1/databases/${id}/query`, {
         method: 'POST',
         headers: {
@@ -428,7 +428,7 @@ export async function onRequest(context) {
         };
       });
 
-      // Carregar estado de exclusão do Notion
+      // Carregar estado de exclusão da base de dados
       const ocultasEmissoras = emissoras
         .filter(e => e.excluir === true)
         .map(e => e.id);
@@ -479,18 +479,23 @@ export async function onRequest(context) {
       const temPatrocinio = emissoras.some(e => e.cotasMeses > 0);
       const temMidia = emissoras.some(e => availableProducts.midia.length > 0);
 
-      // Buscar nome da proposta
+      // Buscar nome da proposta e parent page ID
       let proposalName = 'Proposta';
+      let parentPageId = null;
       try {
-        proposalName = await getProposalName(notionToken, id);
+        const proposalInfo = await getProposalInfo(notionToken, id);
+        proposalName = proposalInfo.proposalName;
+        parentPageId = proposalInfo.parentPageId;
       } catch (error) {
         proposalName = 'Proposta';
+        parentPageId = null;
       }
-      
+
       return new Response(JSON.stringify({
         emissoras: emissoras,
         ocultasEmissoras: ocultasEmissoras,
         proposalName: proposalName,
+        parentPageId: parentPageId,
         availableProducts: availableProducts,
         temMidia: temMidia,
         temPatrocinio: temPatrocinio
@@ -550,7 +555,7 @@ export async function onRequest(context) {
       // Array para guardar resultados das atualizações
       const updatePromises = [];
 
-      // Sincronizar o status "Excluir" com Notion
+      // Sincronizar o status "Excluir" com base de dados
       const emissoras_changes = [];  // Rastrear mudanças de inclusão/exclusão
       if (ocultasEmissoras && Array.isArray(ocultasEmissoras)) {
         log(` Sincronizando status "Excluir" para ${ocultasEmissoras.length} emissoras`);
@@ -622,7 +627,7 @@ export async function onRequest(context) {
         
         if (!emissora || !emissora.id) continue;
 
-        // Mapear campo para nome do Notion
+        // Mapear campo para nome da base de dados
         const fieldMap = {
           'spots30': 'Spots 30ʺ',
           'valorTabela30': 'Valor spot 30ʺ (Tabela)',
@@ -671,10 +676,6 @@ export async function onRequest(context) {
         updateProperties[notionField] = { number: parseFloat(change.new) || 0 };
 
         const bodyToSend = JSON.stringify({ properties: updateProperties });
-        console.log(` FIELD NAME (chave):`, notionField);
-        console.log(` FIELD NAME (type):`, typeof notionField);
-        console.log(` BODY sendo enviado para Notion:`, bodyToSend);
-        console.log(` updateProperties objeto:`, updateProperties);
 
         const updateResponse = await fetch(`https://api.notion.com/v1/pages/${emissora.id}`, {
           method: 'PATCH',
@@ -727,7 +728,8 @@ export async function onRequest(context) {
         // Buscar nome da proposta
         let proposalName = 'Proposta';
         try {
-          proposalName = await getProposalName(notionToken, tableId);
+          const proposalInfo = await getProposalInfo(notionToken, tableId);
+          proposalName = proposalInfo.proposalName;
         } catch (e) {
           console.warn('⚠️ Não conseguiu buscar nome da proposta:', e.message);
         }
@@ -805,18 +807,12 @@ export async function onRequest(context) {
 
 // =====================================================
 // =====================================================
-// FUNÇÃO DE EXTRAÇÃO DO NOME DA PROPOSTA
+// FUNÇÃO DE EXTRAÇÃO DO NOME DA PROPOSTA E PARENT PAGE ID
 // =====================================================
 
-async function getProposalName(notionToken, databaseId) {
+async function getProposalInfo(notionToken, databaseId) {
   try {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 🔍 BUSCANDO NOME DA PROPOSTA');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log(`📍 Database ID: ${databaseId}`);
-    
-    // Passo 1: Buscar metadados da database
-    console.log('\n📍 PASSO 1: Buscando database...');
+    // Buscar metadados da database
     const dbResponse = await fetch(`https://api.notion.com/v1/databases/${databaseId}`, {
       method: 'GET',
       headers: {
@@ -826,40 +822,28 @@ async function getProposalName(notionToken, databaseId) {
     });
 
     if (!dbResponse.ok) {
-      const errorData = await dbResponse.json().catch(() => ({}));
-      console.error('❌ Erro ao buscar database:', errorData);
       throw new Error(`Erro ao buscar database (${dbResponse.status})`);
     }
 
     const dbData = await dbResponse.json();
-    console.log('✅ Database encontrada!');
-    console.log(`   - Database ID: ${dbData.id}`);
-    console.log(`   - Database Title: ${JSON.stringify(dbData.title)}`);
-    console.log(`   - Parent Type: ${dbData.parent?.type || 'nenhum'}`);
-    console.log(`   - Parent Page ID: ${dbData.parent?.page_id || 'nenhum'}`);
-    console.log(`   - Parent Database ID: ${dbData.parent?.database_id || 'nenhum'}`);
-    
-    // Passo 2: Se há parent_id, buscar a página pai
-    let parentPageId = dbData.parent?.page_id;
-    
+
+    // Buscar parent page ID
+    let parentPageId = dbData.parent?.page_id || dbData.parent?.database_id;
+
     if (!parentPageId) {
-      console.log('⚠️ Nenhum parent.page_id encontrado na database');
-      console.log('   Tentando usar database_id do parent...');
-      parentPageId = dbData.parent?.database_id;
-    }
-    
-    if (!parentPageId) {
-      console.log('❌ Nenhum parent encontrado. Usando nome da database.');
       if (dbData.title && dbData.title.length > 0) {
-        const proposalName = dbData.title[0].text.content;
-        console.log(`✅ Nome da database: "${proposalName}"`);
-        return proposalName;
+        return {
+          proposalName: dbData.title[0].text.content,
+          parentPageId: null
+        };
       }
-      return 'Proposta';
+      return {
+        proposalName: 'Proposta',
+        parentPageId: null
+      };
     }
-    
-    // Passo 3: Buscar a página pai
-    console.log(`\n📍 PASSO 2: Buscando página pai (ID: ${parentPageId})...`);
+
+    // Buscar a página pai
     const parentResponse = await fetch(`https://api.notion.com/v1/pages/${parentPageId}`, {
       method: 'GET',
       headers: {
@@ -869,77 +853,41 @@ async function getProposalName(notionToken, databaseId) {
     });
 
     if (!parentResponse.ok) {
-      const errorData = await parentResponse.json().catch(() => ({}));
-      console.error('❌ Erro ao buscar página pai:', errorData);
       throw new Error(`Erro ao buscar página pai (${parentResponse.status})`);
     }
 
     const parentData = await parentResponse.json();
-    console.log('✅ Página pai encontrada!');
-    console.log(`   - Page ID: ${parentData.id}`);
-    console.log(`   - Properties: ${JSON.stringify(Object.keys(parentData.properties || {}))}`);
-    
-    // Passo 4: Extrair o título da página pai
+
+    // Extrair o título da página pai
     let proposalName = null;
-    
-    // Procurar pela propriedade "title" (mais comum)
-    if (parentData.properties?.title) {
-      const titleProp = parentData.properties.title;
-      console.log(`\n📋 Propriedade 'title' encontrada:`);
-      console.log(`   - Tipo: ${titleProp.type}`);
-      console.log(`   - Conteúdo: ${JSON.stringify(titleProp.title)}`);
-      
-      if (titleProp.title && titleProp.title.length > 0) {
-        proposalName = titleProp.title[0].text.content;
-        console.log(`✅ NOME EXTRAÍDO: "${proposalName}"`);
-        return proposalName;
-      }
+
+    // Procurar pela propriedade "title"
+    if (parentData.properties?.title?.title?.[0]?.text?.content) {
+      proposalName = parentData.properties.title.title[0].text.content;
     }
-    
-    // Se não tem "title", procurar por "Name" (alternativa comum)
-    if (!proposalName && parentData.properties?.Name) {
-      const nameProp = parentData.properties.Name;
-      console.log(`\n📋 Propriedade 'Name' encontrada:`);
-      console.log(`   - Tipo: ${nameProp.type}`);
-      console.log(`   - Conteúdo: ${JSON.stringify(nameProp.title)}`);
-      
-      if (nameProp.title && nameProp.title.length > 0) {
-        proposalName = nameProp.title[0].text.content;
-        console.log(`✅ NOME EXTRAÍDO: "${proposalName}"`);
-        return proposalName;
-      }
+
+    // Procurar por "Name"
+    if (!proposalName && parentData.properties?.Name?.title?.[0]?.text?.content) {
+      proposalName = parentData.properties.Name.title[0].text.content;
     }
-    
-    // Se ainda não achou, listar todas as propriedades para debug
+
+    // Buscar em todas as propriedades do tipo title
     if (!proposalName) {
-      console.log('\n⚠️ Nenhuma propriedade "title" ou "Name" encontrada');
-      console.log('📋 Propriedades disponíveis na página pai:');
       for (const [key, prop] of Object.entries(parentData.properties || {})) {
-        console.log(`   - ${key}: ${prop.type}`);
         if (prop.type === 'title' && prop.title?.length > 0) {
           proposalName = prop.title[0].text.content;
-          console.log(`     ✅ ENCONTRADO TÍTULO: "${proposalName}"`);
           break;
         }
       }
     }
-    
-    if (!proposalName) {
-      console.log('⚠️ Não conseguiu extrair nome da página pai, usando padrão');
-      proposalName = 'Proposta';
-    }
-    
-    console.log(`\n✅ NOME FINAL DA PROPOSTA: "${proposalName}"`);
-    console.log('╚════════════════════════════════════════════════════════════════╝\n');
-    return proposalName;
-    
+
+    return {
+      proposalName: proposalName || 'Proposta',
+      parentPageId: parentPageId
+    };
+
   } catch (error) {
-    console.error('\n╔════════════════════════════════════════════════════════════════╗');
-    console.error('║ ❌ ERRO CRÍTICO ao buscar nome da proposta');
-    console.error('╚════════════════════════════════════════════════════════════════╝');
-    console.error(`   Mensagem: ${error.message}`);
-    console.error(`   Stack: ${error.stack}`);
-    console.error('');
+    console.error('Erro ao buscar informações da proposta:', error.message);
     throw error;
   }
 }
@@ -966,23 +914,11 @@ async function sendNotificationEmail(env, data) {
   emailLogs.push('📧 [EMAIL] ===== INICIANDO ENVIO DE EMAIL =====');
   emailLogs.push('📧 [EMAIL] Proposta: ' + proposalName);
   emailLogs.push('📧 [EMAIL] Editor: ' + (editorEmail || 'desconhecido'));
-  emailLogs.push('📧 [EMAIL] RESEND_API_KEY existe? ' + (!!resendApiKey));
-  if (resendApiKey) {
-    emailLogs.push('📧 [EMAIL] RESEND_API_KEY primeiros 10 chars: ' + resendApiKey.substring(0, 10));
-  }
   emailLogs.push('📧 [EMAIL] Alterações recebidas: ' + changes.length);
   emailLogs.push('📧 [EMAIL] Emissoras: ' + emissoras.length);
   
-  console.log('📧 [EMAIL] ===== INICIANDO ENVIO DE EMAIL =====');
-  console.log('📧 [EMAIL] Proposta:', proposalName);
-  console.log('📧 [EMAIL] Editor:', editorEmail || 'desconhecido');
-  console.log('📧 [EMAIL] RESEND_API_KEY existe?', !!resendApiKey);
-  console.log('📧 [EMAIL] Alterações recebidas:', changes.length);
-  console.log('📧 [EMAIL] Emissoras:', emissoras.length);
-  
   if (!resendApiKey) {
-    emailLogs.push('❌ [EMAIL] RESEND_API_KEY NÃO CONFIGURADA! Email NÃO será enviado.');
-    console.error('❌ [EMAIL] RESEND_API_KEY NÃO CONFIGURADA!');
+    emailLogs.push('❌ [EMAIL] API key de email não configurada! Email NÃO será enviado.');
     return emailLogs;
   }
 
@@ -1123,16 +1059,7 @@ async function sendNotificationEmail(env, data) {
 
   // Enviar via Resend
   try {
-    emailLogs.push('📧 [EMAIL] Enviando para: tatico5@hubradios.com');
-    emailLogs.push('📧 [EMAIL] De: onboarding@resend.dev (Email de teste)');
-    emailLogs.push('📧 [EMAIL] Endpoint: https://api.resend.com/emails');
-    console.log('📧 [EMAIL] Enviando para: tatico5@hubradios.com');
-    console.log('📧 [EMAIL] De: onboarding@resend.dev (Email de teste)');
-    console.log('📧 [EMAIL] Endpoint: https://api.resend.com/emails');
-    console.log('📧 [EMAIL] Headers:', {
-      'Authorization': `Bearer ${resendApiKey.substring(0, 10)}***`,
-      'Content-Type': 'application/json'
-    });
+    emailLogs.push('📧 [EMAIL] Enviando notificação por email...');
     
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',

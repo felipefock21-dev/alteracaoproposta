@@ -5,7 +5,8 @@
 
 let proposalData = {
     tableId: null,
-    proposalName: 'Proposta',  // Nome da proposta carregada do Notion
+    proposalName: 'Proposta',  // Nome da proposta carregada da base de dados
+    parentPageId: null,  // ID da página pai (parent page)
     emissoras: [],  // Array de emissoras
     changes: {},
     ocultasEmissoras: new Set(),  // Rastreia emissoras ocultas (por ID)
@@ -14,7 +15,7 @@ let proposalData = {
     temMidia: false,  // Se tem produtos de Mídia Avulsa
     temPatrocinio: false,  // Se tem produtos de Patrocínio
     editorEmail: null,  // Email do editor que está fazendo as alterações
-    availableProducts: {  // Produtos disponíveis carregados do Notion
+    availableProducts: {  // Produtos disponíveis carregados da base de dados
         midia: [],
         patrocinio: []
     }
@@ -188,44 +189,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function showWelcomeMessage() {
-    const container = document.querySelector('.container');
-    if (container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px;">
-                <h1 style="font-size: 2.5rem; color: #6366f1; margin-bottom: 20px;">
-                    📋 E-MÍDIAS
-                </h1>
-                <p style="font-size: 1.1rem; color: #6b7280; margin-bottom: 30px;">
-                    Plataforma de Gestão de Propostas Radiofônicas
-                </p>
-                <div style="background: #f3f4f6; padding: 30px; border-radius: 12px; max-width: 600px; margin: 0 auto;">
-                    <p style="color: #374151; font-size: 1rem; line-height: 1.6; margin-bottom: 25px;">
-                        ℹ️ Nenhuma proposta foi carregada.
-                    </p>
-                    <div style="background: white; padding: 20px; border-radius: 8px;">
-                        <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 10px;">
-                            ID da Tabela no Notion:
-                        </label>
-                        <input 
-                            id="tableIdInput" 
-                            type="text" 
-                            placeholder="Cole o ID da tabela aqui..." 
-                            style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; margin-bottom: 15px;"
-                        />
-                        <button 
-                            onclick="loadFromWelcome()" 
-                            style="width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;"
-                        >
-                            ✅ Carregar Proposta
-                        </button>
-                    </div>
-                    <p style="color: #6b7280; font-size: 0.9rem; margin-top: 15px;">
-                        💡 Ou acesse a URL com o ID: <code style="background: white; padding: 5px 8px; border-radius: 4px;">?id=SEU_ID_AQUI</code>
-                    </p>
-                </div>
-            </div>
-        `;
-    }
+    // Redirecionar automaticamente para https://emidiastec.com.br
+    console.log('⚠️ Nenhum ID de proposta fornecido. Redirecionando para emidiastec.com.br...');
+    window.location.href = 'https://emidiastec.com.br';
 }
 
 function loadFromWelcome() {
@@ -262,13 +228,15 @@ async function loadProposalFromNotion(tableId) {
         let emissoras = Array.isArray(data) ? data : (data.emissoras || []);
         let ocultasEmissoras = data.ocultasEmissoras || [];
         let proposalName = data.proposalName || 'Proposta';
+        let parentPageId = data.parentPageId || null;
         let availableProducts = data.availableProducts || { midia: [], patrocinio: [] };
         let temMidia = data.temMidia || false;
         let temPatrocinio = data.temPatrocinio || false;
-        
+
         if (Array.isArray(emissoras) && emissoras.length > 0) {
             proposalData.emissoras = emissoras;
             proposalData.proposalName = proposalName;
+            proposalData.parentPageId = parentPageId;
             proposalData.temMidia = temMidia;
             proposalData.temPatrocinio = temPatrocinio;
             proposalData.availableProducts = availableProducts;
@@ -1560,41 +1528,33 @@ function showError(message) {
 
 function goBack() {
     /**
-     * Redireciona para a proposta com fallback:
-     * URL Principal: https://hub.emidiastec.com.br/NOME-PROPOSTA-ID
-     * URL Fallback: https://e-radios.notion.site/NOME-PROPOSTA-ID
-     * 
-     * Exemplo: https://hub.emidiastec.com.br/Corteva-24-11-16-27-Patroc-nio-2b520b549cf581818da3d9e924248ec6
+     * Redireciona para a página pai da proposta (parent page)
+     * URL: https://hub.emidiastec.com.br/NOME-PROPOSTA-PARENT-PAGE-ID
+     * Fallback: https://emidiastec.com.br
      */
-    
+
     const proposalName = proposalData.proposalName ? proposalData.proposalName.trim().replace(/\s+/g, '-') : '';
-    const pageId = proposalData.tableId || '';
-    
-    // Construir URL padrão: NOME-PROPOSTA-ID
-    const urlPath = `${proposalName}-${pageId}`;
-    
+    const parentPageId = proposalData.parentPageId || '';
+
+    // Construir URL com parent page ID
+    const urlPath = `${proposalName}-${parentPageId}`;
+
     // URL principal: hub.emidiastec.com.br
     const hubUrl = `https://hub.emidiastec.com.br/${urlPath}`;
-    
-    // URL fallback: e-radios.notion.site com mesmo padrão
-    const fallbackUrl = `https://e-radios.notion.site/${urlPath}`;
-    
-    console.log(`🔗 Redirecionando para: ${hubUrl}`);
+
+    // Fallback: emidiastec.com.br
+    const fallbackUrl = 'https://emidiastec.com.br';
+
+    console.log(`🔗 Redirecionando para página pai: ${hubUrl}`);
     console.log(`⚠️ Fallback disponível: ${fallbackUrl}`);
-    
+
     // Verificar se temos os dados necessários
-    if (proposalName && pageId) {
-        // Redirecionar para URL do hub
+    if (proposalName && parentPageId) {
+        // Redirecionar para URL do hub com parent page
         window.location.href = hubUrl;
-        
-        // Fallback após 4 segundos se a URL não carregar
-        setTimeout(() => {
-            console.warn('⚠️ Hub não respondeu, redirecionando para Notion');
-            window.location.href = fallbackUrl;
-        }, 4000);
     } else {
-        // Se faltam dados, ir direto para o fallback
-        console.warn('⚠️ Dados insuficientes para construir URL, usando fallback');
+        // Se faltam dados, ir para o fallback
+        console.warn('⚠️ Parent page ID não disponível, redirecionando para fallback');
         window.location.href = fallbackUrl;
     }
 }
