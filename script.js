@@ -80,8 +80,17 @@ async function loadProposalFromDB(tableId) {
         const response = await fetch(finalUrl);
 
         if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({}));
-            throw new Error(`Erro ao carregar dados: ${response.status}`);
+            let errorMsg = `Erro ao carregar dados: ${response.status}`;
+            try {
+                const errorBody = await response.json();
+                if (errorBody.error) {
+                    errorMsg = `Erro do servidor: ${errorBody.error}`;
+                }
+                console.error('Detalhes do erro:', errorBody);
+            } catch (e) {
+                // Não conseguiu parsear erro como JSON
+            }
+            throw new Error(errorMsg);
         }
 
         const data = await response.json();
@@ -98,13 +107,17 @@ async function loadProposalFromDB(tableId) {
             proposalData.parentPageId = data.parentPageId || null;
             proposalData.proposalName = data.proposalName || null;
         } else if (Array.isArray(data) && data.length > 0) {
-            // Fallback para formato antigo
+            // Fallback para formato antigo (array direto de emissoras)
             proposalData.emissoras = data;
+            proposalData.parentPageId = null;
+            proposalData.proposalName = null;
+            console.warn('Usando formato legado de resposta da API');
         } else {
-            throw new Error('Nenhuma emissora encontrada');
+            console.error('Formato de dados inválido:', data);
+            throw new Error('Nenhuma emissora encontrada ou formato de dados inválido');
         }
     } catch (error) {
-        console.error(error);
+        console.error('Erro completo:', error);
         throw error;
     }
 }
