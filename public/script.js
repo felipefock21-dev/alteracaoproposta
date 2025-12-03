@@ -1533,11 +1533,27 @@ function goBack() {
      * Fallback: https://emidiastec.com.br
      */
 
-    const proposalName = proposalData.proposalName ? proposalData.proposalName.trim().replace(/\s+/g, '-') : '';
-    const parentPageId = proposalData.parentPageId || '';
+    const rawProposalName = proposalData.proposalName || '';
+    const rawParentPageId = proposalData.parentPageId || '';
 
-    // Construir URL com parent page ID
-    const urlPath = `${proposalName}-${parentPageId}`;
+    // Limpar nome da proposta:
+    // - Remover parênteses ()
+    // - Substituir / e : por -
+    // - Substituir espaços por -
+    // - Remover --- duplicados
+    let cleanProposalName = rawProposalName
+        .replace(/[()]/g, '')           // Remove ()
+        .replace(/[/:]/g, '-')          // Substitui / e : por -
+        .trim()
+        .replace(/\s+/g, '-')           // Substitui espaços por -
+        .replace(/-{2,}/g, '-')         // Remove --- duplicados
+        .replace(/^-+|-+$/g, '');       // Remove - do início e fim
+
+    // Limpar parent page ID: remover todos os traços - do UUID
+    const cleanParentPageId = rawParentPageId.replace(/-/g, '');
+
+    // Construir URL com nome e ID limpos
+    const urlPath = `${cleanProposalName}-${cleanParentPageId}`;
 
     // URL principal: hub.emidiastec.com.br
     const hubUrl = `https://hub.emidiastec.com.br/${urlPath}`;
@@ -1546,10 +1562,9 @@ function goBack() {
     const fallbackUrl = 'https://emidiastec.com.br';
 
     console.log(`🔗 Redirecionando para página pai: ${hubUrl}`);
-    console.log(`⚠️ Fallback disponível: ${fallbackUrl}`);
 
     // Verificar se temos os dados necessários
-    if (proposalName && parentPageId) {
+    if (cleanProposalName && cleanParentPageId) {
         // Redirecionar para URL do hub com parent page
         window.location.href = hubUrl;
     } else {
