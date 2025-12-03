@@ -5,7 +5,9 @@
 let proposalData = {
     tableId: null,
     emissoras: [],  // Array de emissoras
-    changes: {}
+    changes: {},
+    parentPageId: null,
+    proposalName: null
 };
 
 // Definição de todos os produtos disponíveis
@@ -27,32 +29,13 @@ let charts = {
     impacts: null
 };
 
-// Função de debug visual
-function addDebug(message) {
-    console.log(message);
-    const debugPanel = document.getElementById('debugPanel');
-    const debugContent = document.getElementById('debugContent');
-    if (debugPanel && debugContent) {
-        debugPanel.style.display = 'block';
-        const line = document.createElement('div');
-        line.textContent = message;
-        line.style.marginBottom = '5px';
-        debugContent.appendChild(line);
-    }
-}
-
 // =====================================================
 // INICIALIZAÇÃO
 // =====================================================
 
-console.log('═══════════════════════════════════════════════════════════════');
-console.log('🔥 script.js CARREGADO!');
-console.log('═══════════════════════════════════════════════════════════════');
+// Script carregado
 
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('\n🎯 DOMContentLoaded DISPARADO!');
-    console.log('🚀 Inicializando página de proposta...');
-    
     try {
         const params = new URLSearchParams(window.location.search);
         proposalData.tableId = params.get('id');
@@ -62,9 +45,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             throw new Error('Nenhuma tabela selecionada. Aguardando ID da tabela na URL.');
         }
 
-        await loadProposalFromNotion(proposalData.tableId);
+        await loadProposalFromDB(proposalData.tableId);
         renderInterface();
-        console.log('✅ Página carregada com sucesso!');
     } catch (error) {
         console.error('❌ Erro ao carregar:', error);
         showError(error.message);
@@ -72,44 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function showWelcomeMessage() {
-    const container = document.querySelector('.container');
-    if (container) {
-        container.innerHTML = `
-            <div style="text-align: center; padding: 60px 20px;">
-                <h1 style="font-size: 2.5rem; color: #6366f1; margin-bottom: 20px;">
-                    📋 E-MÍDIAS
-                </h1>
-                <p style="font-size: 1.1rem; color: #6b7280; margin-bottom: 30px;">
-                    Plataforma de Gestão de Propostas Radiofônicas
-                </p>
-                <div style="background: #f3f4f6; padding: 30px; border-radius: 12px; max-width: 600px; margin: 0 auto;">
-                    <p style="color: #374151; font-size: 1rem; line-height: 1.6; margin-bottom: 25px;">
-                        ℹ️ Nenhuma proposta foi carregada.
-                    </p>
-                    <div style="background: white; padding: 20px; border-radius: 8px;">
-                        <label style="display: block; color: #374151; font-weight: 500; margin-bottom: 10px;">
-                            ID da Tabela no Notion:
-                        </label>
-                        <input 
-                            id="tableIdInput" 
-                            type="text" 
-                            placeholder="Cole o ID da tabela aqui..." 
-                            style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-family: monospace; margin-bottom: 15px;"
-                        />
-                        <button 
-                            onclick="loadFromWelcome()" 
-                            style="width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem;"
-                        >
-                            ✅ Carregar Proposta
-                        </button>
-                    </div>
-                    <p style="color: #6b7280; font-size: 0.9rem; margin-top: 15px;">
-                        💡 Ou acesse a URL com o ID: <code style="background: white; padding: 5px 8px; border-radius: 4px;">?id=SEU_ID_AQUI</code>
-                    </p>
-                </div>
-            </div>
-        `;
-    }
+    // Redirecionamento automático para a página principal
+    window.location.href = 'https://emidiastec.com.br';
 }
 
 function loadFromWelcome() {
@@ -125,90 +71,53 @@ function loadFromWelcome() {
 // CARREGAMENTO DE DADOS
 // =====================================================
 
-async function loadProposalFromNotion(tableId) {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: loadProposalFromNotion()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('Parâmetro tableId:', tableId);
-    
-    addDebug('🚀 Iniciando carregamento...');
-    addDebug(`📌 ID da tabela: ${tableId}`);
-    
+async function loadProposalFromDB(tableId) {
     const apiUrl = getApiUrl();
     const baseUrl = apiUrl.endsWith('/') ? apiUrl : apiUrl + '/';
     const finalUrl = `${baseUrl}?id=${tableId}`;
     
-    addDebug(`📡 URL final: ${finalUrl}`);
-    
     try {
         const response = await fetch(finalUrl);
-        
-        addDebug(`📊 Status HTTP: ${response.status}`);
-        addDebug(`✅ OK: ${response.ok}`);
-        
+
         if (!response.ok) {
-            const errorBody = await response.json().catch(() => ({}));
-            addDebug(`❌ Erro: ${JSON.stringify(errorBody)}`);
-            throw new Error(`Erro ao carregar dados: ${response.status}`);
+            let errorMsg = `Erro ao carregar dados: ${response.status}`;
+            try {
+                const errorBody = await response.json();
+                if (errorBody.error) {
+                    errorMsg = `Erro do servidor: ${errorBody.error}`;
+                }
+                console.error('Detalhes do erro:', errorBody);
+            } catch (e) {
+                // Não conseguiu parsear erro como JSON
+            }
+            throw new Error(errorMsg);
         }
 
         const data = await response.json();
-        
-        // Log detalhado no console para diagnóstico
-        console.log('');
-        console.log('╔════════════════════════════════════════════════════════╗');
-        console.log('║  RESPOSTA BRUTA DA API - PRIMEIRO REGISTRO COMPLETO   ║');
-        console.log('╚════════════════════════════════════════════════════════╝');
-        if (Array.isArray(data) && data.length > 0) {
-            console.log(data[0]);
-        } else {
-            console.log(data);
-        }
-        console.log('');
-        
-        addDebug(`📦 Dados tipo: ${typeof data}`);
-        addDebug(`📦 Dados é array? ${Array.isArray(data)}`);
-        addDebug(`📦 Dados tem .error? ${'error' in data}`);
-        addDebug(`📦 Dados completo: ${JSON.stringify(data).substring(0, 500)}`);
-        
+
         // Se recebeu erro, mostrar
         if (data.error) {
-          addDebug(`❌ API retornou erro: ${data.error}`);
-          addDebug(`📋 Debug info: ${JSON.stringify(data.debug || {})}`);
           throw new Error(`Erro da API: ${data.error}`);
         }
-        
-        addDebug(`📊 É array? ${Array.isArray(data)}`);
-        addDebug(`📊 Tamanho: ${Array.isArray(data) ? data.length : 'N/A'}`);
-        
-        if (Array.isArray(data) && data.length > 0) {
-            addDebug(`✅ Processando ${data.length} emissoras`);
-            addDebug(`📋 Primeiro item chaves: ${Object.keys(data[0]).join(', ')}`);
-            addDebug(`📋 Primeiro emissora: ${data[0].emissora || 'SEM NOME'}`);
-            
-            // Log detalhado dos nomes dos campos
-            addDebug('');
-            addDebug('🔍 NOMES EXATOS DOS CAMPOS:');
-            const firstRecord = data[0];
-            Object.keys(firstRecord).sort().forEach(key => {
-                const value = firstRecord[key];
-                addDebug(`  "${key}": ${JSON.stringify(value).substring(0, 50)}`);
-            });
-            addDebug('');
-            
-            // Usar os dados diretamente do Notion, sem transformação
+
+        // Armazenar dados da proposta
+        if (data.emissoras && Array.isArray(data.emissoras)) {
+            // Usar os dados diretamente da base de dados, sem transformação
+            proposalData.emissoras = data.emissoras;
+            proposalData.parentPageId = data.parentPageId || null;
+            proposalData.proposalName = data.proposalName || null;
+        } else if (Array.isArray(data) && data.length > 0) {
+            // Fallback para formato antigo (array direto de emissoras)
             proposalData.emissoras = data;
-            
-            addDebug(`✅ ${proposalData.emissoras.length} emissoras carregadas com sucesso!`);
-            addDebug(`✅ Primeira emissora: ${proposalData.emissoras[0].emissora}`);
-            addDebug(`✅ Primeira emissora spots30: ${proposalData.emissoras[0].spots30}`);
+            proposalData.parentPageId = null;
+            proposalData.proposalName = null;
+            console.warn('Usando formato legado de resposta da API');
         } else {
-            addDebug('⚠️ Array vazio ou inválido');
-            throw new Error('Nenhuma emissora encontrada');
+            console.error('Formato de dados inválido:', data);
+            throw new Error('Nenhuma emissora encontrada ou formato de dados inválido');
         }
     } catch (error) {
-        addDebug(`❌ Erro na função: ${error.message}`);
-        console.error(error);
+        console.error('Erro completo:', error);
         throw error;
     }
 }
@@ -240,74 +149,45 @@ function getApiUrl() {
 // =====================================================
 
 function renderInterface() {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: renderInterface()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('proposalData.emissoras:', proposalData.emissoras);
-    console.log('proposalData.emissoras.length:', proposalData.emissoras ? proposalData.emissoras.length : 'UNDEFINED');
-    
-    console.log('🎨 Renderizando interface...');
-    console.log('📊 Emissoras disponíveis:', proposalData.emissoras.length);
     
     // Atualizar título com a primeira emissora como referência
     const firstEmissora = proposalData.emissoras[0];
-    console.log('🏢 Primeira emissora:', firstEmissora);
     document.getElementById('proposalTitle').textContent = firstEmissora ? firstEmissora.emissora : 'Proposta de Mídia';
     document.getElementById('locationInfo').textContent = firstEmissora ? `${firstEmissora.uf}` : '';
-    
-    console.log('🎯 Chamando renderSpotsTable...');
+
     renderSpotsTable();
-    console.log('🎯 Chamando updateStats...');
     updateStats();
-    console.log('🎯 Chamando renderCharts...');
     renderCharts();
-    console.log('✅ renderInterface() finalizado!');
 }
 
 function renderSpotsTable() {
-    console.log('\n🎯🎯🎯 renderSpotsTable() INICIADA 🎯🎯🎯');
-    
     const tbody = document.getElementById('spotsTableBody');
-    
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: renderSpotsTable()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('✅ Procurando tbody #spotsTableBody...');
-    console.log('✅ tbody encontrado?', !!tbody);
-    console.log('✅ proposalData:', proposalData);
-    console.log('✅ proposalData.emissoras:', proposalData.emissoras);
-    console.log('✅ proposalData.emissoras.length:', proposalData.emissoras.length);
-    
+
     if (!tbody) {
-        console.error('❌ CRÍTICO: Elemento spotsTableBody não encontrado no DOM!');
+        console.error('Elemento spotsTableBody não encontrado!');
         return;
     }
-    
+
     if (!proposalData.emissoras || proposalData.emissoras.length === 0) {
-        console.error('❌ CRÍTICO: proposalData.emissoras vazio ou indefinido!');
+        console.error('Dados de emissoras não disponíveis!');
         return;
     }
-    
-    console.log('✅ Iniciando limpeza e preenchimento da tabela...');
+
     tbody.innerHTML = '';
     
     let totalLinhasAdicionadas = 0;
-    
+
     // Renderizar cada emissora + cada produto como uma linha
     proposalData.emissoras.forEach((emissora, emissoraIndex) => {
-        console.log(`\n📍 Processando emissora ${emissoraIndex}: ${emissora.emissora}`);
-        
         // Renderizar cada produto para essa emissora
         PRODUTOS.forEach((produto, produtoIndex) => {
-            // Puxar valores diretos do objeto emissora (vindo do Notion)
+            // Puxar valores diretos do objeto emissora (vindo da base de dados)
             const spots = emissora[produto.key] || 0;
             const valorTabela = emissora[produto.tabelaKey] || 0;
             const valorNegociado = emissora[produto.negKey] || 0;
-            
+
             const invTabela = spots * valorTabela;
             const invNegociado = spots * valorNegociado;
-            
-            console.log(`  📦 ${produto.label}: spots=${spots}, tab=${valorTabela}, neg=${valorNegociado}`);
             
             const rowId = `row-${emissoraIndex}-${produtoIndex}`;
             const checkboxId = `check-${emissoraIndex}-${produtoIndex}`;
@@ -349,76 +229,46 @@ function renderSpotsTable() {
             totalLinhasAdicionadas++;
         });
     });
-    
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log(`✅ Tabela renderizada com sucesso! ${totalLinhasAdicionadas} linhas adicionadas`);
-    console.log('═══════════════════════════════════════════════════════════');
+
     updateStats();
 }
 
 function updateStats() {
-    console.log('\n╔════════════════════════════════════════════════════════════════╗');
-    console.log('║ 📍 INICIANDO: updateStats()');
-    console.log('╚════════════════════════════════════════════════════════════════╝');
-    console.log('✅ Iniciando cálculos...');
-    
     const totalInvTabela = calculateTotalInvestimentoTabela();
     const totalInvNegociado = calculateTotalInvestimentoNegociado();
     const totalSpots = calculateTotalSpots();
     const cpm = calculateCPM();
     const economia = totalInvTabela - totalInvNegociado;
-    
-    console.log('📊 Total Spots:', totalSpots);
-    console.log('💰 Total Investimento Tabela:', totalInvTabela);
-    console.log('💰 Total Investimento Negociado:', totalInvNegociado);
-    console.log('📈 CPM:', cpm);
-    console.log('💵 Economia:', economia);
-    
+
     const statTotalSpots = document.getElementById('statTotalSpots');
     const statTabelaValue = document.getElementById('statTabelaValue');
     const statNegociadoValue = document.getElementById('statNegociadoValue');
     const statCPM = document.getElementById('statCPM');
     const statEconomia = document.getElementById('statEconomia');
-    
-    console.log('🔍 Elementos encontrados:', {
-        statTotalSpots: !!statTotalSpots,
-        statTabelaValue: !!statTabelaValue,
-        statNegociadoValue: !!statNegociadoValue,
-        statCPM: !!statCPM,
-        statEconomia: !!statEconomia
-    });
-    
+
     if (statTotalSpots) statTotalSpots.textContent = totalSpots;
     if (statTabelaValue) statTabelaValue.textContent = formatCurrency(totalInvTabela);
     if (statNegociadoValue) statNegociadoValue.textContent = formatCurrency(totalInvNegociado);
     if (statCPM) statCPM.textContent = `R$ ${cpm.toFixed(2)}`;
     if (statEconomia) statEconomia.textContent = formatCurrency(economia);
-    
-    console.log('✅ Estatísticas atualizadas!\n');
 }
 
 function renderCharts() {
-    console.log('📊 Renderizando gráficos...');
-    
     try {
         Object.values(charts).forEach(chart => {
             if (chart) chart.destroy();
         });
-        
+
         renderInvestmentChart();
         renderSpotTypesChart();
-        console.log('✅ Gráficos renderizados com sucesso!');
     } catch (error) {
-        console.error('⚠️ Erro ao renderizar gráficos (não crítico):', error);
+        console.error('Erro ao renderizar gráficos:', error);
     }
 }
 
 function renderInvestmentChart() {
     const ctx = document.getElementById('investmentChart');
-    if (!ctx) {
-        console.warn('⚠️ Elemento investmentChart não encontrado');
-        return;
-    }
+    if (!ctx) return;
     
     const canvasCtx = ctx.getContext('2d');
     
@@ -512,15 +362,12 @@ function renderSpotTypesChart() {
 // =====================================================
 
 function getSelectedRows() {
-    console.log('  ↳ getSelectedRows() chamada');
     // Retorna array de checkboxes selecionados
     const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]:checked');
-    console.log('  ↳ Checkboxes selecionados:', checkboxes.length);
     return checkboxes;
 }
 
 function calculateTotalSpots() {
-    console.log('  ↳ calculateTotalSpots() chamada');
     let total = 0;
     getSelectedRows().forEach(checkbox => {
         const row = checkbox.closest('tr');
@@ -529,12 +376,10 @@ function calculateTotalSpots() {
             total += parseFloat(input.value) || 0;
         }
     });
-    console.log('  ↳ Total spots calculado:', total);
     return total;
 }
 
 function calculateTotalInvestimentoTabela() {
-    console.log('  ↳ calculateTotalInvestimentoTabela() chamada');
     let total = 0;
     getSelectedRows().forEach(checkbox => {
         const row = checkbox.closest('tr');
@@ -544,12 +389,10 @@ function calculateTotalInvestimentoTabela() {
             total += parseFloat(value) || 0;
         }
     });
-    console.log('  ↳ Total investimento tabela calculado:', total);
     return total;
 }
 
 function calculateTotalInvestimentoNegociado() {
-    console.log('  ↳ calculateTotalInvestimentoNegociado() chamada');
     let total = 0;
     getSelectedRows().forEach(checkbox => {
         const row = checkbox.closest('tr');
@@ -559,17 +402,13 @@ function calculateTotalInvestimentoNegociado() {
             total += parseFloat(value) || 0;
         }
     });
-    console.log('  ↳ Total investimento negociado calculado:', total);
     return total;
 }
 
 function calculateCPM() {
-    console.log('  ↳ calculateCPM() chamada');
     const totalSpots = calculateTotalSpots();
     const totalInvestimento = calculateTotalInvestimentoNegociado();
-    
-    console.log('  ↳ CPM: spots=', totalSpots, 'investimento=', totalInvestimento);
-    
+
     if (totalSpots === 0 || totalInvestimento === 0) return 0;
     return (totalInvestimento / totalSpots) * 1000;
 }
@@ -586,20 +425,19 @@ function updateEmissora(index, field, value) {
     const newValue = parseFloat(value) || 0;
     
     emissora[field] = newValue;
-    
+
     const changeKey = `${index}-${field}`;
     if (!proposalData.changes[changeKey]) {
-        proposalData.changes[changeKey] = { 
+        proposalData.changes[changeKey] = {
             emissoraIndex: index,
             field: field,
-            old: oldValue, 
-            new: newValue 
+            old: oldValue,
+            new: newValue
         };
     } else {
         proposalData.changes[changeKey].new = newValue;
     }
-    
-    console.log(`📝 Emissora ${index} - ${field}: ${oldValue} → ${newValue}`);
+
     renderSpotsTable();
     updateStats();
 }
@@ -629,8 +467,6 @@ async function saveChanges() {
         return;
     }
     
-    console.log('💾 Salvando alterações...', proposalData.changes);
-    
     const changeCount = Object.keys(proposalData.changes).length;
     const confirmSave = confirm(`Deseja salvar ${changeCount} alteração(ões)?`);
     
@@ -654,16 +490,15 @@ async function saveChanges() {
             const error = await response.json();
             throw new Error(error.error || 'Erro ao salvar');
         }
-        
+
         const result = await response.json();
-        console.log('✅ Alterações salvas!', result);
-        
+
         proposalData.changes = {};
         showUnsavedChanges();
-        
-        alert('✅ Proposta atualizada com sucesso no Notion!');
+
+        alert('✅ Proposta atualizada com sucesso!');
     } catch (error) {
-        console.error('❌ Erro:', error);
+        console.error('Erro ao salvar:', error);
         alert(`Erro ao salvar: ${error.message}`);
     }
 }
@@ -685,7 +520,35 @@ function showError(message) {
 }
 
 function goBack() {
-    window.history.back();
+    // Verifica se temos dados da proposta para construir a URL
+    if (proposalData.parentPageId && proposalData.proposalName) {
+        try {
+            // Limpar nome da proposta
+            let cleanName = proposalData.proposalName
+                .replace(/\([^)]*\)/g, '')  // Remove tudo entre parênteses
+                .replace(/[/:]/g, '-')       // Substitui / e : por -
+                .trim();                     // Remove espaços nas pontas
+
+            // Remove --- duplicados (substituir múltiplos - por um único)
+            cleanName = cleanName.replace(/-+/g, '-');
+
+            // Remove - do início e fim
+            cleanName = cleanName.replace(/^-+|-+$/g, '');
+
+            // Limpar parent page ID (remover todos os traços)
+            const cleanId = proposalData.parentPageId.replace(/-/g, '');
+
+            // Construir URL
+            const url = `https://hub.emidiastec.com.br/${cleanName}-${cleanId}`;
+            window.location.href = url;
+        } catch (error) {
+            // Fallback em caso de erro
+            window.location.href = 'https://emidiastec.com.br';
+        }
+    } else {
+        // Fallback se não houver dados completos
+        window.location.href = 'https://emidiastec.com.br';
+    }
 }
 
 window.addEventListener('resize', () => {
