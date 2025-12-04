@@ -383,7 +383,7 @@ body {
     font-weight: var(--font-weight-bold);
     color: var(--emidias-dark);
     display: block;
-    margin-bottom: 4px;
+    margin-bottom: var(--spacing-xs);
     position: relative;
     z-index: 1;
     word-wrap: break-word;
@@ -392,14 +392,28 @@ body {
     white-space: nowrap;
 }
 
-.stat-diff {
+.stat-label {
     font-size: 0.75rem;
-    font-weight: var(--font-weight-medium);
-    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     position: relative;
     z-index: 1;
-    line-height: 1.2;
+    line-height: 1.3;
+    font-weight: var(--font-weight-semibold);
+    color: var(--emidias-dark-gray);
+    margin-bottom: 0;
+}
+
+.stat-diff {
+    font-size: 0.7rem;
+    font-weight: var(--font-weight-medium);
+    margin-top: 4px;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 1;
+    line-height: 1.1;
     font-family: var(--font-primary);
+    min-height: 0;
 }
 
 .stat-diff.neutral {
@@ -412,17 +426,6 @@ body {
 
 .stat-diff.negative {
     color: var(--emidias-danger);
-}
-
-.stat-label {
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: relative;
-    z-index: 1;
-    line-height: 1.3;
-    font-weight: var(--font-weight-semibold);
-    color: var(--emidias-dark-gray);
 }
 
 /* =====================================================
@@ -635,10 +638,28 @@ tbody tr:last-child td {
 .total-row td:nth-child(2),
 .total-row td:nth-child(3),
 .total-row td:nth-child(4) {
-    background: var(--emidias-white);
+    background: var(--emidias-white) !important;
+    z-index: 13;
+    position: sticky;
 }
 
-/* Garantir que todas as células da linha de total tenham background branco */
+.total-row td:nth-child(1) {
+    left: 0;
+}
+
+.total-row td:nth-child(2) {
+    left: 40px;
+}
+
+.total-row td:nth-child(3) {
+    left: 100px;
+}
+
+.total-row td:nth-child(4) {
+    left: 220px;
+}
+
+/* Garantir que todas as células NÃO sticky da linha de total tenham background branco */
 .total-row td {
     background: var(--emidias-white) !important;
 }
