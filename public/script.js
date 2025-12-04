@@ -30,7 +30,8 @@ let initialStats = {
     investimentoNegociado: 0,
     impactos: 0,
     descontoMedio: 0,
-    cpm: 0
+    cpm: 0,
+    captured: false  // Flag para controlar se já foi capturado
 };
 
 
@@ -321,8 +322,7 @@ function renderInterface() {
     renderCharts();
     showUnsavedChanges();
 
-    // Capturar estado inicial para comparação após primeira renderização
-    captureInitialStats();
+    // NÃO capturar estado inicial aqui - será capturado na primeira mudança
 }
 
 function renderSpotsTable() {
@@ -747,7 +747,12 @@ function updateTotalRow() {
 }
 
 function captureInitialStats() {
-    console.log('📸 Capturando estado inicial para comparação...');
+    // Só captura se ainda não foi capturado
+    if (initialStats.captured) {
+        return;
+    }
+
+    console.log('📸 Capturando estado inicial para comparação (primeira mudança)...');
 
     // Calcula o investimento total das emissoras selecionadas
     let totalInvestimentoTabela = 0;
@@ -802,6 +807,7 @@ function captureInitialStats() {
     initialStats.impactos = totalImpactos;
     initialStats.descontoMedio = descontoMedioCard;
     initialStats.cpm = cpmCard;
+    initialStats.captured = true;  // Marcar como capturado
 
     console.log('✅ Estado inicial capturado:', initialStats);
 }
@@ -968,6 +974,12 @@ function updateStats() {
 }
 
 function updateComparisonLines(currentTabela, currentNegociado, currentImpactos, currentDesconto, currentCPM) {
+    // Se o estado inicial ainda não foi capturado, não mostrar comparações
+    if (!initialStats.captured) {
+        console.log('⏭️ Estado inicial não capturado, pulando comparações...');
+        return;
+    }
+
     console.log('📊 Atualizando linhas de comparação...');
 
     // Função auxiliar para formatar a diferença
@@ -1333,40 +1345,43 @@ function recalculateAllImpactos() {
 
 function updateEmissora(index, field, value) {
     console.log(`🔴 UPDATE: index=${index}, field=${field}, value=${value}`);
-    
+
+    // Capturar estado inicial na primeira mudança
+    captureInitialStats();
+
     const emissora = proposalData.emissoras[index];
     if (!emissora) {
         console.error('❌ Emissora não encontrada:', index);
         return;
     }
-    
+
     const oldValue = emissora[field];
     const newValue = parseFloat(value) || 0;
-    
+
     emissora[field] = newValue;
-    
+
     const changeKey = `${index}-${field}`;
     if (!proposalData.changes[changeKey]) {
-        proposalData.changes[changeKey] = { 
+        proposalData.changes[changeKey] = {
             emissoraIndex: index,
             field: field,
-            old: oldValue, 
-            new: newValue 
+            old: oldValue,
+            new: newValue
         };
     } else {
         proposalData.changes[changeKey].new = newValue;
     }
-    
+
     console.log(`📝 Emissora ${index} - ${field}: ${oldValue} → ${newValue}`);
     console.log('📊 Changes agora:', proposalData.changes);
-    
+
     // Recalcular impactos se foi alterado um campo de spot ou PMM
     const spotFields = ['spots30', 'spots60', 'spotsBlitz', 'spots15', 'spots5', 'spotsTest30', 'spotsTest60', 'spotsFlash30', 'spotsFlash60', 'spotsMensham30', 'spotsMensham60', 'PMM'];
     if (spotFields.includes(field)) {
         console.log(`   📊 Campo ${field} alterado - recalculando impactos...`);
         recalculateAllImpactos();
     }
-    
+
     // NÃO chama renderSpotsTable, apenas atualiza estatísticas e gráficos
     updateStats();
     updateTotalRow(); // Atualizar linha de total
@@ -1394,11 +1409,14 @@ function toggleOcultarEmissora(checkbox) {
         ignoreNextCheckboxChange = false;
         return;
     }
-    
+
+    // Capturar estado inicial na primeira mudança
+    captureInitialStats();
+
     const emissoraId = checkbox.getAttribute('data-emissora-id');
     const emissoraIndex = parseInt(checkbox.getAttribute('data-emissora-index'));
     const emissora = proposalData.emissoras[emissoraIndex];
-    
+
     console.log(`🔄 Alternando ocultamento de emissora: ${emissoraId}, marcado: ${checkbox.checked}`);
     
     if (checkbox.checked) {
@@ -1886,10 +1904,10 @@ function clearComparisonLines() {
     if (statDescontoDiff) statDescontoDiff.style.display = 'none';
     if (statCPMDiff) statCPMDiff.style.display = 'none';
 
-    // Recapturar estado inicial (novo baseline)
-    captureInitialStats();
+    // Resetar flag para permitir nova captura na próxima mudança
+    initialStats.captured = false;
 
-    console.log('✅ Linhas de comparação limpas e novo estado inicial capturado!');
+    console.log('✅ Linhas de comparação limpas! Flag resetada para permitir nova captura.');
 }
 
 function showSuccessModal() {
