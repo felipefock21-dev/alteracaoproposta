@@ -512,7 +512,6 @@ export async function onRequest(context) {
       // Array para guardar logs
       const debugLogs = [];
       const log = (msg) => {
-        console.log(msg);
         debugLogs.push(msg);
       };
       
@@ -602,7 +601,6 @@ export async function onRequest(context) {
             } else {
               const error = await excludeResponse.json();
               log(`     Erro ao atualizar Excluir: ${JSON.stringify(error)}`);
-              console.error(`     Erro completo:`, error);
               
               //  IMPORTANTE: Rastrear falha de atualizao de excluso
               updatePromises.push({
@@ -666,7 +664,6 @@ export async function onRequest(context) {
 
         const notionField = fieldMap[change.field];
         if (!notionField) {
-          console.error(` Campo no mapeado: ${change.field}`);
           continue;
         }
 
@@ -690,7 +687,6 @@ export async function onRequest(context) {
         const updateData = await updateResponse.json();
 
         if (!updateResponse.ok) {
-          console.error(` Erro ao atualizar ${emissora.emissora} (${notionField}):`, updateResponse.status);
           updatePromises.push({
             field: change.field,
             notionField: notionField,
@@ -703,7 +699,6 @@ export async function onRequest(context) {
             notionResponse: updateData
           });
         } else {
-          console.log(` ${emissora.emissora} - ${notionField} atualizado com sucesso`);
           updatePromises.push({
             field: change.field,
             notionField: notionField,
@@ -726,7 +721,7 @@ export async function onRequest(context) {
           const proposalInfo = await getProposalInfo(notionToken, tableId);
           proposalName = proposalInfo.proposalName;
         } catch (e) {
-          console.warn('⚠️ Não conseguiu buscar nome da proposta:', e.message);
+          // Silently fail
         }
 
         const emailPayload = {
@@ -742,7 +737,6 @@ export async function onRequest(context) {
         emailLogs = await sendNotificationEmail(env, emailPayload);
         debugLogs.push(...emailLogs);
       } catch (emailError) {
-        console.error('⚠️ [PATCH] Erro ao enviar email:', emailError.message);
         log('⚠️ Erro ao enviar email: ' + emailError.message);
         debugLogs.push('⚠️ Erro ao enviar email: ' + emailError.message);
         // Não interrompe o fluxo se falhar o email
@@ -778,9 +772,7 @@ export async function onRequest(context) {
     });
 
   } catch (error) {
-    console.error(' Erro:', error);
-    
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       error: 'Erro interno',
       details: error.message
     }), {
@@ -872,7 +864,6 @@ async function getProposalInfo(notionToken, databaseId) {
     };
 
   } catch (error) {
-    console.error('Erro ao buscar informações da proposta:', error.message);
     throw error;
   }
 }
@@ -1005,7 +996,6 @@ async function sendNotificationEmail(env, data) {
     emailLogs.push('❌ [EMAIL] ERRO: data inválida ou undefined!');
     emailLogs.push('❌ [EMAIL] data type: ' + typeof data);
     emailLogs.push('❌ [EMAIL] data value: ' + JSON.stringify(data));
-    console.error('❌ [EMAIL] ERRO: data inválida ou undefined!', data);
     return emailLogs;
   }
 
@@ -1104,27 +1094,25 @@ async function sendNotificationEmail(env, data) {
           box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         }
 
-        .logo-section {
-          background-color: #ffffff;
-          padding: 30px 40px 20px 40px;
-          text-align: center;
-        }
-
-        .logo-img {
-          max-width: 150px;
-          height: auto;
-        }
-
         .header {
           background: linear-gradient(135deg, #06055b 0%, #1a0f4f 100%);
           color: white;
-          padding: 20px 40px;
-          text-align: center;
+          padding: 25px 40px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          border-radius: 12px 12px 0 0;
+        }
+
+        .header-logo {
+          max-width: 140px;
+          height: auto;
         }
 
         .header h1 {
           font-size: 24px;
           font-weight: 600;
+          margin: 0;
         }
 
         .content {
@@ -1326,7 +1314,22 @@ async function sendNotificationEmail(env, data) {
         }
 
         @media (max-width: 600px) {
-          .header, .content, .footer {
+          .header {
+            flex-direction: column;
+            text-align: center;
+            gap: 15px;
+            padding: 20px;
+          }
+
+          .header-logo {
+            max-width: 120px;
+          }
+
+          .header h1 {
+            font-size: 20px;
+          }
+
+          .content, .footer {
             padding: 25px 20px;
           }
 
@@ -1348,23 +1351,13 @@ async function sendNotificationEmail(env, data) {
             align-items: flex-start;
             gap: 5px;
           }
-
-          .notification-badge {
-            top: 15px;
-            right: 15px;
-            font-size: 10px;
-            padding: 4px 8px;
-          }
         }
       </style>
     </head>
     <body>
       <div class="email-container">
-        <div class="logo-section">
-          <img src="https://emidiastec.com.br/wp-content/smush-avif/2025/03/logo-E-MIDIAS-png-fundo-escuro-HORIZONTAL.png.avif" alt="E-MÍDIAS" class="logo-img">
-        </div>
-
         <div class="header">
+          <img src="https://emidiastec.com.br/wp-content/smush-avif/2025/03/logo-E-MIDIAS-png-fundo-escuro-HORIZONTAL.png.avif" alt="E-MÍDIAS" class="header-logo">
           <h1>Alteração de Proposta</h1>
         </div>
 
@@ -1523,9 +1516,12 @@ async function sendNotificationEmail(env, data) {
 
       emailLogs.push('✅ [EMAIL] Access token obtido com sucesso');
 
+      // Encode nome do remetente em MIME
+      const senderName = encodeSubject('E-MIDIAS');
+
       // Criar mensagem RFC 2822
       const emailMessage = [
-        `From: E-MÍDIAS <${senderEmail}>`,
+        `From: ${senderName} <${senderEmail}>`,
         `To: ${recipients.join(', ')}`,
         `Subject: ${subject}`,
         `MIME-Version: 1.0`,
@@ -1579,24 +1575,20 @@ async function sendNotificationEmail(env, data) {
     // Processar resultado final
     const statusMsg = `📧 [EMAIL] Status da resposta Gmail API: ${response.status} (usando ${senderUsed})`;
     emailLogs.push(statusMsg);
-    console.log(statusMsg);
 
     if (response.ok) {
       const result = await response.json();
       const successMsg = `✅ [EMAIL] Email enviado com sucesso via ${senderUsed}! ID: ${result.id}`;
       emailLogs.push(successMsg);
       emailLogs.push('📧 [EMAIL] Thread ID: ' + result.threadId);
-      console.log(successMsg);
     } else {
       const errorText = await response.text();
       const errorMsg = `❌ [EMAIL] Erro ao enviar email via Gmail API com ${senderUsed}. Status: ${response.status}, Resposta: ${errorText}`;
       emailLogs.push(errorMsg);
-      console.error(errorMsg);
 
       try {
         const errorJson = JSON.parse(errorText);
         emailLogs.push('📧 [EMAIL] Erro detalhado: ' + JSON.stringify(errorJson));
-        console.error('📧 [EMAIL] Erro detalhado:', errorJson);
       } catch (e) {
         // erro não é JSON, mantém como texto
       }
@@ -1605,8 +1597,6 @@ async function sendNotificationEmail(env, data) {
     const errorMsg = '❌ [EMAIL] Erro na requisição Gmail API: ' + error.message;
     emailLogs.push(errorMsg);
     emailLogs.push('❌ [EMAIL] Stack trace: ' + error.stack);
-    console.error(errorMsg);
-    console.error('Erro completo:', error);
   }
   
   return emailLogs;
