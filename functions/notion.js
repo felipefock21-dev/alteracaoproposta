@@ -964,7 +964,7 @@ async function createJWT(serviceAccountEmail, privateKey, scope, userToImpersona
 }
 
 // Função para obter access token do Google
-async function getGoogleAccessToken(serviceAccountEmail, privateKey) {
+async function getGoogleAccessToken(serviceAccountEmail, privateKey, userToImpersonate) {
 
   const scope =
     "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.modify";
@@ -973,7 +973,7 @@ async function getGoogleAccessToken(serviceAccountEmail, privateKey) {
     serviceAccountEmail,
     privateKey,
     scope,
-    "emidias@hubradios.com"  // ← aqui entra o impersonation
+    userToImpersonate  // ← aqui entra o impersonation
   );
 
   const response = await fetch('https://oauth2.googleapis.com/token', {
@@ -1488,20 +1488,8 @@ async function sendNotificationEmail(env, data) {
     </html>
   `;
 
-  // Enviar via Gmail API
+  // Enviar via Gmail API com fallback
   try {
-    emailLogs.push('📧 [EMAIL] Obtendo access token do Google...');
-
-    // Obter access token
-    const accessToken = await getGoogleAccessToken(
-      gmailClientEmail,
-      gmailPrivateKey,
-      'https://www.googleapis.com/auth/gmail.send'
-    );
-
-    emailLogs.push('✅ [EMAIL] Access token obtido com sucesso');
-    emailLogs.push('📧 [EMAIL] Preparando email para envio...');
-
     // Destinatários fixos
     const recipients = ['kaike@hubradios.com', 'dani@hubradios.com'];
     const subjectText = `${proposalName} - Modificado`;
@@ -1521,56 +1509,87 @@ async function sendNotificationEmail(env, data) {
 
     const subject = encodeSubject(subjectText);
 
-    // Criar mensagem RFC 2822
-    const emailMessage = [
-      `From: E-MÍDIAS <emidias@hubradios.com>`,
-      `To: ${recipients.join(', ')}`,
-      `Subject: ${subject}`,
-      `MIME-Version: 1.0`,
-      `Content-Type: text/html; charset=utf-8`,
-      ``,
-      emailHTML
-    ].join('\r\n');
+    // Função auxiliar para tentar enviar email com um remetente específico
+    const tryEmailSend = async (senderEmail) => {
+      emailLogs.push(`📧 [EMAIL] Tentando enviar com ${senderEmail}...`);
+      emailLogs.push('📧 [EMAIL] Obtendo access token do Google...');
 
-    // Codificar mensagem em base64url
-    const encodedMessage = btoa(unescape(encodeURIComponent(emailMessage)))
-      .replace(/\+/g, '-')
-      .replace(/\//g, '_')
-      .replace(/=+$/, '');
+      // Obter access token com impersonation
+      const accessToken = await getGoogleAccessToken(
+        gmailClientEmail,
+        gmailPrivateKey,
+        senderEmail  // Impersonate com o email do remetente
+      );
 
-    emailLogs.push('📧 [EMAIL] Enviando email via Gmail API...');
-    emailLogs.push('📧 [EMAIL] Remetente (impersonation): emidias@hubradios.com');
-    emailLogs.push('📧 [EMAIL] Destinatários: ' + recipients.join(', '));
+      emailLogs.push('✅ [EMAIL] Access token obtido com sucesso');
 
-    // Enviar email via Gmail API usando impersonation
-const response = await fetch(
-  'https://gmail.googleapis.com/gmail/v1/users/emidias@hubradios.com/messages/send?alt=json',
-  {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      raw: encodedMessage
-    })
-  }
-);
+      // Criar mensagem RFC 2822
+      const emailMessage = [
+        `From: E-MÍDIAS <${senderEmail}>`,
+        `To: ${recipients.join(', ')}`,
+        `Subject: ${subject}`,
+        `MIME-Version: 1.0`,
+        `Content-Type: text/html; charset=utf-8`,
+        ``,
+        emailHTML
+      ].join('\r\n');
 
+      // Codificar mensagem em base64url
+      const encodedMessage = btoa(unescape(encodeURIComponent(emailMessage)))
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
 
-    const statusMsg = '📧 [EMAIL] Status da resposta Gmail API: ' + response.status;
+      emailLogs.push('📧 [EMAIL] Enviando email via Gmail API...');
+      emailLogs.push(`📧 [EMAIL] Remetente: ${senderEmail}`);
+      emailLogs.push('📧 [EMAIL] Destinatários: ' + recipients.join(', '));
+
+      // Enviar email via Gmail API
+      const response = await fetch(
+        `https://gmail.googleapis.com/gmail/v1/users/${senderEmail}/messages/send?alt=json`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            raw: encodedMessage
+          })
+        }
+      );
+
+      return response;
+    };
+
+    // Tentar primeiro com emidias@hubradios.com
+    let response = await tryEmailSend('emidias@hubradios.com');
+    let senderUsed = 'emidias@hubradios.com';
+
+    // Se falhar, tentar fallback com kaike@hubradios.com
+    if (!response.ok) {
+      const errorText = await response.text();
+      emailLogs.push(`⚠️ [EMAIL] Falha com emidias@hubradios.com (${response.status}): ${errorText}`);
+      emailLogs.push('🔄 [EMAIL] Tentando fallback com kaike@hubradios.com...');
+
+      response = await tryEmailSend('kaike@hubradios.com');
+      senderUsed = 'kaike@hubradios.com';
+    }
+
+    // Processar resultado final
+    const statusMsg = `📧 [EMAIL] Status da resposta Gmail API: ${response.status} (usando ${senderUsed})`;
     emailLogs.push(statusMsg);
     console.log(statusMsg);
 
     if (response.ok) {
       const result = await response.json();
-      const successMsg = '✅ [EMAIL] Email enviado com sucesso via Gmail API! ID: ' + result.id;
+      const successMsg = `✅ [EMAIL] Email enviado com sucesso via ${senderUsed}! ID: ${result.id}`;
       emailLogs.push(successMsg);
       emailLogs.push('📧 [EMAIL] Thread ID: ' + result.threadId);
       console.log(successMsg);
     } else {
       const errorText = await response.text();
-      const errorMsg = '❌ [EMAIL] Erro ao enviar email via Gmail API. Status: ' + response.status + ', Resposta: ' + errorText;
+      const errorMsg = `❌ [EMAIL] Erro ao enviar email via Gmail API com ${senderUsed}. Status: ${response.status}, Resposta: ${errorText}`;
       emailLogs.push(errorMsg);
       console.error(errorMsg);
 
