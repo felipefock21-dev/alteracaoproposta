@@ -459,7 +459,7 @@ function renderSpotsTable() {
             <td>${emissora.uf || '-'}</td>
             <td>${emissora.praca || '-'}</td>
             <td class="emissora-cell">
-                ${logoUrl ? `<img src="${logoUrl}" alt="${emissora.emissora}" class="emissora-logo" onerror="//console.error('Erro ao carregar logo de ${emissora.emissora}')">` : ''}
+                ${logoUrl ? `<img src="${logoUrl}" alt="${emissora.emissora}" class="emissora-logo" onerror="this.style.display='none'">` : ''}
                 <span class="emissora-name"><strong>${emissora.emissora || '-'}</strong></span>
             </td>
         `;
@@ -951,13 +951,13 @@ function updateStats() {
         ? (totalInvestimentoNegociado / totalImpactos) * 1000
         : 0;
 
-    //console.log('🔍 Elementos encontrados:', {
+    /*console.log('🔍 Elementos encontrados:', {
         statTabelaValue: !!statTabelaValue,
         statNegociadoValue: !!statNegociadoValue,
         statTotalImpacts: !!statTotalImpacts,
         statDescontoMedio: !!statDescontoMedio,
         statCPM: !!statCPM
-    });
+    });*/
 
     if (statTabelaValue) statTabelaValue.textContent = formatCurrencyCompact(totalInvestimentoTabela);
     if (statNegociadoValue) statNegociadoValue.textContent = formatCurrencyCompact(totalInvestimentoNegociado);
