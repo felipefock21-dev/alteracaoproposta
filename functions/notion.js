@@ -1506,9 +1506,16 @@ async function sendNotificationEmail(env, data) {
     const recipients = ['kaike@hubradios.com', 'dani@hubradios.com'];
     const subjectText = `${proposalName} - Modificado`;
 
-    // Encode subject em MIME para suportar caracteres especiais
+    // Encode subject em MIME para suportar caracteres especiais (Cloudflare Workers)
     const encodeSubject = (text) => {
-      const encoded = Buffer.from(text, 'utf8').toString('base64');
+      // Usar TextEncoder para converter string em bytes UTF-8
+      const encoder = new TextEncoder();
+      const utf8Bytes = encoder.encode(text);
+
+      // Converter bytes para string e então para base64
+      const binaryString = String.fromCharCode(...utf8Bytes);
+      const encoded = btoa(binaryString);
+
       return `=?UTF-8?B?${encoded}?=`;
     };
 
