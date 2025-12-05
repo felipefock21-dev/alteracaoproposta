@@ -1102,17 +1102,21 @@ async function sendNotificationEmail(env, data) {
           align-items: center;
           justify-content: space-between;
           border-radius: 12px 12px 0 0;
+          gap: 30px;
         }
 
         .header-logo {
           max-width: 140px;
           height: auto;
+          flex-shrink: 0;
         }
 
         .header h1 {
           font-size: 24px;
           font-weight: 600;
           margin: 0;
+          text-align: right;
+          flex: 1;
         }
 
         .content {
