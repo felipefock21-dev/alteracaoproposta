@@ -480,9 +480,6 @@ function renderSpotsTable() {
                 investimentoTabelaEmissora += spots * valorTabela;
                 investimentoNegociadoEmissora += spots * valorNegociado;
 
-                // Calcula o valor TOTAL (quantidade * valor unitário) para exibir
-                const valorTotalNegociado = spots * valorNegociado;
-
                 row.innerHTML += `
                     <td class="spots-cell">
                         <input
@@ -495,7 +492,7 @@ function renderSpotsTable() {
                             style="padding: 4px; text-align: center;"
                         >
                     </td>
-                    <td class="product-value-negociado product-value-${emissoraIndex}-${produto.key}">R$ ${valorTotalNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="product-value-negociado">R$ ${valorNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 `;
             }
         });
@@ -1451,13 +1448,6 @@ function updateRowCalculations(emissoraIndex) {
 
         investimentoTabela += spots * valorTabela;
         investimentoNegociado += spots * valorNegociado;
-
-        // Atualizar a célula de valor total do produto na tabela
-        const valorTotalNegociado = spots * valorNegociado;
-        const productValueCell = row.querySelector(`.product-value-${emissoraIndex}-${produto.key}`);
-        if (productValueCell) {
-            productValueCell.textContent = `R$ ${valorTotalNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-        }
     });
 
     // PATROCÍNIO
