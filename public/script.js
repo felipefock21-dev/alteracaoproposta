@@ -473,13 +473,16 @@ function renderSpotsTable() {
                 const spots = emissora[produto.key] || 0;
                 const valorTabela = emissora[produto.tabelaKey] || 0;
                 const valorNegociado = emissora[produto.negKey] || 0;
-                
+
                 //console.log(`     - ${produto.label}: ${spots} spots × R$ ${valorTabela} = R$ ${spots * valorTabela}`);
-                
+
                 // CALCULA O INVESTIMENTO PARA MÍDIA AVULSA
                 investimentoTabelaEmissora += spots * valorTabela;
                 investimentoNegociadoEmissora += spots * valorNegociado;
-                
+
+                // Calcula o valor TOTAL (quantidade * valor unitário) para exibir
+                const valorTotalNegociado = spots * valorNegociado;
+
                 row.innerHTML += `
                     <td class="spots-cell">
                         <input
@@ -492,7 +495,7 @@ function renderSpotsTable() {
                             style="padding: 4px; text-align: center;"
                         >
                     </td>
-                    <td class="product-value-negociado">R$ ${valorNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+                    <td class="product-value-negociado product-value-${emissoraIndex}-${produto.key}">R$ ${valorTotalNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
                 `;
             }
         });
@@ -1448,6 +1451,13 @@ function updateRowCalculations(emissoraIndex) {
 
         investimentoTabela += spots * valorTabela;
         investimentoNegociado += spots * valorNegociado;
+
+        // Atualizar a célula de valor total do produto na tabela
+        const valorTotalNegociado = spots * valorNegociado;
+        const productValueCell = row.querySelector(`.product-value-${emissoraIndex}-${produto.key}`);
+        if (productValueCell) {
+            productValueCell.textContent = `R$ ${valorTotalNegociado.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
     });
 
     // PATROCÍNIO
